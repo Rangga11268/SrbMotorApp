@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/register_screen.dart';
+import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,10 +24,23 @@ class _LoginScreenState extends State<LoginScreen> {
               _emailController.text.trim(),
               _passwordController.text.trim(),
             );
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (route) => false,
+          );
+        }
       } catch (e) {
         if (mounted) {
+          String errorMessage = e.toString().replaceAll('Exception: ', '');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString())),
+            SnackBar(
+              content: Text(errorMessage, style: GoogleFonts.outfit()),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
           );
         }
       }
@@ -37,27 +52,43 @@ class _LoginScreenState extends State<LoginScreen> {
     final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              const SizedBox(height: 60),
+              Center(
+                child: Hero(
+                  tag: 'logo',
+                  child: Image.asset(
+                    'assets/images/logo_srb.png',
+                    height: 100,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.motorcycle,
+                      size: 100,
+                      color: Color(0xFF2563EB),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              Text(
                 'Selamat Datang',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2563EB),
+                  color: const Color(0xFF1E293B),
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Masuk ke Akun SRB Motor Anda',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+                style: GoogleFonts.outfit(color: Colors.blueGrey, fontSize: 16),
               ),
               const SizedBox(height: 48),
               Form(
@@ -66,35 +97,58 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     TextFormField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
+                      style: GoogleFonts.outfit(),
+                      decoration: InputDecoration(
                         labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(),
+                        labelStyle: GoogleFonts.outfit(color: Colors.blueGrey),
+                        prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF2563EB)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Email tidak boleh kosong';
-                        }
+                        if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
-                      decoration: const InputDecoration(
+                      style: GoogleFonts.outfit(),
+                      decoration: InputDecoration(
                         labelText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(),
+                        labelStyle: GoogleFonts.outfit(color: Colors.blueGrey),
+                        prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF2563EB)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                        ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Password tidak boleh kosong';
-                        }
+                        if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
                         return null;
                       },
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Lupa Password?',
+                    style: GoogleFonts.outfit(color: const Color(0xFF2563EB), fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -103,25 +157,32 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  elevation: 5,
+                  shadowColor: const Color(0xFF2563EB).withOpacity(0.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('MASUK', style: TextStyle(fontSize: 16)),
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Text('MASUK', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                  );
-                },
-                child: const Text('Belum punya akun? Daftar Sekarang'),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Belum punya akun? ', style: GoogleFonts.outfit(color: Colors.blueGrey)),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
+                    },
+                    child: Text(
+                      'Daftar Sekarang',
+                      style: GoogleFonts.outfit(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

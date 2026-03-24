@@ -18,7 +18,7 @@ class AuthService {
     if (response.statusCode == 200) {
       return {
         'success': true,
-        'user': User.fromJson(data['user']),
+        'user': User.fromJson(data['data']),
         'token': data['access_token'],
       };
     } else {
@@ -46,11 +46,15 @@ class AuthService {
       }),
     );
 
+    print('DEBUG REGISTER RESPONSE: ${response.body}');
     final data = jsonDecode(response.body);
     if (response.statusCode == 201 || response.statusCode == 200) {
+      if (data['data'] == null) {
+        throw Exception('Server returned success but user data is missing');
+      }
       return {
         'success': true,
-        'user': User.fromJson(data['user']),
+        'user': User.fromJson(data['data']),
         'token': data['access_token'],
       };
     } else {

@@ -5,6 +5,7 @@ import './providers/motor_provider.dart';
 import './providers/order_provider.dart';
 import './screens/auth/login_screen.dart';
 import './screens/home/home_screen.dart';
+import './screens/splash/splash_screen.dart';
 
 void main() {
   runApp(
@@ -44,13 +45,7 @@ class _MyAppState extends State<MyApp> {
           seedColor: const Color(0xFF2563EB),
         ),
       ),
-      home: Consumer<AuthProvider>(
-        builder: (context, auth, _) {
-          return auth.isAuthenticated 
-              ? const HomeScreen() 
-              : const LoginScreen();
-        },
-      ),
+      home: const SplashScreen(),
     );
   }
 }

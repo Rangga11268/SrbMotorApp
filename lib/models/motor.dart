@@ -29,8 +29,12 @@ class Motor {
       name: json['name'],
       brand: json['brand'] ?? 'Unknown',
       type: json['type'],
-      price: (json['price'] ?? 0).toDouble(),
-      imagePath: json['image_path'],
+      price: double.tryParse(json['price'].toString()) ?? 0.0,
+      imagePath: json['image_path'] != null 
+          ? (json['image_path'].toString().startsWith('http') 
+              ? json['image_path'] 
+              : 'http://10.0.2.2:8000/${json['image_path']}') 
+          : null,
       details: json['details'],
       transmission: json['transmission'],
       engine: json['engine'],
