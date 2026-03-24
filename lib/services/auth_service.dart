@@ -64,4 +64,28 @@ class AuthService {
       };
     }
   }
+
+  Future<Map<String, dynamic>> loginWithGoogle(String idToken) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/login/google'),
+      headers: await ApiConfig.headers,
+      body: jsonEncode({
+        'id_token': idToken,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'user': User.fromJson(data['user']),
+        'token': data['token'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal login Google',
+      };
+    }
+  }
 }
