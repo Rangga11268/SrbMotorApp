@@ -71,12 +71,11 @@ class _HomeContentState extends State<HomeContent> {
     super.initState();
     Future.microtask(() {
       if (mounted) {
-        context.read<MotorProvider>().fetchMotors();
+        context.read<MotorProvider>().initializeData();
       }
     });
   }
 
-  final List<String> categories = ['All', 'Sport', 'Scooter', 'CUB', 'EV'];
 
   @override
   Widget build(BuildContext context) {
@@ -161,17 +160,32 @@ class _HomeContentState extends State<HomeContent> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: categories.length,
+                  itemCount: motorProvider.categories.length + 1,
                   itemBuilder: (context, index) {
-                    final category = categories[index];
-                    final isSelected = motorProvider.selectedCategory == (category == 'All' ? null : category);
+                    final String categoryName;
+                    final bool isSelected;
+                    
+                    if (index == 0) {
+                      categoryName = 'All';
+                      isSelected = motorProvider.selectedCategory == null;
+                    } else {
+                      final category = motorProvider.categories[index - 1];
+                      categoryName = category.name;
+                      isSelected = motorProvider.selectedCategory == category.name;
+                    }
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: ChoiceChip(
-                        label: Text(category),
+                        avatar: Icon(
+                          _getIconData(index == 0 ? 'all' : (motorProvider.categories[index - 1].icon ?? 'motorcycle')),
+                          size: 18,
+                          color: isSelected ? Colors.white : const Color(0xFF2563EB),
+                        ),
+                        label: Text(categoryName),
                         selected: isSelected,
                         onSelected: (selected) {
-                          motorProvider.setCategory(category == 'All' ? null : category);
+                          motorProvider.setCategory(index == 0 ? null : categoryName);
                         },
                         selectedColor: const Color(0xFF2563EB),
                         labelStyle: GoogleFonts.outfit(
@@ -179,8 +193,14 @@ class _HomeContentState extends State<HomeContent> {
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                         backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.withValues(alpha: 0.1),
+                          ),
+                        ),
                         elevation: isSelected ? 4 : 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                     );
                   },
@@ -246,6 +266,18 @@ class _HomeContentState extends State<HomeContent> {
         ),
       ),
     );
+  }
+
+  IconData _getIconData(String iconName) {
+    switch (iconName.toLowerCase()) {
+      case 'all': return Icons.grid_view_outlined;
+      case 'motorcycle': return Icons.motorcycle_outlined;
+      case 'speed': return Icons.speed_outlined;
+      case 'electric_bolt': return Icons.electric_bolt_outlined;
+      case 'pedal_bike': return Icons.pedal_bike_outlined;
+      case 'settings_input_component': return Icons.settings_input_component_outlined;
+      default: return Icons.motorcycle_outlined;
+    }
   }
 
   Widget _buildPartnerLogo(String path) {

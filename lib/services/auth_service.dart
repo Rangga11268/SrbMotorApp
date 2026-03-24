@@ -12,7 +12,7 @@ class AuthService {
         'email': email,
         'password': password,
       }),
-    );
+    ).timeout(const Duration(seconds: 10));
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
@@ -44,7 +44,7 @@ class AuthService {
         'password': password,
         'phone': phone,
       }),
-    );
+    ).timeout(const Duration(seconds: 10));
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 201 || response.statusCode == 200) {
@@ -71,7 +71,7 @@ class AuthService {
       body: jsonEncode({
         'id_token': idToken,
       }),
-    );
+    ).timeout(const Duration(seconds: 10));
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
@@ -84,6 +84,26 @@ class AuthService {
       return {
         'success': false,
         'message': data['message'] ?? 'Gagal login Google',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getUserProfile() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/user'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'user': User.fromJson(data['data']),
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal mengambil profil',
       };
     }
   }

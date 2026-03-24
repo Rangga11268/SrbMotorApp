@@ -8,7 +8,7 @@ class OrderService {
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/orders'),
       headers: await ApiConfig.headers,
-    );
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -37,7 +37,7 @@ class OrderService {
         'customer_address': address,
         'notes': notes,
       }),
-    );
+    ).timeout(const Duration(seconds: 10));
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 201 || response.statusCode == 200) {

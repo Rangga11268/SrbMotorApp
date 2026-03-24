@@ -18,6 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   void _register() async {
     if (_formKey.currentState!.validate()) {
@@ -37,15 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       } catch (e) {
         if (mounted) {
-          String errorMessage = e.toString().replaceAll('Exception: ', '');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage, style: GoogleFonts.outfit()),
-              backgroundColor: Colors.redAccent,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-          );
+          _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
         }
       }
     }
@@ -138,13 +131,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isPassword = false, TextInputType? keyboardType}) {
     return TextFormField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword ? _obscurePassword : false,
       keyboardType: keyboardType,
       style: GoogleFonts.outfit(),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.outfit(color: Colors.blueGrey),
         prefixIcon: Icon(icon, color: const Color(0xFF2563EB)),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  color: const Color(0xFF2563EB),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              )
+            : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
@@ -155,8 +161,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) return '$label tidak boleh kosong';
+        if (label == 'Email' && !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+          return 'Format email tidak valid';
+        }
+        if (label == 'Password' && value.length < 8) {
+          return 'Password minimal 8 karakter';
+        }
+        if (label == 'Nomor Telepon' && !RegExp(r'^[0-9]+$').hasMatch(value)) {
+          return 'Nomor telepon hanya boleh angka';
+        }
         return null;
       },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Gagal Daftar', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text(message, style: GoogleFonts.outfit()),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF2563EB))),
+          ),
+        ],
+      ),
     );
   }
 }

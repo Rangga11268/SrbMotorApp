@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/motor.dart';
+import '../models/category.dart';
 import 'api_config.dart';
 
 class MotorService {
@@ -14,7 +15,7 @@ class MotorService {
     final response = await http.get(
       uri,
       headers: await ApiConfig.headers,
-    );
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -24,11 +25,25 @@ class MotorService {
     }
   }
 
+  Future<List<CategoryModel>> getCategories() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/categories'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => CategoryModel.fromJson(item)).toList();
+    } else {
+      throw Exception('Gagal mengambil data kategori');
+    }
+  }
+
   Future<Motor> getMotorDetail(int id) async {
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/motors/$id'),
       headers: await ApiConfig.headers,
-    );
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

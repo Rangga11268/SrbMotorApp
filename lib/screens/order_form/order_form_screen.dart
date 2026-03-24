@@ -59,11 +59,25 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           ),
         );
       } else if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.read<OrderProvider>().errorMessage ?? 'Gagal membuat pesanan')),
-        );
+        _showErrorDialog(context.read<OrderProvider>().errorMessage ?? 'Gagal membuat pesanan');
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Gagal Memesan'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -159,6 +173,9 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return '$label tidak boleh kosong';
+        }
+        if (label == 'Nomor Telepon' && !RegExp(r'^[0-9]+$').hasMatch(value)) {
+          return 'Nomor telepon hanya boleh angka';
         }
         return null;
       },

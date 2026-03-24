@@ -23,21 +23,23 @@ class AuthProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final result = await _authService.login(email, password);
+    try {
+      final result = await _authService.login(email, password);
 
-    if (result['success']) {
-      _user = result['user'];
-      _token = result['token'];
-      
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', _token!);
-    }
+      if (result['success']) {
+        _user = result['user'];
+        _token = result['token'];
+        
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', _token!);
+      }
 
-    _isLoading = false;
-    notifyListeners();
-    
-    if (!result['success']) {
-      throw Exception(result['message']);
+      if (!result['success']) {
+        throw Exception(result['message']);
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -50,26 +52,28 @@ class AuthProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final result = await _authService.register(
-      name: name,
-      email: email,
-      password: password,
-      phone: phone,
-    );
+    try {
+      final result = await _authService.register(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      );
 
-    if (result['success']) {
-      _user = result['user'];
-      _token = result['token'];
+      if (result['success']) {
+        _user = result['user'];
+        _token = result['token'];
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', _token!);
-    }
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', _token!);
+      }
 
-    _isLoading = false;
-    notifyListeners();
-
-    if (!result['success']) {
-      throw Exception(result['message']);
+      if (!result['success']) {
+        throw Exception(result['message']);
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -135,7 +139,30 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> checkAuth() async {
     final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString('token');
-    notifyListeners();
+    final token = prefs.getString('token');
+    
+    if (token != null) {
+      _token = token;
+      _isLoading = true;
+      notifyListeners();
+
+      try {
+        final result = await _authService.getUserProfile();
+        if (result['success']) {
+          _user = result['user'];
+        } else {
+          // Token mungkin expired
+          _token = null;
+          await prefs.remove('token');
+        }
+      } catch (e) {
+        debugPrint('CheckAuth Error: $e');
+        // Tetap simpan token tapi user null jika hanya masalah koneksi?
+        // Untuk amannya, jika gagal total (kecuali timeout), biarkan user login ulang
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    }
   }
 }
