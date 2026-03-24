@@ -157,21 +157,6 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                       currencyFormat.format(widget.motor.price),
                       style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[700]),
                     ),
-                    if (widget.motor.promotions != null && widget.motor.promotions!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Row(
-                          children: widget.motor.promotions!.map((p) => Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: Colors.orange[100], borderRadius: BorderRadius.circular(6)),
-                            child: Text(
-                              p['name'] ?? 'Promo',
-                              style: GoogleFonts.outfit(fontSize: 10, color: Colors.orange[900], fontWeight: FontWeight.bold),
-                            ),
-                          )).toList(),
-                        ),
-                      ),
                   
                   const SizedBox(height: 32),
                   

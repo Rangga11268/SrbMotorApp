@@ -10,7 +10,6 @@ class Motor {
   final int? engine;
   final int? weight;
   final dynamic colors;
-  final List<dynamic>? promotions;
   final int year;
   final bool tersedia;
 
@@ -26,7 +25,6 @@ class Motor {
     this.engine,
     this.weight,
     this.colors,
-    this.promotions,
     required this.year,
     this.tersedia = true,
   });
@@ -48,7 +46,6 @@ class Motor {
       engine: json['engine'],
       weight: json['weight'],
       colors: json['colors'],
-      promotions: json['promotions'],
       year: json['year'] ?? 0,
       tersedia: json['tersedia'] == 1 || json['tersedia'] == true,
     );
@@ -67,7 +64,6 @@ class Motor {
       'engine': engine,
       'weight': weight,
       'colors': colors,
-      'promotions': promotions,
       'year': year,
       'tersedia': tersedia ? 1 : 0,
     };

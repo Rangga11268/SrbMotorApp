@@ -178,7 +178,7 @@ class _HomeContentState extends State<HomeContent> {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: ChoiceChip(
                         avatar: Icon(
-                          _getIconData(index == 0 ? 'all' : (motorProvider.categories[index - 1].icon ?? 'motorcycle')),
+                          _getIconData(index == 0 ? 'all' : categoryName),
                           size: 18,
                           color: isSelected ? Colors.white : const Color(0xFF2563EB),
                         ),
@@ -268,15 +268,15 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  IconData _getIconData(String iconName) {
-    switch (iconName.toLowerCase()) {
+  IconData _getIconData(String name) {
+    switch (name.toLowerCase()) {
       case 'all': return Icons.grid_view_outlined;
-      case 'motorcycle': return Icons.motorcycle_outlined;
-      case 'speed': return Icons.speed_outlined;
-      case 'electric_bolt': return Icons.electric_bolt_outlined;
-      case 'pedal_bike': return Icons.pedal_bike_outlined;
-      case 'settings_input_component': return Icons.settings_input_component_outlined;
-      default: return Icons.motorcycle_outlined;
+      case 'scooter': case 'matic': case 'automatic': return Icons.motorcycle_outlined;
+      case 'sport': return Icons.speed_outlined;
+      case 'cub': case 'bebek': return Icons.pedal_bike_outlined;
+      case 'ev': case 'electric': return Icons.electric_bolt_outlined;
+      case 'trail': case 'adventure': return Icons.terrain_outlined;
+      default: return Icons.two_wheeler_outlined;
     }
   }
 
