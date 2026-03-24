@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
 import '../../models/motor.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../motor_detail/motor_detail_screen.dart';
 import '../menu/order_history_screen.dart';
 import '../menu/profile_screen.dart';
@@ -30,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           boxShadow: [
             BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 0),
           ],
@@ -81,36 +82,7 @@ class _HomeContentState extends State<HomeContent> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        title: Image.asset(
-          'assets/images/logo_srb.png',
-          height: 35,
-          errorBuilder: (context, error, stackTrace) => Text(
-            'SRB MOTOR',
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF2563EB)),
-          ),
-        ),
-        actions: [
-          Stack(
-            children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none_outlined, color: Colors.black87)),
-              Positioned(
-                right: 12,
-                top: 12,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
-                  constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
-                ),
-              )
-            ],
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      appBar: const CustomAppBar(),
       body: RefreshIndicator(
         onRefresh: () => context.read<MotorProvider>().fetchMotors(),
         child: CustomScrollView(
@@ -135,17 +107,22 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
             
-            // Banner Carousel
+            // Single Banner
             SliverToBoxAdapter(
-              child: Container(
-                height: 180,
-                child: PageView(
-                  controller: PageController(viewportFraction: 0.9),
-                  children: [
-                    _buildBanner('assets/images/banner1.jpg'),
-                    _buildBanner('assets/images/banner2.jpg'),
-                    _buildBanner('assets/images/banner3.jpg'),
-                  ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+                    ],
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/banner/banner.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -246,23 +223,6 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildBanner(String imagePath) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
-        ],
-        image: DecorationImage(
-          image: AssetImage(imagePath),
-          fit: BoxFit.cover,
-          onError: (exception, stackTrace) {},
-        ),
-      ),
-    );
-  }
-
   Widget _buildPartnerLogo(String path) {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -303,18 +263,34 @@ class _HomeContentState extends State<HomeContent> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                      image: motor.imagePath != null
-                          ? DecorationImage(
-                              image: NetworkImage(motor.imagePath!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: motor.imagePath == null
-                        ? const Center(child: Icon(Icons.motorcycle, size: 50, color: Colors.grey))
-                        : null,
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  image: motor.imagePath != null
+                      ? DecorationImage(
+                          image: NetworkImage(motor.imagePath!),
+                          fit: BoxFit.cover,
+                        )
+                      : DecorationImage(
+                          image: const AssetImage('assets/images/logo_srb.png'),
+                          fit: BoxFit.contain,
+                          opacity: 0.1, // Subtle watermark look
+                        ),
+                ),
+                child: motor.imagePath == null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.motorcycle, size: 40, color: Colors.blueGrey.withOpacity(0.3)),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Foto Belum Tersedia',
+                              style: GoogleFonts.outfit(fontSize: 10, color: Colors.blueGrey.withOpacity(0.5)),
+                            ),
+                          ],
+                        ),
+                      )
+                    : null,
                   ),
                   Positioned(
                     top: 10,

@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import './providers/auth_provider.dart';
 import './providers/motor_provider.dart';
 import './providers/order_provider.dart';
-import './screens/auth/login_screen.dart';
-import './screens/home/home_screen.dart';
 import './screens/splash/splash_screen.dart';
 
 void main() {
