@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
-import '../home/home_screen.dart';
 import '../../widgets/custom_app_bar.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -29,13 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               phone: _phoneController.text.trim(),
               password: _passwordController.text.trim(),
             );
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (route) => false,
-          );
-        }
+        // Navigation handled by Consumer in main.dart
       } catch (e) {
         if (mounted) {
           _showErrorDialog(e.toString().replaceAll('Exception: ', ''));

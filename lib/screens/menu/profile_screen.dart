@@ -115,12 +115,8 @@ class ProfileScreen extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: () async {
                   await authProvider.logout();
-                  if (context.mounted) {
-                    Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
-                      '/', // Back to splash or login
-                      (route) => false,
-                    );
-                  }
+                  // Consumer in main.dart auto-navigates to LoginScreen
+                  // when isAuthenticated becomes false
                 },
                 style: TextButton.styleFrom(
                   minimumSize: const Size(double.infinity, 56),

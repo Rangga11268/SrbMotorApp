@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/register_screen.dart';
-import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,13 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (route) => false,
-          );
-        }
+        // Navigation is handled automatically by Consumer<AuthProvider> in main.dart
+        // when isAuthenticated becomes true
       } catch (e) {
         if (mounted) {
           _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
@@ -69,13 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _loginWithGoogle() async {
     try {
       await context.read<AuthProvider>().signInWithGoogle();
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false,
-        );
-      }
+      // Navigation handled by Consumer in main.dart
     } catch (e) {
       if (mounted) {
         _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
