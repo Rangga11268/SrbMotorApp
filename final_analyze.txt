@@ -1,0 +1,5 @@
+Analyzing SrbMotorApp...                                        
+
+   info - Don't use 'BuildContext's across async gaps - lib\screens\home\home_screen.dart:72:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\screens\menu\order_history_screen.dart:20:28 - use_build_context_synchronously
+

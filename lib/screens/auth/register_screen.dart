@@ -120,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   elevation: 5,
-                  shadowColor: const Color(0xFF2563EB).withOpacity(0.5),
+                  shadowColor: const Color(0xFF2563EB).withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 child: isLoading

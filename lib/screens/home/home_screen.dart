@@ -69,7 +69,11 @@ class _HomeContentState extends State<HomeContent> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<MotorProvider>().fetchMotors());
+    Future.microtask(() {
+      if (mounted) {
+        context.read<MotorProvider>().fetchMotors();
+      }
+    });
   }
 
   final List<String> categories = ['All', 'Sport', 'Scooter', 'CUB', 'EV'];
@@ -102,6 +106,27 @@ class _HomeContentState extends State<HomeContent> {
                       'Mau motor apa hari ini?',
                       style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
                     ),
+                    const SizedBox(height: 20),
+                    // Search Bar
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+                        ],
+                      ),
+                      child: TextField(
+                        onChanged: (value) => motorProvider.setSearchQuery(value),
+                        decoration: InputDecoration(
+                          hintText: 'Cari motor impian Anda...',
+                          hintStyle: GoogleFonts.outfit(color: Colors.grey, fontSize: 14),
+                          prefixIcon: const Icon(Icons.search, color: Color(0xFF2563EB)),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -116,7 +141,7 @@ class _HomeContentState extends State<HomeContent> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 5)),
                     ],
                     image: const DecorationImage(
                       image: AssetImage('assets/images/banner/banner.png'),
@@ -230,7 +255,7 @@ class _HomeContentState extends State<HomeContent> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5),
         ],
       ),
       child: Image.asset(path, height: 40, errorBuilder: (c, e, s) => const Icon(Icons.business, color: Colors.grey)),
@@ -252,7 +277,7 @@ class _HomeContentState extends State<HomeContent> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 15, offset: const Offset(0, 8)),
           ],
         ),
         child: Column(
@@ -281,11 +306,11 @@ class _HomeContentState extends State<HomeContent> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.motorcycle, size: 40, color: Colors.blueGrey.withOpacity(0.3)),
+                            Icon(Icons.motorcycle, size: 40, color: Colors.blueGrey.withValues(alpha: 0.3)),
                             const SizedBox(height: 8),
                             Text(
                               'Foto Belum Tersedia',
-                              style: GoogleFonts.outfit(fontSize: 10, color: Colors.blueGrey.withOpacity(0.5)),
+                              style: GoogleFonts.outfit(fontSize: 10, color: Colors.blueGrey.withValues(alpha: 0.5)),
                             ),
                           ],
                         ),

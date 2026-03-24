@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../providers/motor_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import '../../models/motor.dart';
 import '../order_form/order_form_screen.dart';
 
@@ -150,10 +153,25 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                     style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    currencyFormat.format(widget.motor.price),
-                    style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[700]),
-                  ),
+                    Text(
+                      currencyFormat.format(widget.motor.price),
+                      style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[700]),
+                    ),
+                    if (widget.motor.promotions != null && widget.motor.promotions!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: widget.motor.promotions!.map((p) => Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.orange[100], borderRadius: BorderRadius.circular(6)),
+                            child: Text(
+                              p['name'] ?? 'Promo',
+                              style: GoogleFonts.outfit(fontSize: 10, color: Colors.orange[900], fontWeight: FontWeight.bold),
+                            ),
+                          )).toList(),
+                        ),
+                      ),
                   
                   const SizedBox(height: 32),
                   
@@ -178,15 +196,20 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                     style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    widget.motor.details ?? 'Unit motor premium dengan kondisi terbaik. Sudah melalui pengecekan menyeluruh oleh teknisi ahli SRB Motor.',
-                    style: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF64748B), height: 1.6),
+                  HtmlWidget(
+                    widget.motor.details ?? 'Unit motor premium dengan kondisi terbaik.',
+                    textStyle: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF64748B), height: 1.6),
                   ),
 
                   const SizedBox(height: 32),
 
                   // Benefits
                   _buildBenefits(),
+
+                  const SizedBox(height: 32),
+                  
+                  // Related Motors
+                  _buildRelatedMotors(),
 
                   const SizedBox(height: 100), // Space for bottom bar
                 ],
@@ -208,12 +231,21 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
     );
   }
 
+  String _getColorsDisplay() {
+    if (widget.motor.colors == null) return 'Beragam';
+    if (widget.motor.colors is List) {
+      if ((widget.motor.colors as List).isEmpty) return 'Beragam';
+      return (widget.motor.colors as List).join(', ');
+    }
+    return widget.motor.colors.toString();
+  }
+
   Widget _buildSpecGrid() {
     final specs = [
-      {'icon': Icons.bolt, 'label': 'Engine', 'value': '${widget.motor.engine ?? '-'} cc'},
-      {'icon': Icons.settings_outlined, 'label': 'Transmisi', 'value': widget.motor.transmission ?? 'Matic'},
-      {'icon': Icons.fitness_center, 'label': 'Berat', 'value': '${widget.motor.weight ?? '-'} kg'},
-      {'icon': Icons.category_outlined, 'label': 'Tipe', 'value': widget.motor.type ?? 'Sport'},
+      {'icon': Icons.calendar_today_outlined, 'label': 'Tahun', 'value': widget.motor.year.toString()},
+      {'icon': Icons.palette_outlined, 'label': 'Warna', 'value': _getColorsDisplay()},
+      {'icon': Icons.settings_outlined, 'label': 'Transmisi', 'value': widget.motor.type?.toLowerCase().contains('matic') ?? false ? 'Matic' : 'Manual'},
+      {'icon': Icons.verified_user_outlined, 'label': 'Status', 'value': widget.motor.tersedia ? 'Tersedia' : 'Terjual'},
     ];
 
     return GridView.builder(
@@ -471,6 +503,69 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRelatedMotors() {
+    final motorProvider = context.watch<MotorProvider>();
+    final related = motorProvider.motors
+        .where((m) => m.id != widget.motor.id && (m.brand == widget.motor.brand || m.type == widget.motor.type))
+        .take(4)
+        .toList();
+
+    if (related.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Unit Terkait',
+          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 220,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: related.length,
+            itemBuilder: (context, index) {
+              final motor = related[index];
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 16),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MotorDetailScreen(motor: motor)),
+                    );
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            image: motor.imagePath != null
+                                ? DecorationImage(image: NetworkImage(motor.imagePath!), fit: BoxFit.cover)
+                                : null,
+                          ),
+                          child: motor.imagePath == null ? const Icon(Icons.motorcycle, color: Colors.grey) : null,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(motor.name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(currencyFormat.format(motor.price), style: GoogleFonts.outfit(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

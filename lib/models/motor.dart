@@ -9,6 +9,10 @@ class Motor {
   final String? transmission;
   final int? engine;
   final int? weight;
+  final dynamic colors;
+  final List<dynamic>? promotions;
+  final int year;
+  final bool tersedia;
 
   Motor({
     required this.id,
@@ -21,6 +25,10 @@ class Motor {
     this.transmission,
     this.engine,
     this.weight,
+    this.colors,
+    this.promotions,
+    required this.year,
+    this.tersedia = true,
   });
 
   factory Motor.fromJson(Map<String, dynamic> json) {
@@ -39,6 +47,10 @@ class Motor {
       transmission: json['transmission'],
       engine: json['engine'],
       weight: json['weight'],
+      colors: json['colors'],
+      promotions: json['promotions'],
+      year: json['year'] ?? 0,
+      tersedia: json['tersedia'] == 1 || json['tersedia'] == true,
     );
   }
 
@@ -54,6 +66,10 @@ class Motor {
       'transmission': transmission,
       'engine': engine,
       'weight': weight,
+      'colors': colors,
+      'promotions': promotions,
+      'year': year,
+      'tersedia': tersedia ? 1 : 0,
     };
   }
 }

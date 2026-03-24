@@ -17,7 +17,11 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<OrderProvider>().fetchOrderHistory());
+    Future.microtask(() {
+      if (mounted) {
+        context.read<OrderProvider>().fetchOrderHistory();
+      }
+    });
   }
 
   @override
@@ -62,7 +66,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
-                                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8)),
+                                BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 15, offset: const Offset(0, 8)),
                               ],
                             ),
                             child: InkWell(
@@ -88,7 +92,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                           decoration: BoxDecoration(
-                                            color: statusColor.withOpacity(0.1),
+                                            color: statusColor.withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(10),
                                           ),
                                           child: Text(

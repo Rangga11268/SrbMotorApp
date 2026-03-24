@@ -5,10 +5,9 @@ import 'api_config.dart';
 
 class MotorService {
   Future<List<Motor>> getMotors({String? category, String? search}) async {
-    final queryParams = {
-      if (category != null) 'category': category,
-      if (search != null) 'search': search,
-    };
+    final Map<String, String> queryParams = {};
+    if (category != null) queryParams['category'] = category;
+    if (search != null) queryParams['search'] = search;
     
     final uri = Uri.parse('${ApiConfig.baseUrl}/motors').replace(queryParameters: queryParams);
     

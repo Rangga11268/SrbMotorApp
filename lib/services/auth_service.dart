@@ -46,7 +46,6 @@ class AuthService {
       }),
     );
 
-    print('DEBUG REGISTER RESPONSE: ${response.body}');
     final data = jsonDecode(response.body);
     if (response.statusCode == 201 || response.statusCode == 200) {
       if (data['data'] == null) {

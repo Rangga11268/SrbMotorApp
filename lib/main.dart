@@ -4,6 +4,8 @@ import './providers/auth_provider.dart';
 import './providers/motor_provider.dart';
 import './providers/order_provider.dart';
 import './screens/splash/splash_screen.dart';
+import './screens/home/home_screen.dart';
+import './screens/auth/login_screen.dart';
 
 void main() {
   runApp(
@@ -29,7 +31,11 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<AuthProvider>().checkAuth());
+    Future.microtask(() {
+      if (mounted) {
+        context.read<AuthProvider>().checkAuth();
+      }
+    });
   }
 
   @override
@@ -43,7 +49,12 @@ class _MyAppState extends State<MyApp> {
           seedColor: const Color(0xFF2563EB),
         ),
       ),
-      home: const SplashScreen(),
+      home: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          if (auth.isLoading) return const SplashScreen();
+          return auth.isAuthenticated ? const HomeScreen() : const LoginScreen();
+        },
+      ),
     );
   }
 }
