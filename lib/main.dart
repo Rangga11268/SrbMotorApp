@@ -36,9 +36,12 @@ class _MyAppState extends State<MyApp> {
     _initApp();
   }
 
-  void _initApp() async {
-    // Start auth check in background
-    context.read<AuthProvider>().checkAuth();
+  void _initApp() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<AuthProvider>().checkAuth();
+      }
+    });
   }
 
   @override
@@ -64,15 +67,6 @@ class _MyAppState extends State<MyApp> {
                   _showSplash = false;
                 });
               },
-            );
-          } else if (auth.isLoading) {
-            currentScreen = const Scaffold(
-              key: ValueKey('auth_loading_screen'),
-              body: Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF2563EB),
-                ),
-              ),
             );
           } else if (auth.isAuthenticated) {
             currentScreen = const HomeScreen(key: ValueKey('home_screen'));

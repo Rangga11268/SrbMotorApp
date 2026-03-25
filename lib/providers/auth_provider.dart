@@ -37,6 +37,8 @@ class AuthProvider with ChangeNotifier {
       if (!result['success']) {
         throw Exception(result['message']);
       }
+    } catch (e) {
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
