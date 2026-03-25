@@ -28,14 +28,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _showSplash = true;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      if (mounted) {
-        context.read<AuthProvider>().checkAuth();
-      }
-    });
+    _initApp();
+  }
+
+  void _initApp() async {
+    // Start auth check in background
+    context.read<AuthProvider>().checkAuth();
   }
 
   @override
@@ -51,8 +54,36 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
-          if (auth.isLoading) return const SplashScreen();
-          return auth.isAuthenticated ? const HomeScreen() : const LoginScreen();
+          Widget currentScreen;
+
+          if (_showSplash) {
+            currentScreen = SplashScreen(
+              key: const ValueKey('splash_screen'),
+              onGetStarted: () {
+                setState(() {
+                  _showSplash = false;
+                });
+              },
+            );
+          } else if (auth.isLoading) {
+            currentScreen = const Scaffold(
+              key: ValueKey('auth_loading_screen'),
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+            );
+          } else if (auth.isAuthenticated) {
+            currentScreen = const HomeScreen(key: ValueKey('home_screen'));
+          } else {
+            currentScreen = const LoginScreen(key: ValueKey('login_screen'));
+          }
+
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: currentScreen,
+          );
         },
       ),
     );
