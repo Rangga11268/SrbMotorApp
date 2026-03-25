@@ -31,12 +31,16 @@ class OrderProvider with ChangeNotifier {
   }
 
   Future<bool> submitCashOrder({
-
     required int motorId,
     required String name,
     required String phone,
-    required String occupation,
+    required String nik,
     required String address,
+    required String motorColor,
+    required String deliveryMethod,
+    required String paymentMethod,
+    double? bookingFee,
+    String? email,
     String? notes,
   }) async {
     _isLoading = true;
@@ -49,8 +53,13 @@ class OrderProvider with ChangeNotifier {
         motorId: motorId,
         name: name,
         phone: phone,
-        occupation: occupation,
+        nik: nik,
         address: address,
+        motorColor: motorColor,
+        deliveryMethod: deliveryMethod,
+        paymentMethod: paymentMethod,
+        bookingFee: bookingFee,
+        email: email,
         notes: notes,
       );
 
