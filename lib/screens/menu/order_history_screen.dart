@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/order_provider.dart';
 import 'package:intl/intl.dart';
 import 'order_status_screen.dart';
@@ -111,8 +112,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                           decoration: BoxDecoration(
                                             color: const Color(0xFFF1F5F9),
                                             borderRadius: BorderRadius.circular(16),
+                                            image: order.motor?.imagePath != null
+                                                ? DecorationImage(
+                                                    image: CachedNetworkImageProvider(order.motor!.imagePath!),
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : null,
                                           ),
-                                          child: const Icon(Icons.motorcycle, color: Colors.blueGrey),
+                                          child: order.motor?.imagePath == null
+                                              ? const Icon(Icons.motorcycle, color: Colors.blueGrey)
+                                              : null,
                                         ),
                                         const SizedBox(width: 16),
                                         Expanded(
@@ -174,7 +183,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       case 'completed':
         return const Color(0xFF10B981);
       case 'cancelled':
+      case 'dibatalkan':
         return const Color(0xFFEF4444);
+      case 'pembayaran_dikonfirmasi':
+      case 'payment_confirmed':
+      case 'unit_preparation':
+        return const Color(0xFF3B82F6);
       default:
         return const Color(0xFF64748B);
     }

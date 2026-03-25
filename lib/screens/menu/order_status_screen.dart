@@ -562,19 +562,65 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   void _showCancelDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Batalkan Pesanan?', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text('Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.', style: GoogleFonts.outfit()),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('TIDAK', style: GoogleFonts.outfit(color: Colors.grey))),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              _handleCancel();
-            },
-            child: Text('YA, BATALKAN', style: GoogleFonts.outfit(color: Colors.red, fontWeight: FontWeight.bold)),
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), shape: BoxShape.circle),
+                child: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Batalkan Pesanan?',
+                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Gunakan pembatalan hanya jika Anda yakin. Tindakan ini tidak dapat diurungkan.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF64748B), height: 1.5),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('Kembali', style: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _handleCancel();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('Ya, Batalkan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -585,13 +631,70 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
     if (mounted) {
       if (result['success']) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result['message'])));
-        // Refresh the entire order list and pop back
+        _showSuccessCancelDialog();
         await orderProvider.fetchOrderHistory();
-        if (mounted) Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result['message']), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
       }
     }
+  }
+
+  void _showSuccessCancelDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
+                child: const Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 48),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Berhasil Dibatalkan',
+                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Pesanan Anda telah berhasil dibatalkan dari sistem kami.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                    Navigator.pop(context); // Back to history
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('OK, MENGERTI', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
