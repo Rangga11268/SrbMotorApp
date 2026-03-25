@@ -17,13 +17,21 @@ class OrderStatusScreen extends StatefulWidget {
 }
 
 class _OrderStatusScreenState extends State<OrderStatusScreen> {
-  late OrderModel _currentOrder;
+  OrderModel get _currentOrder {
+    try {
+      return context.watch<OrderProvider>().orders.firstWhere(
+            (o) => o.id == widget.order.id,
+          );
+    } catch (_) {
+      return widget.order;
+    }
+  }
+
   bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
-    _currentOrder = widget.order;
   }
 
   Future<void> _refresh() async {
@@ -31,12 +39,6 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     try {
       final orderProvider = context.read<OrderProvider>();
       await orderProvider.fetchOrderHistory();
-      if (mounted) {
-        final updatedOrder = orderProvider.orders.firstWhere((o) => o.id == widget.order.id);
-        setState(() {
-          _currentOrder = updatedOrder;
-        });
-      }
     } catch (e) {
       debugPrint('Error refreshing order: $e');
     } finally {
@@ -73,12 +75,19 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
         Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
-        title: Text('Detail Pesanan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
+            title: Text('Detail Pesanan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            elevation: 0,
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Color(0xFF2563EB)),
+                onPressed: _refresh,
+                tooltip: 'Refresh Status',
+              ),
+            ],
+          ),
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: SingleChildScrollView(

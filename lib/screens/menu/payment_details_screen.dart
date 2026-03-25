@@ -32,19 +32,6 @@ class PaymentDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final format = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    double total = order.motor?.price ?? 0;
-    double bFee = order.bookingFee;
-    double remaining = total - bFee;
-
-    InstallmentModel? bookingInstallment;
-    InstallmentModel? remainingInstallment;
-
-    if (order.installments.isNotEmpty) {
-      bookingInstallment = order.installments.firstWhere((i) => i.installmentNumber == 0, orElse: () => order.installments.first);
-      if (order.installments.length > 1) {
-         remainingInstallment = order.installments.firstWhere((i) => i.installmentNumber == 1, orElse: () => order.installments.last);
-      }
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,78 +41,118 @@ class PaymentDetailsScreen extends StatelessWidget {
         surfaceTintColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF2563EB)),
+            onPressed: () => context.read<OrderProvider>().fetchOrderHistory(),
+            tooltip: 'Refresh Status',
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Receipt Header
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: Colors.blue[50], shape: BoxShape.circle),
-                    child: const Icon(Icons.receipt_long_outlined, color: Colors.blue, size: 32),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Rincian Tagihan', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('#SRB-${order.id}', style: GoogleFonts.outfit(color: Colors.grey)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
+      body: Consumer<OrderProvider>(
+        builder: (context, orderProvider, child) {
+          // Find the latest version of this order in the provider
+          final currentOrder = orderProvider.orders.firstWhere(
+            (o) => o.id == order.id,
+            orElse: () => order,
+          );
 
-            // 2. Breakdown Table
-            Text('DETAIL PESANAN', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
-            const SizedBox(height: 16),
-            _buildRow('Unit Motor', order.motor?.name ?? 'Unit'),
-            if (order.motorColor != null) _buildRow('Warna', order.motorColor!),
-            _buildRow('Harga Unit', format.format(total), isBold: true),
-            
-            const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider(height: 1)),
-            
-            Text('STATUS PEMBAYARAN', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
-            const SizedBox(height: 16),
-            
-            _buildPaymentCard(
-              context,
-              label: 'Booking Fee',
-              amount: format.format(bFee),
-              status: bookingInstallment?.status ?? 'Pending',
-              installment: bookingInstallment,
-            ),
-            const SizedBox(height: 16),
-            _buildPaymentCard(
-              context,
-              label: 'Sisa Pelunasan',
-              amount: format.format(remaining),
-              status: remainingInstallment?.status ?? 'Unpaid',
-              installment: remainingInstallment,
-            ),
-            
-            const SizedBox(height: 40),
-            
-            // 3. Security Note
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.orange[50], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.orange[100]!)),
-              child: Row(
-                children: [
-                  const Icon(Icons.security, color: Colors.orange, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Pembayaran diproses secara aman melalui Midtrans. Status akan otomatis diperbarui setelah pembayaran sukses.',
-                      style: GoogleFonts.outfit(fontSize: 12, color: Colors.orange[800], height: 1.4),
+          double total = currentOrder.motor?.price ?? 0;
+          double bFee = currentOrder.bookingFee;
+          double remaining = total - bFee;
+
+          InstallmentModel? bookingInstallment;
+          InstallmentModel? remainingInstallment;
+
+          if (currentOrder.installments.isNotEmpty) {
+            bookingInstallment = currentOrder.installments.firstWhere((i) => i.installmentNumber == 0, orElse: () => currentOrder.installments.first);
+            if (currentOrder.installments.length > 1) {
+              remainingInstallment = currentOrder.installments.firstWhere((i) => i.installmentNumber == 1, orElse: () => currentOrder.installments.last);
+            }
+          }
+
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. Receipt Header
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(color: Colors.blue[50], shape: BoxShape.circle),
+                            child: const Icon(Icons.receipt_long_outlined, color: Colors.blue, size: 32),
+                          ),
+                          const SizedBox(height: 16),
+                          Text('Rincian Tagihan', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+                          Text('#SRB-${currentOrder.id}', style: GoogleFonts.outfit(color: Colors.grey)),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 40),
+
+                    // 2. Breakdown Table
+                    Text('DETAIL PESANAN', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+                    const SizedBox(height: 16),
+                    _buildRow('Unit Motor', currentOrder.motor?.name ?? 'Unit'),
+                    if (currentOrder.motorColor != null) _buildRow('Warna', currentOrder.motorColor!),
+                    _buildRow('Harga Unit', format.format(total), isBold: true),
+                    
+                    const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider(height: 1)),
+                    
+                    Text('STATUS PEMBAYARAN', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+                    const SizedBox(height: 16),
+                    
+                    _buildPaymentCard(
+                      context,
+                      label: 'Booking Fee',
+                      amount: format.format(bFee),
+                      status: bookingInstallment?.status ?? 'Pending',
+                      installment: bookingInstallment,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPaymentCard(
+                      context,
+                      label: 'Sisa Pelunasan',
+                      amount: format.format(remaining),
+                      status: remainingInstallment?.status ?? 'Unpaid',
+                      installment: remainingInstallment,
+                    ),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // 3. Security Note
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.orange[50], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.orange[100]!)),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.security, color: Colors.orange, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Pembayaran diproses secara aman melalui Midtrans. Status akan otomatis diperbarui setelah pembayaran sukses.',
+                              style: GoogleFonts.outfit(fontSize: 12, color: Colors.orange[800], height: 1.4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+              if (orderProvider.isLoading)
+                Container(
+                  color: Colors.white.withOpacity(0.5),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

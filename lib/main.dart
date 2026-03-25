@@ -82,36 +82,16 @@ class _MyAppState extends State<MyApp> {
       if (!mounted) return;
 
       try {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        
         // Hide splash immediately if we got a valid link
         if (_showSplash) {
           setState(() {
             _showSplash = false;
           });
         }
-
-        if (authProvider.isAuthenticated) {
-          final mainProvider = Provider.of<MainProvider>(context, listen: false);
-          final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-
-          // Change tab to Orders
-          mainProvider.setSelectedIndex(1);
-          
-          final queryParams = uri.queryParameters;
-          
-          // Execute refresh logic
-          if (queryParams.containsKey('installment_id')) {
-            final id = int.tryParse(queryParams['installment_id'] ?? '');
-            if (id != null) orderProvider.refreshOrderStatus(id);
-          } else if (queryParams.containsKey('installment_ids')) {
-            final idsStr = queryParams['installment_ids'] ?? '';
-            final ids = idsStr.split(',').map((s) => int.tryParse(s.trim())).whereType<int>().toList();
-            if (ids.isNotEmpty) orderProvider.refreshOrderStatus(ids.first);
-          } else {
-            orderProvider.fetchOrderHistory();
-          }
-        }
+        
+        // Manual refresh is now preferred by the user. 
+        // We just hide the splash and let the user navigate/refresh manually.
+        debugPrint('Deep link received (Auto-refresh disabled per user request): $uri');
       } catch (e) {
         debugPrint('Error handling deep link: $e');
       }
