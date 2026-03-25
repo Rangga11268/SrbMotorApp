@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../models/motor.dart';
 import '../../providers/order_provider.dart';
 import '../../providers/auth_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderFormScreen extends StatefulWidget {
   final Motor motor;
@@ -75,7 +76,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           );
 
       if (success && mounted) {
-        _showSuccessDialog();
+        final lastResult = context.read<OrderProvider>().lastOrderResult;
+        
+        if (_paymentMethod == 'Transfer Bank' && lastResult?['redirect_url'] != null) {
+          _handleMidtransRedirection(lastResult!['redirect_url']);
+        } else {
+          _showSuccessDialog();
+        }
       } else if (!success && mounted) {
         _showErrorDialog(context.read<OrderProvider>().errorMessage ?? 'Gagal membuat pesanan');
       }
@@ -129,6 +136,61 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     elevation: 0,
                   ),
                   child: const Text('KEMBALI KE HOME', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleMidtransRedirection(String url) async {
+    final uri = Uri.parse(url);
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.payment, color: Colors.blue, size: 60),
+              const SizedBox(height: 24),
+              const Text(
+                'Lanjutkan Pembayaran',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Outfit'),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Anda akan dialihkan ke halaman pembayaran aman Midtrans untuk menyelesaikan transaksi.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, height: 1.5),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context); // Close dialog
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      if (mounted) {
+                         Navigator.of(context).pop(); // Back from form
+                         Navigator.of(context).pop(); // Back from detail
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('BAYAR SEKARANG', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

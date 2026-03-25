@@ -54,6 +54,8 @@ class OrderService {
       return {
         'success': true,
         'order_id': data['order_id'],
+        'snap_token': data['snap_token'],
+        'redirect_url': data['redirect_url'],
         'message': data['message'] ?? 'Pesanan berhasil dibuat',
       };
     } else {

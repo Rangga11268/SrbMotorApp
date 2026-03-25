@@ -7,11 +7,13 @@ class OrderProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
+  Map<String, dynamic>? _lastOrderResult;
 
   List<OrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
+  Map<String, dynamic>? get lastOrderResult => _lastOrderResult;
 
   final OrderService _orderService = OrderService();
 
@@ -65,6 +67,7 @@ class OrderProvider with ChangeNotifier {
 
       if (result['success']) {
         _successMessage = result['message'];
+        _lastOrderResult = result;
         notifyListeners();
         return true;
       } else {
