@@ -176,11 +176,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     Navigator.pop(context); // Close dialog
-                    if (await canLaunchUrl(uri)) {
+                    try {
                       await launchUrl(uri, mode: LaunchMode.externalApplication);
                       if (mounted) {
                          Navigator.of(context).pop(); // Back from form
                          Navigator.of(context).pop(); // Back from detail
+                      }
+                    } catch (e) {
+                      debugPrint('Error launching URL: $e');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Gagal membuka halaman pembayaran: $url')),
+                        );
                       }
                     }
                   },
