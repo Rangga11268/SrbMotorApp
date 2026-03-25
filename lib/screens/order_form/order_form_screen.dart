@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../models/motor.dart';
 import '../../providers/order_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/main_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrderFormScreen extends StatefulWidget {
@@ -124,6 +125,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    context.read<MainProvider>().setSelectedIndex(1); // Go to Orders tab
                     Navigator.of(context).pop(); // Tutup dialog
                     Navigator.of(context).pop(); // Kembali dari form
                     Navigator.of(context).pop(); // Kembali dari detail
@@ -175,6 +177,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
+                    context.read<MainProvider>().setSelectedIndex(1); // Go to Orders tab
                     Navigator.pop(context); // Close dialog
                     try {
                       await launchUrl(uri, mode: LaunchMode.externalApplication);

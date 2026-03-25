@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
 import '../../models/motor.dart';
+import '../../providers/main_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../motor_detail/motor_detail_screen.dart';
 import '../menu/order_history_screen.dart';
@@ -18,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
 
   final List<Widget> _pages = [
     const HomeContent(),
@@ -28,8 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mainProvider = context.watch<MainProvider>();
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: _pages[mainProvider.selectedIndex],
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           boxShadow: [
@@ -37,11 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
+          currentIndex: mainProvider.selectedIndex,
           onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
+            mainProvider.setSelectedIndex(index);
           },
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),

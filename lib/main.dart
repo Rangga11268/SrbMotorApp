@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import './providers/auth_provider.dart';
 import './providers/motor_provider.dart';
 import './providers/order_provider.dart';
+import './providers/main_provider.dart';
 import './screens/splash/splash_screen.dart';
 import './screens/home/home_screen.dart';
 import './screens/auth/login_screen.dart';
@@ -14,6 +15,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => MotorProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => MainProvider()),
       ],
       child: const MyApp(),
     ),
