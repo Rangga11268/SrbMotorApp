@@ -97,7 +97,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                             borderRadius: BorderRadius.circular(10),
                                           ),
                                           child: Text(
-                                            order.status.replaceAll('_', ' ').toUpperCase(),
+                                            order.statusText,
                                             style: GoogleFonts.outfit(fontSize: 10, color: statusColor, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                                           ),
                                         ),

@@ -16,6 +16,7 @@ class OrderModel {
   final double bookingFee;
   final String? notes;
   final String status;
+  final String statusText;
   final DateTime createdAt;
   final Motor? motor;
   final List<InstallmentModel> installments;
@@ -35,6 +36,7 @@ class OrderModel {
     this.bookingFee = 0.0,
     this.notes,
     required this.status,
+    required this.statusText,
     required this.createdAt,
     this.motor,
     this.installments = const [],
@@ -61,6 +63,7 @@ class OrderModel {
       bookingFee: double.tryParse(json['booking_fee'].toString()) ?? 0.0,
       notes: json['notes'],
       status: json['status'],
+      statusText: json['status_text'] ?? (json['status'] ?? 'Unknown').toString().replaceAll('_', ' ').toUpperCase(),
       createdAt: DateTime.parse(json['created_at']),
       motor: json['motor'] != null ? Motor.fromJson(json['motor']) : null,
       installments: items,

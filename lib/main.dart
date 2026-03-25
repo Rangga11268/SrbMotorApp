@@ -51,55 +51,71 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _initDeepLinks() {
+  Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // Handle links when app is in background or closed
-    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-      _handleDeepLink(uri);
-    });
+    // 1. Handle initial link (cold start)
+    try {
+      final initialUri = await _appLinks.getInitialLink();
+      if (initialUri != null) {
+        _handleDeepLink(initialUri);
+      }
+    } catch (e) {
+      debugPrint('Error getting initial link: $e');
+    }
+
+    // 2. Handle links when app is in background or foreground
+    _linkSubscription = _appLinks.uriLinkStream.listen(
+      (uri) => _handleDeepLink(uri),
+      onError: (err) => debugPrint('Deep link stream error: $err'),
+    );
   }
 
   void _handleDeepLink(Uri uri) {
-    debugPrint('Received deep link: $uri');
-    if (uri.scheme == 'srbmotor' && uri.host == 'payment-success') {
-      if (mounted) {
-        setState(() {
-          _showSplash = false;
-        });
+    debugPrint('Processing deep link: $uri');
+    
+    // Safety check for specific host
+    if (uri.scheme != 'srbmotor' || uri.host != 'payment-success') return;
+
+    // Use microtask to ensure context is stable and not in the middle of a build
+    Future.microtask(() {
+      if (!mounted) return;
+
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
         
-        final mainProvider = context.read<MainProvider>();
-        final orderProvider = context.read<OrderProvider>();
-        final authProvider = context.read<AuthProvider>();
+        // Hide splash immediately if we got a valid link
+        if (_showSplash) {
+          setState(() {
+            _showSplash = false;
+          });
+        }
 
         if (authProvider.isAuthenticated) {
-          mainProvider.setSelectedIndex(1); // Go to Orders tab
+          final mainProvider = Provider.of<MainProvider>(context, listen: false);
+          final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+          // Change tab to Orders
+          mainProvider.setSelectedIndex(1);
           
-          // Manual Status Sync if IDs are present
           final queryParams = uri.queryParameters;
+          
+          // Execute refresh logic
           if (queryParams.containsKey('installment_id')) {
             final id = int.tryParse(queryParams['installment_id'] ?? '');
-            if (id != null) {
-              orderProvider.refreshOrderStatus(id);
-            } else {
-              orderProvider.fetchOrderHistory();
-            }
+            if (id != null) orderProvider.refreshOrderStatus(id);
           } else if (queryParams.containsKey('installment_ids')) {
             final idsStr = queryParams['installment_ids'] ?? '';
             final ids = idsStr.split(',').map((s) => int.tryParse(s.trim())).whereType<int>().toList();
-            if (ids.isNotEmpty) {
-              // Refresh first one is usually enough to trigger the sync logic, 
-              // but we can loop or just reload history
-              orderProvider.refreshOrderStatus(ids.first);
-            } else {
-              orderProvider.fetchOrderHistory();
-            }
+            if (ids.isNotEmpty) orderProvider.refreshOrderStatus(ids.first);
           } else {
-            orderProvider.fetchOrderHistory(); 
+            orderProvider.fetchOrderHistory();
           }
         }
+      } catch (e) {
+        debugPrint('Error handling deep link: $e');
       }
-    }
+    });
   }
 
   @override
@@ -139,7 +155,7 @@ class _MyAppState extends State<MyApp> {
           }
 
           return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 300),
             child: currentScreen,
           );
         },

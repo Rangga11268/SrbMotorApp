@@ -131,13 +131,22 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
   Widget _buildHeaderSection() {
     Color statusColor;
-    String statusText = _currentOrder.status.toUpperCase().replaceAll('_', ' ');
+    String statusText = _currentOrder.statusText;
     
     switch (_currentOrder.status.toLowerCase()) {
       case 'new_order': statusColor = Colors.blue; break;
-      case 'pending': statusColor = Colors.orange; break;
+      case 'pending': 
+      case 'waiting_payment':
+        statusColor = Colors.orange; break;
       case 'completed': statusColor = Colors.green; break;
-      case 'cancelled': statusColor = Colors.red; break;
+      case 'cancelled': 
+      case 'dibatalkan':
+        statusColor = Colors.red; break;
+      case 'pembayaran_dikonfirmasi':
+      case 'unit_preparation':
+      case 'ready_for_delivery':
+      case 'dalam_pengiriman':
+        statusColor = Colors.blueAccent; break;
       default: statusColor = Colors.grey;
     }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
 import '../../models/motor.dart';
@@ -323,7 +324,7 @@ class _HomeContentState extends State<HomeContent> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   image: motor.imagePath != null
                       ? DecorationImage(
-                          image: NetworkImage(motor.imagePath!),
+                          image: CachedNetworkImageProvider(motor.imagePath!),
                           fit: BoxFit.cover,
                         )
                       : DecorationImage(
