@@ -65,4 +65,49 @@ class OrderService {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getInstallmentPaymentUrl(int installmentId) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/installments/$installmentId/pay-online'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'snap_token': data['snap_token'],
+        'redirect_url': data['redirection_url'] ?? data['redirect_url'], // Support both naming variants if any
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal mendapatkan link pembayaran',
+      };
+    }
+  }
+
+  Future<bool> checkInstallmentStatus(int installmentId) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/installments/$installmentId/check-status'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    return response.statusCode == 200;
+  }
+
+  Future<Map<String, dynamic>> cancelOrder(int orderId, String? reason) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/orders/$orderId/cancel'),
+      headers: await ApiConfig.headers,
+      body: jsonEncode({'reason': reason}),
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {'success': true, 'message': data['message']};
+    } else {
+      return {'success': false, 'message': data['message'] ?? 'Gagal membatalkan pesanan'};
+    }
+  }
 }

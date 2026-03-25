@@ -84,4 +84,42 @@ class OrderProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<Map<String, dynamic>> getInstallmentPaymentUrl(int installmentId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      return await _orderService.getInstallmentPaymentUrl(installmentId);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> refreshOrderStatus(int installmentId) async {
+    final success = await _orderService.checkInstallmentStatus(installmentId);
+    if (success) {
+      await fetchOrderHistory();
+    }
+    return success;
+  }
+
+  Future<Map<String, dynamic>> cancelOrder(int orderId, String? reason) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final result = await _orderService.cancelOrder(orderId, reason);
+      if (result['success']) {
+        await fetchOrderHistory();
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
