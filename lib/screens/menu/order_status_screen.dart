@@ -17,16 +17,6 @@ class OrderStatusScreen extends StatefulWidget {
 }
 
 class _OrderStatusScreenState extends State<OrderStatusScreen> {
-  OrderModel get _currentOrder {
-    try {
-      return context.watch<OrderProvider>().orders.firstWhere(
-            (o) => o.id == widget.order.id,
-          );
-    } catch (_) {
-      return widget.order;
-    }
-  }
-
   bool _isRefreshing = false;
 
   @override
@@ -68,77 +58,87 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final dateFormat = DateFormat('dd MMMM yyyy, HH:mm');
-    final isLoading = context.watch<OrderProvider>().isLoading || _isRefreshing;
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
-          appBar: AppBar(
-            title: Text('Detail Pesanan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.white,
-            elevation: 0,
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh, color: Color(0xFF2563EB)),
-                onPressed: _refresh,
-                tooltip: 'Refresh Status',
+    return Selector<OrderProvider, OrderModel>(
+      selector: (context, provider) => provider.orders.firstWhere(
+        (o) => o.id == widget.order.id,
+        orElse: () => widget.order,
+      ),
+      builder: (context, currentOrder, child) {
+        final _currentOrder = currentOrder; // Shadowing for sub-builders
+        final isLoading = context.select<OrderProvider, bool>((p) => p.isLoading) || _isRefreshing;
+
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: const Color(0xFFF8FAFC),
+              appBar: AppBar(
+                title: Text('Detail Pesanan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.white,
+                elevation: 0,
+                centerTitle: true,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Color(0xFF2563EB)),
+                    onPressed: _refresh,
+                    tooltip: 'Refresh Status',
+                  ),
+                ],
               ),
-            ],
-          ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Transaction ID & Status Badge
-              _buildHeaderSection(),
-              const SizedBox(height: 24),
+              body: RefreshIndicator(
+                onRefresh: _refresh,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Transaction ID & Status Badge
+                      _buildHeaderSection(_currentOrder),
+                      const SizedBox(height: 24),
 
-              // 2. Main Call to Action (Payment)
-              if (_currentOrder.status != 'completed' && _currentOrder.status != 'cancelled')
-                _buildPaymentCTA(),
-              const SizedBox(height: 24),
+                      // 2. Main Call to Action (Payment)
+                      if (_currentOrder.status != 'completed' && _currentOrder.status != 'cancelled')
+                        _buildPaymentCTA(_currentOrder),
+                      const SizedBox(height: 24),
 
-              // 3. Motor Info Card
-              _buildMotorCard(currencyFormat),
-              const SizedBox(height: 24),
+                      // 3. Motor Info Card
+                      _buildMotorCard(_currentOrder, currencyFormat),
+                      const SizedBox(height: 24),
 
-              // 4. Payment Summary (Booking Fee & Pelunasan)
-              _buildPaymentSection(currencyFormat),
-              const SizedBox(height: 24),
+                      // 4. Payment Summary (Booking Fee & Pelunasan)
+                      _buildPaymentSection(_currentOrder, currencyFormat),
+                      const SizedBox(height: 24),
 
-              // 5. Timeline Status
-              _buildTimelineSection(dateFormat),
-              const SizedBox(height: 24),
+                      // 5. Timeline Status
+                      _buildTimelineSection(_currentOrder, dateFormat),
+                      const SizedBox(height: 24),
 
-              // 6. Customer Details Card
-              _buildCustomerInfoCard(),
-              const SizedBox(height: 24),
+                      // 6. Customer Details Card
+                      _buildCustomerInfoCard(_currentOrder),
+                      const SizedBox(height: 24),
 
-              // 7. Cancel Button (conditional)
-              if (_isCancellable()) _buildCancelButton(),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
-    ),
-    if (isLoading)
-      Container(
-        color: Colors.black.withOpacity(0.1),
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-  ],
-);
+                      // 7. Cancel Button (conditional)
+                      if (_isCancellable(_currentOrder)) _buildCancelButton(_currentOrder),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.1),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        );
+      },
+    );
   }
 
-  Widget _buildHeaderSection() {
+  Widget _buildHeaderSection(OrderModel _currentOrder) {
     Color statusColor;
     String statusText = _currentOrder.statusText;
     
@@ -185,7 +185,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildMotorCard(NumberFormat format) {
+  Widget _buildMotorCard(OrderModel _currentOrder, NumberFormat format) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -226,7 +226,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildPaymentSection(NumberFormat format) {
+  Widget _buildPaymentSection(OrderModel _currentOrder, NumberFormat format) {
     double total = _currentOrder.motor?.price ?? 0;
     double bFee = _currentOrder.bookingFee;
     double remaining = total - bFee;
@@ -372,7 +372,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildTimelineSection(DateFormat format) {
+  Widget _buildTimelineSection(OrderModel _currentOrder, DateFormat format) {
     // Current status index for filling progress
     final statuses = [
       'new_order', 
@@ -471,7 +471,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildCustomerInfoCard() {
+  Widget _buildCustomerInfoCard(OrderModel _currentOrder) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -514,7 +514,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildPaymentCTA() {
+  Widget _buildPaymentCTA(OrderModel _currentOrder) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -553,7 +553,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  bool _isCancellable() {
+  bool _isCancellable(OrderModel _currentOrder) {
     final status = _currentOrder.status.toLowerCase();
     // Cash statuses
     if (status == 'new_order' || status == 'waiting_payment') return true;
@@ -562,11 +562,11 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     return false;
   }
 
-  Widget _buildCancelButton() {
+  Widget _buildCancelButton(OrderModel _currentOrder) {
     return SizedBox(
       width: double.infinity,
       child: TextButton.icon(
-        onPressed: _showCancelDialog,
+        onPressed: () => _showCancelDialog(_currentOrder),
         icon: const Icon(Icons.cancel_outlined, color: Colors.red),
         label: Text('Batalkan Pesanan', style: GoogleFonts.outfit(color: Colors.red, fontWeight: FontWeight.bold)),
         style: TextButton.styleFrom(
@@ -577,7 +577,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  void _showCancelDialog() {
+  void _showCancelDialog(OrderModel _currentOrder) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -622,7 +622,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        _handleCancel();
+                        _handleCancel(_currentOrder);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -643,7 +643,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  void _handleCancel() async {
+  void _handleCancel(OrderModel _currentOrder) async {
     final orderProvider = context.read<OrderProvider>();
     final result = await orderProvider.cancelOrder(_currentOrder.id, "Dibatalkan melalui aplikasi mobile");
 

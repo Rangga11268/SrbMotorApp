@@ -49,13 +49,13 @@ class PaymentDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<OrderProvider>(
-        builder: (context, orderProvider, child) {
-          // Find the latest version of this order in the provider
-          final currentOrder = orderProvider.orders.firstWhere(
-            (o) => o.id == order.id,
-            orElse: () => order,
-          );
+      body: Selector<OrderProvider, OrderModel>(
+        selector: (context, provider) => provider.orders.firstWhere(
+          (o) => o.id == order.id,
+          orElse: () => order,
+        ),
+        builder: (context, currentOrder, child) {
+          final isLoading = context.select<OrderProvider, bool>((p) => p.isLoading);
 
           double total = currentOrder.motor?.price ?? 0;
           double bFee = currentOrder.bookingFee;
@@ -145,7 +145,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              if (orderProvider.isLoading)
+              if (isLoading)
                 Container(
                   color: Colors.white.withOpacity(0.5),
                   child: const Center(child: CircularProgressIndicator()),
