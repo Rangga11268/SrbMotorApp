@@ -40,7 +40,7 @@ class Motor {
       if (rawImg.startsWith('http')) {
         // Already a full URL (e.g. from the 'image' accessor)
         // Fix for Android emulator: replace localhost with 10.0.2.2
-        imagePath = rawImg.replaceAll('localhost', '10.0.2.2');
+        imagePath = rawImg.replaceAll('localhost', '10.0.2.2').replaceAll('srbmotor.test', '10.0.2.2');
       } else if (rawImg.startsWith('assets/')) {
         // Legacy assets-folder path (e.g. assets/img/yamaha/aerox_155.png)
         imagePath = 'http://10.0.2.2:8000/$rawImg';

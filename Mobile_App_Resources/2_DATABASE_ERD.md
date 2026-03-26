@@ -40,8 +40,10 @@ erDiagram
         string model
         string slug
         decimal price
+        int year
+        string type
         string image_path
-        text details
+        text details "Mapped to 'description' in app"
         boolean tersedia
         decimal min_dp_amount
         json colors
