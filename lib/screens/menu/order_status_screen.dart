@@ -379,8 +379,10 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   }
 
   Widget _buildTimelineSection(OrderModel _currentOrder, DateFormat format) {
-    final isCancelled = _currentOrder.status.toLowerCase() == 'cancelled' ||
-        _currentOrder.status.toLowerCase() == 'dibatalkan';
+    final currentStatusRaw = _currentOrder.status.toLowerCase();
+    final isCancelled = currentStatusRaw == 'cancelled' || currentStatusRaw == 'dibatalkan';
+    final isRejected = currentStatusRaw == 'ditolak';
+    final isTerminal = isCancelled || isRejected;
 
     // Full status ordered list — matches Transaction model statusMap
     final List<Map<String, dynamic>> cashSteps = [
@@ -399,6 +401,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
       {'key': 'data_tidak_valid',        'label': 'Perbaiki Dokumen',         'icon': Icons.edit_document, 'isWarning': true},
       {'key': 'dikirim_ke_surveyor',     'label': 'Proses Surveyor',          'icon': Icons.person_search_outlined},
       {'key': 'jadwal_survey',           'label': 'Jadwal Survey',            'icon': Icons.calendar_month_outlined},
+      {'key': 'waiting_credit_approval', 'label': 'Menunggu Persetujuan',   'icon': Icons.fact_check_outlined},
       {'key': 'disetujui',               'label': 'Kredit Disetujui',         'icon': Icons.thumb_up_outlined},
       {'key': 'unit_preparation',        'label': 'Motor Disiapkan',          'icon': Icons.settings_suggest_outlined},
       {'key': 'ready_for_delivery',      'label': 'Motor Siap Dikirim/Ambil', 'icon': Icons.inventory_2_outlined},
@@ -426,21 +429,47 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8))],
           ),
-          child: isCancelled
+          child: isTerminal
               ? Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.red.withOpacity(0.08), shape: BoxShape.circle),
-                      child: const Icon(Icons.cancel_outlined, color: Colors.red, size: 28),
+                      decoration: BoxDecoration(
+                        color: (isRejected ? Colors.orange : Colors.red).withOpacity(0.08),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isRejected ? Icons.block_flipped : Icons.cancel_outlined,
+                        color: isRejected ? Colors.orange : Colors.red,
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Pesanan Dibatalkan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red)),
-                        Text(format.format(_currentOrder.createdAt), style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isRejected ? 'Kredit Ditolak' : 'Pesanan Dibatalkan',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: isRejected ? Colors.orange : Colors.red,
+                            ),
+                          ),
+                          Text(
+                            isRejected 
+                                ? 'Maaf, pengajuan kredit Anda belum disetujui.' 
+                                : 'Pesanan ini tidak dapat dilanjutkan.',
+                            style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            format.format(_currentOrder.createdAt),
+                            style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[400]),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 )
