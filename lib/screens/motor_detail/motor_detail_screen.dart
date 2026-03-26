@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/motor_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../services/api_config.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -87,10 +89,10 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   fit: StackFit.expand,
                   children: [
                     if (widget.motor.imagePath != null)
-                      Image.network(
-                        widget.motor.imagePath!,
+                      CachedNetworkImage(
+                        imageUrl: ApiConfig.sanitizeUrl(widget.motor.imagePath!)!,
                         fit: BoxFit.cover,
-                        errorBuilder: (c, e, s) => _buildPlaceholder(),
+                        errorWidget: (context, url, error) => _buildPlaceholder(),
                       )
                     else
                       _buildPlaceholder(),
@@ -614,7 +616,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             image: motor.imagePath != null
-                                ? DecorationImage(image: NetworkImage(motor.imagePath!), fit: BoxFit.cover)
+                                ? DecorationImage(
+                                    image: CachedNetworkImageProvider(ApiConfig.sanitizeUrl(motor.imagePath!)!), 
+                                    fit: BoxFit.cover,
+                                    onError: (e, s) => debugPrint('Related image load error: $e'),
+                                  )
                                 : null,
                           ),
                           child: motor.imagePath == null ? const Icon(Icons.motorcycle, color: Colors.grey) : null,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/order_provider.dart';
+import '../../services/api_config.dart';
 import 'package:intl/intl.dart';
 import 'order_status_screen.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -114,7 +115,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                             borderRadius: BorderRadius.circular(16),
                                             image: order.motor?.imagePath != null
                                                 ? DecorationImage(
-                                                    image: CachedNetworkImageProvider(order.motor!.imagePath!),
+                                                    image: CachedNetworkImageProvider(ApiConfig.sanitizeUrl(order.motor!.imagePath!)!),
                                                     fit: BoxFit.cover,
                                                   )
                                                 : null,

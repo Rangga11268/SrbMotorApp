@@ -6,6 +6,8 @@ import '../../models/order.dart';
 import '../../models/installment.dart';
 import '../../providers/order_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../services/api_config.dart';
 import 'payment_details_screen.dart';
 
 class OrderStatusScreen extends StatefulWidget {
@@ -208,10 +210,16 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(12),
               image: _currentOrder.motor?.imagePath != null
-                  ? DecorationImage(image: NetworkImage(_currentOrder.motor!.imagePath!), fit: BoxFit.cover)
+                  ? DecorationImage(
+                      image: CachedNetworkImageProvider(ApiConfig.sanitizeUrl(_currentOrder.motor!.imagePath!)!), 
+                      fit: BoxFit.cover,
+                      onError: (exception, stackTrace) => debugPrint('Image load error: $exception'),
+                    )
                   : null,
             ),
-            child: _currentOrder.motor?.imagePath == null ? const Icon(Icons.motorcycle, color: Colors.grey) : null,
+            child: _currentOrder.motor?.imagePath == null 
+                ? const Icon(Icons.motorcycle, color: Colors.grey) 
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(
