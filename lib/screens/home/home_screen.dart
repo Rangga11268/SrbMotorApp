@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../services/api_config.dart';
 import '../../models/motor.dart';
 import '../../providers/main_provider.dart';
@@ -73,6 +74,7 @@ class _HomeContentState extends State<HomeContent> {
     Future.microtask(() {
       if (mounted) {
         context.read<MotorProvider>().initializeData();
+        context.read<NotificationProvider>().fetchNotifications();
       }
     });
   }
