@@ -23,17 +23,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: showLogo ? false : true,
       title: showLogo
-          ? Image.asset(
-              'assets/images/logo_srb.png',
-              height: 35,
-              errorBuilder: (context, error, stackTrace) => Text(
-                'SRB MOTOR',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2563EB),
-                  letterSpacing: 1.2,
+          ? Row(
+              children: [
+                Image.asset(
+                  'assets/images/logo_srb.png',
+                  height: 30,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  'SRB MOTOR',
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E293B),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             )
           : (title != null
               ? Text(
