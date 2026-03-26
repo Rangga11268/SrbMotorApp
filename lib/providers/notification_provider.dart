@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/notification.dart';
 import '../services/api_config.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationProvider extends ChangeNotifier {
   List<NotificationModel> _notifications = [];
