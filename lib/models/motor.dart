@@ -39,14 +39,21 @@ class Motor {
     if (rawImg != null && rawImg.isNotEmpty) {
       if (rawImg.startsWith('http')) {
         // Already a full URL (e.g. from the 'image' accessor)
-        // Fix for Android emulator: replace localhost with 10.0.2.2
-        imagePath = rawImg.replaceAll('localhost', '10.0.2.2').replaceAll('srbmotor.test', '10.0.2.2');
+        // Fix for Android emulator: replace localhost/srbmotor.test/127.0.0.1 with 10.0.2.2
+        imagePath = rawImg
+            .replaceAll('localhost', '10.0.2.2')
+            .replaceAll('srbmotor.test', '10.0.2.2')
+            .replaceAll('127.0.0.1', '10.0.2.2');
       } else if (rawImg.startsWith('assets/')) {
-        // Legacy assets-folder path (e.g. assets/img/yamaha/aerox_155.png)
+        // Local assets path for test data
         imagePath = 'http://10.0.2.2:8000/$rawImg';
       } else {
-        // Storage-disk path (e.g. motors/xxx.png)
-        imagePath = 'http://10.0.2.2:8000/storage/$rawImg';
+        // Storage-disk path (e.g. motors/xxx.png or storage/motors/xxx.png)
+        String cleanPath = rawImg;
+        if (cleanPath.startsWith('/')) cleanPath = cleanPath.substring(1);
+        if (cleanPath.startsWith('storage/')) cleanPath = cleanPath.replaceFirst('storage/', '');
+        
+        imagePath = 'http://10.0.2.2:8000/storage/$cleanPath';
       }
     }
 
