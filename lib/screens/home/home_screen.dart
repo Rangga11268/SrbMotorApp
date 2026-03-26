@@ -100,7 +100,7 @@ class _HomeContentState extends State<HomeContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Halo, ${user?.name ?? 'Pengguna'} 👋',
+                      'Selamat Datang, ${user?.name ?? 'Pengguna'}',
                       style: GoogleFonts.outfit(fontSize: 16, color: Colors.blueGrey),
                     ),
                     const SizedBox(height: 4),
