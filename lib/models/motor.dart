@@ -30,17 +30,33 @@ class Motor {
   });
 
   factory Motor.fromJson(Map<String, dynamic> json) {
+    // Build the correct image URL from whatever the API returns
+    String? imagePath;
+    final rawImg = (json['image']?.toString().isNotEmpty == true)
+        ? json['image'].toString()
+        : json['image_path']?.toString();
+
+    if (rawImg != null && rawImg.isNotEmpty) {
+      if (rawImg.startsWith('http')) {
+        // Already a full URL (e.g. from the 'image' accessor)
+        // Fix for Android emulator: replace localhost with 10.0.2.2
+        imagePath = rawImg.replaceAll('localhost', '10.0.2.2');
+      } else if (rawImg.startsWith('assets/')) {
+        // Legacy assets-folder path (e.g. assets/img/yamaha/aerox_155.png)
+        imagePath = 'http://10.0.2.2:8000/$rawImg';
+      } else {
+        // Storage-disk path (e.g. motors/xxx.png)
+        imagePath = 'http://10.0.2.2:8000/storage/$rawImg';
+      }
+    }
+
     return Motor(
       id: json['id'],
       name: json['name'],
       brand: json['brand'] ?? 'Unknown',
       type: json['type'],
       price: double.tryParse(json['price'].toString()) ?? 0.0,
-      imagePath: json['image_path'] != null 
-          ? (json['image_path'].toString().startsWith('http') 
-              ? json['image_path'] 
-              : 'http://10.0.2.2:8000/${json['image_path']}') 
-          : null,
+      imagePath: imagePath,
       details: json['details'],
       transmission: json['transmission'],
       engine: json['engine'],

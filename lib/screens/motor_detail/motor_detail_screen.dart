@@ -139,6 +139,22 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: widget.motor.tersedia ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          widget.motor.tersedia ? 'Tersedia' : 'Sudah Dipesan',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: widget.motor.tersedia ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                          ),
+                        ),
+                      ),
                       const Spacer(),
                       if (widget.motor.type != null)
                         Text(
@@ -185,6 +201,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                     widget.motor.details ?? 'Unit motor premium dengan kondisi terbaik.',
                     textStyle: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF64748B), height: 1.6),
                   ),
+
+                  const SizedBox(height: 32),
+
+                  // Financing Partners (from DB)
+                  _buildFinancingPartners(),
 
                   const SizedBox(height: 32),
 
@@ -440,6 +461,64 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
     );
   }
 
+  Widget _buildFinancingPartners() {
+    final providers = context.watch<MotorProvider>().leasingProviders;
+    if (providers.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Partner Pembiayaan',
+          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: providers.map((p) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (p.logoUrl != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Image.network(p.logoUrl!, width: 32, height: 32, errorBuilder: (c, e, s) => const SizedBox.shrink()),
+                    )
+                  else
+                    Container(
+                      width: 32,
+                      height: 32,
+                      margin: const EdgeInsets.only(right: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.account_balance_outlined, size: 18, color: Color(0xFF2563EB)),
+                    ),
+                  Text(
+                    p.name,
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF1E293B)),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -465,23 +544,24 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: widget.motor.tersedia ? () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => OrderFormScreen(motor: widget.motor),
                   ),
                 );
-              },
+              } : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: widget.motor.tersedia ? const Color(0xFF2563EB) : Colors.grey,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
+                disabledBackgroundColor: Colors.grey.shade300,
               ),
               child: Text(
-                'PESAN SEKARANG',
+                widget.motor.tersedia ? 'PESAN SEKARANG' : 'SUDAH DIPESAN',
                 style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
             ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/motor.dart';
 import '../models/category.dart';
+import '../models/leasing_provider.dart';
 import 'api_config.dart';
 
 class MotorService {
@@ -50,6 +51,20 @@ class MotorService {
       return Motor.fromJson(data);
     } else {
       throw Exception('Gagal mengambil detail motor');
+    }
+  }
+
+  Future<List<LeasingProvider>> getLeasingProviders() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/leasing-providers'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => LeasingProvider.fromJson(item)).toList();
+    } else {
+      throw Exception('Gagal mengambil data partner pembiayaan');
     }
   }
 }

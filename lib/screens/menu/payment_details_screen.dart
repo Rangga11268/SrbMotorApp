@@ -44,7 +44,7 @@ class PaymentDetailsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFF2563EB)),
-            onPressed: () => context.read<OrderProvider>().fetchOrderHistory(),
+            onPressed: () => context.read<OrderProvider>().syncOrderDetails(order),
             tooltip: 'Refresh Status',
           ),
         ],

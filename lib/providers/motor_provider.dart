@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/motor.dart';
 import '../models/category.dart';
+import '../models/leasing_provider.dart';
 import '../services/motor_service.dart';
 
 class MotorProvider with ChangeNotifier {
   List<Motor> _motors = [];
   List<CategoryModel> _categories = [];
+  List<LeasingProvider> _leasingProviders = [];
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
   String? _errorMessage;
@@ -14,6 +16,7 @@ class MotorProvider with ChangeNotifier {
 
   List<Motor> get motors => _motors;
   List<CategoryModel> get categories => _categories;
+  List<LeasingProvider> get leasingProviders => _leasingProviders;
   bool get isLoading => _isLoading || _isCategoriesLoading;
   bool get isInitialLoading => _isLoading && _motors.isEmpty;
   String? get errorMessage => _errorMessage;
@@ -57,6 +60,16 @@ class MotorProvider with ChangeNotifier {
   Future<void> initializeData() async {
     await fetchCategories();
     await fetchMotors();
+    fetchLeasingProviders(); // fire-and-forget, not critical for initial load
+  }
+
+  Future<void> fetchLeasingProviders() async {
+    try {
+      _leasingProviders = await _motorService.getLeasingProviders();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching leasing providers: $e');
+    }
   }
 
   void setCategory(String? category) {

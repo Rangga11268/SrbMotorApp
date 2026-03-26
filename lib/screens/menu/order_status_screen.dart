@@ -28,7 +28,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     setState(() => _isRefreshing = true);
     try {
       final orderProvider = context.read<OrderProvider>();
-      await orderProvider.fetchOrderHistory();
+      // Get the latest version of this order from provider
+      final latestOrder = orderProvider.orders.firstWhere(
+        (o) => o.id == widget.order.id,
+        orElse: () => widget.order,
+      );
+      // Proactively sync with Midtrans for all pending installments
+      await orderProvider.syncOrderDetails(latestOrder);
     } catch (e) {
       debugPrint('Error refreshing order: $e');
     } finally {
@@ -275,7 +281,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 label: 'Booking Fee', 
                 amount: format.format(bFee), 
                 status: bookingInstallment?.status ?? 'Pending',
-                canPay: bookingInstallment != null && (bookingInstallment.status == 'unpaid' || bookingInstallment.status == 'pending_payment'),
+                canPay: bookingInstallment != null && _canPayInstallment(bookingInstallment.status),
                 onPay: () => _handlePayment(bookingInstallment!),
               ),
               
@@ -284,7 +290,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 label: 'Sisa Pelunasan', 
                 amount: format.format(remaining), 
                 status: remainingInstallment?.status ?? (_currentOrder.status == 'completed' ? 'paid' : 'unpaid'),
-                canPay: remainingInstallment != null && (remainingInstallment.status == 'unpaid' || remainingInstallment.status == 'pending_payment'),
+                canPay: remainingInstallment != null && _canPayInstallment(remainingInstallment.status),
                 onPay: () => _handlePayment(remainingInstallment!),
               ),
               
@@ -373,19 +379,40 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   }
 
   Widget _buildTimelineSection(OrderModel _currentOrder, DateFormat format) {
-    // Current status index for filling progress
-    final statuses = [
-      'new_order', 
-      'waiting_payment', 
-      'pembayaran_dikonfirmasi', 
-      'unit_preparation', 
-      'ready_for_delivery', 
-      'dalam_pengiriman', 
-      'completed'
+    final isCancelled = _currentOrder.status.toLowerCase() == 'cancelled' ||
+        _currentOrder.status.toLowerCase() == 'dibatalkan';
+
+    // Full status ordered list — matches Transaction model statusMap
+    final List<Map<String, dynamic>> cashSteps = [
+      {'key': 'new_order',               'label': 'Pesanan Masuk',            'icon': Icons.assignment_outlined},
+      {'key': 'waiting_payment',          'label': 'Menunggu Pembayaran',      'icon': Icons.account_balance_wallet_outlined},
+      {'key': 'pembayaran_dikonfirmasi',  'label': 'Pembayaran Dikonfirmasi',  'icon': Icons.verified_outlined},
+      {'key': 'unit_preparation',         'label': 'Motor Disiapkan',          'icon': Icons.settings_suggest_outlined},
+      {'key': 'ready_for_delivery',       'label': 'Motor Siap Dikirim/Ambil', 'icon': Icons.inventory_2_outlined},
+      {'key': 'dalam_pengiriman',         'label': 'Dalam Pengiriman',         'icon': Icons.local_shipping_outlined},
+      {'key': 'completed',               'label': 'Pesanan Selesai',           'icon': Icons.check_circle_outline},
     ];
-    
-    int currentIndex = statuses.indexOf(_currentOrder.status.toLowerCase());
-    if (currentIndex == -1 && _currentOrder.status.toLowerCase() != 'cancelled') currentIndex = 0;
+
+    final List<Map<String, dynamic>> creditSteps = [
+      {'key': 'new_order',               'label': 'Pesanan Masuk',            'icon': Icons.assignment_outlined},
+      {'key': 'menunggu_persetujuan',    'label': 'Verifikasi Berkas',        'icon': Icons.folder_open_outlined},
+      {'key': 'data_tidak_valid',        'label': 'Perbaiki Dokumen',         'icon': Icons.edit_document, 'isWarning': true},
+      {'key': 'dikirim_ke_surveyor',     'label': 'Proses Surveyor',          'icon': Icons.person_search_outlined},
+      {'key': 'jadwal_survey',           'label': 'Jadwal Survey',            'icon': Icons.calendar_month_outlined},
+      {'key': 'disetujui',               'label': 'Kredit Disetujui',         'icon': Icons.thumb_up_outlined},
+      {'key': 'unit_preparation',        'label': 'Motor Disiapkan',          'icon': Icons.settings_suggest_outlined},
+      {'key': 'ready_for_delivery',      'label': 'Motor Siap Dikirim/Ambil', 'icon': Icons.inventory_2_outlined},
+      {'key': 'dalam_pengiriman',        'label': 'Dalam Pengiriman',         'icon': Icons.local_shipping_outlined},
+      {'key': 'completed',              'label': 'Pesanan Selesai',            'icon': Icons.check_circle_outline},
+    ];
+
+    // Select steps based on transaction type
+    final steps = (_currentOrder.transactionType?.toUpperCase() == 'CREDIT') 
+        ? creditSteps 
+        : cashSteps;
+        
+    final currentStatus = _currentOrder.status.toLowerCase();
+    final currentIdx = steps.indexWhere((s) => s['key'] == currentStatus);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,72 +426,130 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 8))],
           ),
-          child: Column(
-            children: [
-              _buildTimelineTile(
-                title: 'Pesanan Diterima',
-                subtitle: format.format(_currentOrder.createdAt),
-                isFirst: true,
-                isCompleted: currentIndex >= 0,
-                icon: Icons.assignment_outlined,
-              ),
-              _buildTimelineTile(
-                title: 'Konfirmasi Pembayaran',
-                subtitle: currentIndex >= 2 ? 'Pembayaran telah diverifikasi' : 'Menunggu tahap pembayaran selesai',
-                isCompleted: currentIndex >= 2,
-                icon: Icons.account_balance_wallet_outlined,
-              ),
-              _buildTimelineTile(
-                title: 'Persiapan Unit',
-                subtitle: currentIndex >= 3 ? 'Unit sedang dipersiapkan oleh mekanik' : 'Menunggu antrean persiapan',
-                isCompleted: currentIndex >= 3,
-                icon: Icons.settings_suggest_outlined,
-              ),
-              _buildTimelineTile(
-                title: 'Pengiriman / Penyerahan',
-                subtitle: currentIndex >= 5 ? 'Unit sedang dikirim / siap diambil' : 'Menunggu jadwal pengiriman',
-                isCompleted: currentIndex >= 5,
-                icon: Icons.local_shipping_outlined,
-              ),
-              _buildTimelineTile(
-                title: 'Transaksi Selesai',
-                subtitle: currentIndex >= 6 ? 'Terima kasih telah berbelanja di SRB Motor' : 'Menunggu konfirmasi penerimaan',
-                isLast: true,
-                isCompleted: currentIndex >= 6,
-                icon: Icons.verified_outlined,
-              ),
-            ],
-          ),
+          child: isCancelled
+              ? Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: Colors.red.withOpacity(0.08), shape: BoxShape.circle),
+                      child: const Icon(Icons.cancel_outlined, color: Colors.red, size: 28),
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Pesanan Dibatalkan', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red)),
+                        Text(format.format(_currentOrder.createdAt), style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
+                  ],
+                )
+              : Column(
+                  children: steps.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final step = entry.value;
+                    final isCompleted = currentIdx >= idx;
+                    final isCurrent = currentIdx == idx;
+                    final isLast = idx == steps.length - 1;
+                    final isWarning = step['isWarning'] == true;
+
+                    Color dotColor = isCompleted
+                        ? (isWarning && isCurrent ? Colors.orange : const Color(0xFF2563EB))
+                        : Colors.grey.shade200;
+
+                    return _buildTimelineTile(
+                      title: step['label'] as String,
+                      subtitle: isCurrent
+                          ? 'Status saat ini'
+                          : isCompleted
+                              ? 'Selesai'
+                              : 'Menunggu',
+                      icon: step['icon'] as IconData,
+                      isFirst: idx == 0,
+                      isLast: isLast,
+                      isCompleted: isCompleted,
+                      isCurrent: isCurrent,
+                      dotColor: dotColor,
+                    );
+                  }).toList(),
+                ),
         ),
       ],
     );
   }
 
-  Widget _buildTimelineTile({required String title, required String subtitle, bool isFirst = false, bool isLast = false, bool isCompleted = false, required IconData icon}) {
+  Widget _buildTimelineTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    bool isFirst = false,
+    bool isLast = false,
+    bool isCompleted = false,
+    bool isCurrent = false,
+    Color? dotColor,
+  }) {
+    final color = dotColor ?? (isCompleted ? const Color(0xFF2563EB) : Colors.grey.shade200);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
           children: [
             Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: isCompleted ? const Color(0xFF2563EB) : Colors.grey[200]),
-              child: Icon(isCompleted ? Icons.check : icon, size: 14, color: isCompleted ? Colors.white : Colors.grey[400]),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                border: isCurrent ? Border.all(color: const Color(0xFF2563EB), width: 2.5) : null,
+                boxShadow: isCurrent
+                    ? [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 8)]
+                    : null,
+              ),
+              child: Icon(
+                isCompleted ? Icons.check : icon,
+                size: 15,
+                color: isCompleted ? Colors.white : Colors.grey.shade400,
+              ),
             ),
             if (!isLast)
-              Container(width: 2, height: 45, color: isCompleted ? const Color(0xFF2563EB).withOpacity(0.5) : Colors.grey[100]),
+              Container(
+                width: 2,
+                height: 44,
+                color: isCompleted ? const Color(0xFF2563EB).withOpacity(0.3) : Colors.grey.shade100,
+              ),
           ],
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: isCompleted ? Colors.black : Colors.grey[400])),
-              Text(subtitle, style: GoogleFonts.outfit(fontSize: 12, color: isCompleted ? Colors.grey[600] : Colors.grey[300])),
-              const SizedBox(height: 16),
-            ],
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: isCurrent ? FontWeight.w900 : FontWeight.w600,
+                    color: isCompleted ? Colors.black87 : Colors.grey.shade400,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    color: isCurrent
+                        ? const Color(0xFF2563EB)
+                        : isCompleted
+                            ? Colors.grey.shade500
+                            : Colors.grey.shade300,
+                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -560,6 +645,12 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     // Credit statuses
     if (status == 'menunggu_persetujuan' || status == 'waiting_credit_approval') return true;
     return false;
+  }
+
+  /// Returns true if the given installment status allows payment
+  bool _canPayInstallment(String status) {
+    final s = status.toLowerCase();
+    return s == 'unpaid' || s == 'pending' || s == 'pending_payment' || s == 'waiting_approval';
   }
 
   Widget _buildCancelButton(OrderModel _currentOrder) {

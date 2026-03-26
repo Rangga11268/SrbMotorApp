@@ -99,11 +99,27 @@ class OrderProvider with ChangeNotifier {
   }
 
   Future<bool> refreshOrderStatus(int installmentId) async {
-    final success = await _orderService.checkInstallmentStatus(installmentId);
-    if (success) {
+    return await _orderService.checkInstallmentStatus(installmentId);
+  }
+
+  Future<void> syncOrderDetails(OrderModel order) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      // Sync each pending/unpaid installment with Midtrans
+      for (var inst in order.installments) {
+        if (inst.status.toLowerCase() != 'paid') {
+          await _orderService.checkInstallmentStatus(inst.id);
+        }
+      }
+      // Reload final state from DB
       await fetchOrderHistory();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    return success;
   }
 
   Future<Map<String, dynamic>> cancelOrder(int orderId, String? reason) async {

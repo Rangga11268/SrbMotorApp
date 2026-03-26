@@ -17,6 +17,7 @@ class OrderModel {
   final String? notes;
   final String status;
   final String statusText;
+  final String? transactionType;
   final DateTime createdAt;
   final Motor? motor;
   final List<InstallmentModel> installments;
@@ -37,6 +38,7 @@ class OrderModel {
     this.notes,
     required this.status,
     required this.statusText,
+    this.transactionType,
     required this.createdAt,
     this.motor,
     this.installments = const [],
@@ -64,6 +66,7 @@ class OrderModel {
       notes: json['notes'],
       status: json['status'],
       statusText: json['status_text'] ?? (json['status'] ?? 'Unknown').toString().replaceAll('_', ' ').toUpperCase(),
+      transactionType: json['transaction_type'],
       createdAt: DateTime.parse(json['created_at']),
       motor: json['motor'] != null ? Motor.fromJson(json['motor']) : null,
       installments: items,

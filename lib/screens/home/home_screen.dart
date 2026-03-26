@@ -351,10 +351,25 @@ class _HomeContentState extends State<HomeContent> {
                   ),
                   Positioned(
                     top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: motor.tersedia ? Colors.green.withValues(alpha: 0.9) : Colors.red.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        motor.tersedia ? 'Tersedia' : 'Sudah Pesan',
+                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 10,
                     right: 10,
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(color: Colors.white70, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), shape: BoxShape.circle),
                       child: const Icon(Icons.favorite_border, size: 18, color: Colors.red),
                     ),
                   ),

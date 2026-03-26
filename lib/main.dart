@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import './screens/home/home_screen.dart';
 import './screens/auth/login_screen.dart';
+import './screens/menu/order_status_screen.dart';
 
 void main() {
   runApp(
@@ -35,6 +36,7 @@ class _MyAppState extends State<MyApp> {
   bool _showSplash = true;
   late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -54,44 +56,88 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // 1. Handle initial link (cold start)
-    try {
-      final initialUri = await _appLinks.getInitialLink();
-      if (initialUri != null) {
-        _handleDeepLink(initialUri);
-      }
-    } catch (e) {
-      debugPrint('Error getting initial link: $e');
-    }
+    // NOTE: We intentionally do NOT call getInitialLink() here.
+    // getInitialLink() caches the last received URI at the OS level and re-fires it
+    // on cold start, which causes it to navigate to OrderStatusScreen BEFORE the
+    // splash screen is dismissed — breaking normal app startup flow.
+    //
+    // For payment redirect flows, uriLinkStream is sufficient:
+    // the app is always running in the background during payment (user just switches
+    // to browser), so when browser redirects to srbmotor://, uriLinkStream fires.
 
-    // 2. Handle links when app is in background or foreground
+    // Handle links when app is resumed from background (e.g. after payment in browser).
     _linkSubscription = _appLinks.uriLinkStream.listen(
-      (uri) => _handleDeepLink(uri),
+      (uri) {
+        debugPrint('Foreground deep link received: $uri');
+        _handleDeepLink(uri);
+      },
       onError: (err) => debugPrint('Deep link stream error: $err'),
     );
   }
 
   void _handleDeepLink(Uri uri) {
-    debugPrint('Processing deep link: $uri');
-    
-    // Safety check for specific host
-    if (uri.scheme != 'srbmotor' || uri.host != 'payment-success') return;
+    if (uri.scheme != 'srbmotor') return;
 
-    // Use microtask to ensure context is stable and not in the middle of a build
-    Future.microtask(() {
+    Future.microtask(() async {
       if (!mounted) return;
 
       try {
-        // Hide splash immediately if we got a valid link
-        if (_showSplash) {
-          setState(() {
-            _showSplash = false;
-          });
+        // Guard: wait until splash is gone and user is on the main app
+        // This prevents navigating to OrderStatusScreen before HomeScreen exists
+        int waitCount = 0;
+        while (_showSplash && waitCount < 20) {
+          await Future.delayed(const Duration(milliseconds: 300));
+          waitCount++;
         }
-        
-        // Manual refresh is now preferred by the user. 
-        // We just hide the splash and let the user navigate/refresh manually.
-        debugPrint('Deep link received (Auto-refresh disabled per user request): $uri');
+        if (!mounted) return;
+        if (_showSplash) return; // Still on splash after timeout, abort
+
+        // Extra settle time so HomeScreen navigator is ready
+        await Future.delayed(const Duration(milliseconds: 400));
+        if (!mounted) return;
+
+        final isPaymentEvent = uri.host == 'payment-success' ||
+            uri.host == 'payment-finish' ||
+            uri.host == 'payment-error' ||
+            uri.host == 'payment-pending';
+
+        if (!isPaymentEvent) return;
+
+        final transactionIdStr = uri.queryParameters['transaction_id'];
+        final orderProvider = context.read<OrderProvider>();
+        final mainProvider = context.read<MainProvider>();
+
+        // Switch to Order History tab
+        mainProvider.setSelectedIndex(1);
+
+        // Fetch fresh order data
+        await orderProvider.fetchOrderHistory();
+        if (!mounted) return;
+
+        if (transactionIdStr != null) {
+          final orderId = int.tryParse(transactionIdStr);
+          if (orderId != null) {
+            final order = orderProvider.orders.where((o) => o.id == orderId).firstOrNull;
+            if (order != null) {
+              // Sync installment status with Midtrans
+              await orderProvider.syncOrderDetails(order);
+              if (!mounted) return;
+
+              final refreshedOrder = orderProvider.orders
+                  .where((o) => o.id == orderId)
+                  .firstOrNull ?? order;
+
+              // Push OrderStatusScreen on top of HomeScreen
+              _navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (_) => OrderStatusScreen(order: refreshedOrder),
+                ),
+              );
+            }
+          }
+        }
+
+        debugPrint('Deep link fully handled: $uri');
       } catch (e) {
         debugPrint('Error handling deep link: $e');
       }
@@ -108,6 +154,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SRB Motor',
+      navigatorKey: _navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
