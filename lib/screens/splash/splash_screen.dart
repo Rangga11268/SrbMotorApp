@@ -9,168 +9,286 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+class _SplashScreenState extends State<SplashScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeIn)),
-    );
-
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic)),
-    );
-
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final List<OnboardingData> _onboardingData = [
+    OnboardingData(
+      title: 'Premium\nMotorcycle\nExperience.',
+      description: 'Layanan jual beli motor premium dengan kualitas terbaik dan terpercaya di Indonesia.',
+      image: 'assets/images/logo_srb.png',
+      isLogo: true,
+    ),
+    OnboardingData(
+      title: 'Koleksi\nTerlengkap & Terpilih.',
+      description: 'Temukan berbagai pilihan motor dari brand ternama dengan kondisi yang sudah terverifikasi.',
+      icon: Icons.motorcycle_rounded,
+      isLogo: false,
+    ),
+    OnboardingData(
+      title: 'Proses\nKredit Cepat & Mudah.',
+      description: 'Bekerjasama dengan partner leasing terpercaya untuk kemudahan transaksi Anda.',
+      icon: Icons.verified_user_rounded,
+      isLogo: false,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Simple Modern Background
+          // Dynamic Gradient Background
           Positioned.fill(
-            child: Container(
-              color: const Color(0xFF0F172A), // Clean Slate 900
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 500),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: _getBackgroundColors(_currentPage),
+                ),
+              ),
             ),
           ),
           
-          // Subtle Pattern or Noise could go here, but keeping it clean for now
+          // Floating background elements for "life"
+          Positioned(
+            top: -100,
+            right: -100,
+            child: _buildBackgroundCircle(200, Colors.white.withValues(alpha: 0.05)),
+          ),
+          Positioned(
+            bottom: 100,
+            left: -50,
+            child: _buildBackgroundCircle(150, Colors.blue.withValues(alpha: 0.1)),
+          ),
 
-          // Content
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Spacer(flex: 2),
-                  
-                  // Logo
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Hero(
-                      tag: 'logo',
-                      child: Image.asset(
-                        'assets/images/logo_srb.png',
-                        height: 120, // Increased size for impact
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.motorcycle,
-                          size: 100,
-                          color: Colors.white,
+            child: Column(
+              children: [
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemCount: _onboardingData.length,
+                    itemBuilder: (context, index) {
+                      return OnboardingPage(data: _onboardingData[index]);
+                    },
+                  ),
+                ),
+                
+                // Bottom Section: Indicators and Buttons
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                  child: Column(
+                    children: [
+                      // Indicators
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: List.generate(
+                          _onboardingData.length,
+                          (index) => _buildIndicator(index == _currentPage),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 40),
+                      
+                      // Action Button
+                      _buildActionButton(),
+                    ],
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Title
-                  SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Premium\nMotorcycle\nExperience.',
-                            style: GoogleFonts.outfit(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              height: 1.1,
-                              color: Colors.white,
-                              letterSpacing: -1,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Temukan motor impian Anda dengan layanan terbaik dan kemudahan transaksi hanya di SRB Motor.',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              color: Colors.white70,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  const Spacer(),
-                  
-                  // Action Button
-                  SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 40),
-                        width: double.infinity,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF2563EB).withValues(alpha: 0.4),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: widget.onGetStarted,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Get Started',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward, color: Colors.white),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  List<Color> _getBackgroundColors(int page) {
+    switch (page) {
+      case 0:
+        return [const Color(0xFF0F172A), const Color(0xFF1E293B)];
+      case 1:
+        return [const Color(0xFF1E3A8A), const Color(0xFF0F172A)];
+      case 2:
+        return [const Color(0xFF1E40AF), const Color(0xFF1E293B)];
+      default:
+        return [const Color(0xFF0F172A), const Color(0xFF1E293B)];
+    }
+  }
+
+  Widget _buildBackgroundCircle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget _buildIndicator(bool isActive) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.only(right: 8),
+      height: 8,
+      width: isActive ? 32 : 12,
+      decoration: BoxDecoration(
+        color: isActive ? Colors.white : Colors.white38,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+
+  Widget _buildActionButton() {
+    bool isLastPage = _currentPage == _onboardingData.length - 1;
+    
+    return Container(
+      width: double.infinity,
+      height: 64,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          if (isLastPage) {
+            widget.onGetStarted();
+          } else {
+            _pageController.nextPage(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              isLastPage ? 'Mulai Sekarang' : 'Lanjutkan',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Icon(
+              isLastPage ? Icons.check_circle_outline : Icons.arrow_forward_rounded,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OnboardingPage extends StatelessWidget {
+  final OnboardingData data;
+
+  const OnboardingPage({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Spacer(flex: 2),
+          
+          // Image or Icon
+          if (data.isLogo)
+            Image.asset(
+              data.image!,
+              height: 120,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.motorcycle,
+                size: 100,
+                color: Colors.white,
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(
+                data.icon,
+                size: 80,
+                color: Colors.white,
+              ),
+            ),
+          
+          const SizedBox(height: 48),
+          
+          // Text Content
+          Text(
+            data.title,
+            style: GoogleFonts.outfit(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              height: 1.1,
+              color: Colors.white,
+              letterSpacing: -1,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            data.description,
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              color: Colors.white.withValues(alpha: 0.7),
+              height: 1.6,
+            ),
+          ),
+          
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
+
+class OnboardingData {
+  final String title;
+  final String description;
+  final String? image;
+  final IconData? icon;
+  final bool isLogo;
+
+  OnboardingData({
+    required this.title,
+    required this.description,
+    this.image,
+    this.icon,
+    required this.isLogo,
+  });
 }
