@@ -6,6 +6,8 @@ import '../../providers/order_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/main_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../services/api_config.dart';
 
 class OrderFormScreen extends StatefulWidget {
   final Motor motor;
@@ -388,7 +390,19 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: widget.motor.imagePath != null
-                ? Image.network(widget.motor.imagePath!, width: 100, height: 80, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildNoImage())
+                ? CachedNetworkImage(
+                    imageUrl: ApiConfig.sanitizeUrl(widget.motor.imagePath!)!,
+                    width: 100,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      width: 100,
+                      height: 80,
+                      color: Colors.grey[100],
+                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                    errorWidget: (context, url, error) => _buildNoImage(),
+                  )
                 : _buildNoImage(),
           ),
           const SizedBox(width: 16),
