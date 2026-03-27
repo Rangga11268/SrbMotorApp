@@ -167,4 +167,32 @@ class AuthProvider with ChangeNotifier {
       }
     }
   }
+
+  Future<void> updateProfile({
+    required String name,
+    required String phone,
+    required String nik,
+    required String alamat,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await _authService.updateProfile(
+        name: name,
+        phone: phone,
+        nik: nik,
+        alamat: alamat,
+      );
+
+      if (result['success']) {
+        _user = result['user'];
+      } else {
+        throw Exception(result['message']);
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

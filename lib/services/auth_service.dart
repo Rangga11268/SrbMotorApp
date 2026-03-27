@@ -107,4 +107,36 @@ class AuthService {
       };
     }
   }
+
+  Future<Map<String, dynamic>> updateProfile({
+    required String name,
+    required String phone,
+    required String nik,
+    required String alamat,
+  }) async {
+    final response = await http.put(
+      Uri.parse('${ApiConfig.baseUrl}/profile'),
+      headers: await ApiConfig.headers,
+      body: jsonEncode({
+        'name': name,
+        'phone': phone,
+        'nik': nik,
+        'alamat': alamat,
+      }),
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'user': User.fromJson(data['data']),
+        'message': data['message'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal memperbarui profil',
+      };
+    }
+  }
 }

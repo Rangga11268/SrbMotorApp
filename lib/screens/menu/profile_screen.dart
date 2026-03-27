@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_app_bar.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -74,6 +75,30 @@ class ProfileScreen extends StatelessWidget {
                       _buildHeaderStat('Status', 'Platinum'),
                     ],
                   ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB).withOpacity(0.05),
+                        foregroundColor: const Color(0xFF2563EB),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(color: const Color(0xFF2563EB).withOpacity(0.1)),
+                        ),
+                      ),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: Text('EDIT PROFIL', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -91,9 +116,9 @@ class ProfileScreen extends StatelessWidget {
                     style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1.5),
                   ),
                   const SizedBox(height: 16),
-                  _buildProfileItem(Icons.phone_outlined, 'Nomor Telepon', user?.phone ?? '-', Colors.blue[600]!),
-                  _buildProfileItem(Icons.location_on_outlined, 'Alamat Utama', 'Bekasi, Jawa Barat', Colors.orange[600]!),
-                  _buildProfileItem(Icons.security_outlined, 'Keamanan Akun', 'Ubah Password', Colors.purple[600]!),
+                  _buildProfileItem(context, Icons.phone_outlined, 'Nomor Telepon', user?.phone ?? '-', Colors.blue[600]!),
+                  _buildProfileItem(context, Icons.location_on_outlined, 'Alamat Utama', user?.alamat ?? 'Belum diset', Colors.orange[600]!),
+                  _buildProfileItem(context, Icons.security_outlined, 'Keamanan Akun', 'Ubah Password', Colors.purple[600]!),
                   
                   const SizedBox(height: 32),
                   Text(
@@ -101,8 +126,8 @@ class ProfileScreen extends StatelessWidget {
                     style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1.5),
                   ),
                   const SizedBox(height: 16),
-                  _buildProfileItem(Icons.help_outline, 'Pusat Bantuan', 'Hubungi CS', Colors.teal[600]!),
-                  _buildProfileItem(Icons.info_outline, 'Info Aplikasi', 'Versi 1.0.0', Colors.blueGrey[600]!),
+                  _buildProfileItem(context, Icons.help_outline, 'Pusat Bantuan', 'Hubungi CS', Colors.teal[600]!),
+                  _buildProfileItem(context, Icons.info_outline, 'Info Aplikasi', 'Versi 1.0.0', Colors.blueGrey[600]!),
                 ],
               ),
             ),
@@ -144,7 +169,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileItem(IconData icon, String title, String value, Color color) {
+  Widget _buildProfileItem(BuildContext context, IconData icon, String title, String value, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -164,7 +189,12 @@ class ProfileScreen extends StatelessWidget {
         title: Text(title, style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
         subtitle: Text(value, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
         trailing: const Icon(Icons.chevron_right, size: 18, color: Color(0xFFCBD5E1)),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+          );
+        },
       ),
     );
   }
