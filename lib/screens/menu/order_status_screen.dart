@@ -263,11 +263,48 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
           children: [
             Text('RINCIAN PEMBAYARAN', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700], letterSpacing: 0.5)),
             GestureDetector(
-              onTap: () {
-                // Future: Show full invoice/receipt
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fitur invoice segera hadir')));
+              onTap: () async {
+                debugPrint('Fetching invoice for order ID: ${_currentOrder.id}');
+                final orderProvider = context.read<OrderProvider>();
+                final result = await orderProvider.getInvoiceUrl(_currentOrder.id);
+                
+                debugPrint('Invoice result: $result');
+
+                if (result['success'] && result['url'] != null) {
+                  final rawUrl = result['url'];
+                  final sanitizedUrl = ApiConfig.sanitizeUrl(rawUrl);
+                  debugPrint('Sanitized URL: $sanitizedUrl');
+                  
+                  if (sanitizedUrl != null) {
+                    final uri = Uri.parse(sanitizedUrl);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    } else {
+                      debugPrint('Could not launch URL: $sanitizedUrl');
+                    }
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(result['message'] ?? 'Gagal memuat invoice')),
+                    );
+                  }
+                }
               },
-              child: Text('Lihat Invoice', style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2563EB).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.description_outlined, size: 14, color: Color(0xFF2563EB)),
+                    const SizedBox(width: 4),
+                    Text('Lihat Invoice', style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

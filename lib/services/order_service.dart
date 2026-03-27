@@ -110,4 +110,18 @@ class OrderService {
       return {'success': false, 'message': data['message'] ?? 'Gagal membatalkan pesanan'};
     }
   }
+
+  Future<Map<String, dynamic>> getInvoiceUrl(int orderId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/orders/$orderId/get-invoice-url'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {'success': true, 'url': data['url']};
+    } else {
+      return {'success': false, 'message': data['message'] ?? 'Gagal mendapatkan link invoice'};
+    }
+  }
 }

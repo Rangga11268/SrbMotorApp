@@ -90,7 +90,7 @@ class _HomeContentState extends State<HomeContent> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: const CustomAppBar(),
       body: RefreshIndicator(
-        onRefresh: () => context.read<MotorProvider>().fetchMotors(),
+        onRefresh: () => context.read<MotorProvider>().initializeData(),
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -156,39 +156,38 @@ class _HomeContentState extends State<HomeContent> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-            // Categories
+            // Brand Category Chips
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 45,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: motorProvider.categories.length + 1,
+                  itemCount: motorProvider.brands.length + 1,
                   itemBuilder: (context, index) {
-                    final String categoryName;
+                    final String brandName;
                     final bool isSelected;
                     
                     if (index == 0) {
-                      categoryName = 'All';
-                      isSelected = motorProvider.selectedCategory == null;
+                      brandName = 'All';
+                      isSelected = motorProvider.selectedBrand == null;
                     } else {
-                      final category = motorProvider.categories[index - 1];
-                      categoryName = category.name;
-                      isSelected = motorProvider.selectedCategory == category.name;
+                      brandName = motorProvider.brands[index - 1];
+                      isSelected = motorProvider.selectedBrand == brandName;
                     }
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: ChoiceChip(
                         avatar: Icon(
-                          _getIconData(index == 0 ? 'all' : categoryName),
+                          _getIconData(index == 0 ? 'all' : brandName),
                           size: 18,
                           color: isSelected ? Colors.white : const Color(0xFF2563EB),
                         ),
-                        label: Text(categoryName),
+                        label: Text(brandName),
                         selected: isSelected,
                         onSelected: (selected) {
-                          motorProvider.setCategory(index == 0 ? null : categoryName);
+                          motorProvider.setBrand(index == 0 ? null : brandName);
                         },
                         selectedColor: const Color(0xFF2563EB),
                         labelStyle: GoogleFonts.outfit(
@@ -274,11 +273,10 @@ class _HomeContentState extends State<HomeContent> {
   IconData _getIconData(String name) {
     switch (name.toLowerCase()) {
       case 'all': return Icons.grid_view_outlined;
-      case 'scooter': case 'matic': case 'automatic': return Icons.motorcycle_outlined;
-      case 'sport': return Icons.speed_outlined;
-      case 'cub': case 'bebek': return Icons.pedal_bike_outlined;
-      case 'ev': case 'electric': return Icons.electric_bolt_outlined;
-      case 'trail': case 'adventure': return Icons.terrain_outlined;
+      case 'honda': return Icons.motorcycle;
+      case 'yamaha': return Icons.speed;
+      case 'kawasaki': return Icons.directions_run; // Ninja vibe?
+      case 'suzuki': return Icons.electric_bike;
       default: return Icons.two_wheeler_outlined;
     }
   }

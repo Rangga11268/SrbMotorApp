@@ -6,9 +6,10 @@ import '../models/leasing_provider.dart';
 import 'api_config.dart';
 
 class MotorService {
-  Future<List<Motor>> getMotors({String? category, String? search}) async {
+  Future<List<Motor>> getMotors({String? category, String? brand, String? search}) async {
     final Map<String, String> queryParams = {};
     if (category != null) queryParams['category'] = category;
+    if (brand != null) queryParams['brand'] = brand;
     if (search != null) queryParams['search'] = search;
     
     final uri = Uri.parse('${ApiConfig.baseUrl}/motors').replace(queryParameters: queryParams);
@@ -23,6 +24,20 @@ class MotorService {
       return data.map((item) => Motor.fromJson(item)).toList();
     } else {
       throw Exception('Gagal mengambil data motor');
+    }
+  }
+
+  Future<List<String>> getBrands() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/motors/brands'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => item.toString()).toList();
+    } else {
+      throw Exception('Gagal mengambil data merek');
     }
   }
 

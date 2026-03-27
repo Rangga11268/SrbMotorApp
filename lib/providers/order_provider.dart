@@ -138,4 +138,17 @@ class OrderProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<Map<String, dynamic>> getInvoiceUrl(int orderId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      return await _orderService.getInvoiceUrl(orderId);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

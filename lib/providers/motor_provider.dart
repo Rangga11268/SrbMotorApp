@@ -7,20 +7,25 @@ import '../services/motor_service.dart';
 class MotorProvider with ChangeNotifier {
   List<Motor> _motors = [];
   List<CategoryModel> _categories = [];
+  List<String> _brands = [];
   List<LeasingProvider> _leasingProviders = [];
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
+  bool _isBrandsLoading = false;
   String? _errorMessage;
   String? _selectedCategory;
+  String? _selectedBrand;
   String? _searchQuery;
 
   List<Motor> get motors => _motors;
   List<CategoryModel> get categories => _categories;
+  List<String> get brands => _brands;
   List<LeasingProvider> get leasingProviders => _leasingProviders;
-  bool get isLoading => _isLoading || _isCategoriesLoading;
+  bool get isLoading => _isLoading || _isCategoriesLoading || _isBrandsLoading;
   bool get isInitialLoading => _isLoading && _motors.isEmpty;
   String? get errorMessage => _errorMessage;
   String? get selectedCategory => _selectedCategory;
+  String? get selectedBrand => _selectedBrand;
 
   final MotorService _motorService = MotorService();
 
@@ -32,6 +37,7 @@ class MotorProvider with ChangeNotifier {
     try {
       _motors = await _motorService.getMotors(
         category: _selectedCategory,
+        brand: _selectedBrand,
         search: _searchQuery,
       );
     } catch (e) {
@@ -57,10 +63,28 @@ class MotorProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchBrands() async {
+    _isBrandsLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _brands = await _motorService.getBrands();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isBrandsLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> initializeData() async {
-    await fetchCategories();
+    await Future.wait([
+      fetchBrands(),
+      fetchCategories(),
+    ]);
     await fetchMotors();
-    fetchLeasingProviders(); // fire-and-forget, not critical for initial load
+    fetchLeasingProviders(); // fire-and-forget
   }
 
   Future<void> fetchLeasingProviders() async {
@@ -74,6 +98,11 @@ class MotorProvider with ChangeNotifier {
 
   void setCategory(String? category) {
     _selectedCategory = category;
+    fetchMotors();
+  }
+
+  void setBrand(String? brand) {
+    _selectedBrand = brand;
     fetchMotors();
   }
 
