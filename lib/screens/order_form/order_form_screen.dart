@@ -30,13 +30,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   String _paymentMethod = 'Tunai di Toko';
   double _sisaPembayaran = 0;
 
-  final List<String> _availableColors = [
-    'Merah',
-    'Hitam',
-    'Putih',
-    'Biru',
-    'Silver/Abu-abu'
-  ];
+  List<String> _availableColors = [];
 
   @override
   void initState() {
@@ -46,6 +40,20 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     _phoneController = TextEditingController(text: user?.phone);
     _emailController = TextEditingController(text: user?.email);
     _sisaPembayaran = widget.motor.price;
+
+    // Initialize colors
+    if (widget.motor.colors is List) {
+      _availableColors = List<String>.from(widget.motor.colors);
+    } else if (widget.motor.colors != null && widget.motor.colors.toString().isNotEmpty) {
+      _availableColors = [widget.motor.colors.toString()];
+    }
+
+    if (_availableColors.isEmpty) {
+      _availableColors = ['Beragam'];
+      _selectedColor = 'Beragam';
+    } else if (_availableColors.length == 1) {
+      _selectedColor = _availableColors.first;
+    }
   }
 
   @override
