@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import 'edit_profile_screen.dart';
@@ -159,8 +160,22 @@ class ProfileScreen extends StatelessWidget {
                     style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1.5),
                   ),
                   const SizedBox(height: 16),
-                  _buildProfileItem(context, Icons.help_outline, 'Pusat Bantuan', 'Hubungi CS', Colors.teal[600]!),
-                  _buildProfileItem(context, Icons.info_outline, 'Info Aplikasi', 'Versi 1.0.0', Colors.blueGrey[600]!),
+                  _buildProfileItem(
+                    context,
+                    Icons.help_outline,
+                    'Pusat Bantuan',
+                    'Hubungi CS',
+                    Colors.teal[600]!,
+                    onTap: () => _launchHelpWhatsApp(),
+                  ),
+                  _buildProfileItem(
+                    context,
+                    Icons.info_outline,
+                    'Info Aplikasi',
+                    'Versi 1.0.0',
+                    Colors.blueGrey[600]!,
+                    onTap: () => _showAppInfo(context),
+                  ),
                 ],
               ),
             ),
@@ -199,6 +214,101 @@ class ProfileScreen extends StatelessWidget {
         Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B))),
         Text(label, style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
       ],
+    );
+  }
+
+  void _launchHelpWhatsApp() async {
+    final message = Uri.encodeComponent(
+      'Halo SRB Motors, saya butuh bantuan mengenai pengajuan atau unit di aplikasi.',
+    );
+    final url = Uri.parse('https://wa.me/628978638849?text=$message');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showAppInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Image.asset('assets/images/logo_srb.png',
+                    width: 70,
+                    errorBuilder: (c, e, s) => const Icon(Icons.motorcycle,
+                        size: 32, color: Color(0xFF2563EB))),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'SRB Motor App',
+                style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1E293B)),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Versi 1.0.0 Stable',
+                style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: const Color(0xFF94A3B8),
+                    fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 24),
+              Text(
+                '"Solusi Kendaraan Impian Anda"',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                    fontSize: 15,
+                    fontStyle: FontStyle.italic,
+                    color: const Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1E293B),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: Text('TUTUP',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
