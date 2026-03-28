@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../models/leasing_provider.dart';
 import '../../services/api_config.dart';
 import '../../models/motor.dart';
 import '../../providers/main_provider.dart';
@@ -241,25 +242,46 @@ class _HomeContentState extends State<HomeContent> {
 
             // Partners Section
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Partner Pembiayaan Kami',
-                      style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildPartnerLogo('assets/images/logo_adira.png'),
-                        _buildPartnerLogo('assets/images/logo_baf.png'),
+                        Text(
+                          'Partner Pembiayaan',
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                        Text(
+                          'Resmi',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF2563EB),
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(
+                    height: 80,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: motorProvider.leasingProviders.length,
+                      itemBuilder: (context, index) {
+                        final provider = motorProvider.leasingProviders[index];
+                        return _buildPartnerLogo(provider);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             
@@ -281,17 +303,61 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  Widget _buildPartnerLogo(String path) {
+  Widget _buildPartnerLogo(LeasingProvider provider) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      width: 140,
+      margin: const EdgeInsets.only(right: 12, bottom: 8, top: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5),
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
         ],
       ),
-      child: Image.asset(path, height: 40, errorBuilder: (c, e, s) => const Icon(Icons.business, color: Colors.grey)),
+      child: Center(
+        child: provider.logoUrl != null
+            ? CachedNetworkImage(
+                imageUrl: ApiConfig.sanitizeUrl(provider.logoUrl!)!,
+                height: 32,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2)),
+                errorWidget: (c, e, s) => Text(
+                  provider.name,
+                  style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: const Color(0xFF64748B)),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.account_balance_outlined,
+                      size: 16, color: Color(0xFF2563EB)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      provider.name,
+                      style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: const Color(0xFF1E293B)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 
