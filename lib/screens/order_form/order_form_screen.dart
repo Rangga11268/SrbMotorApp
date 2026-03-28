@@ -22,8 +22,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
-  final _nikController = TextEditingController();
-  final _addressController = TextEditingController();
+  late TextEditingController _nikController;
+  late TextEditingController _addressController;
   final _notesController = TextEditingController();
   final _bookingFeeController = TextEditingController();
 
@@ -41,6 +41,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     _nameController = TextEditingController(text: user?.name);
     _phoneController = TextEditingController(text: user?.phone);
     _emailController = TextEditingController(text: user?.email);
+    _nikController = TextEditingController(text: user?.nik);
+    _addressController = TextEditingController(text: user?.alamat);
     _sisaPembayaran = widget.motor.price;
 
     // Initialize colors
