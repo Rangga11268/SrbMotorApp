@@ -360,7 +360,7 @@ class _HomeContentState extends State<HomeContent> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        motor.tersedia ? 'Tersedia' : 'Sudah Pesan',
+                        motor.tersedia ? 'Tersedia' : 'Habis',
                         style: GoogleFonts.outfit(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),

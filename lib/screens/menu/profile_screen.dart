@@ -116,9 +116,42 @@ class ProfileScreen extends StatelessWidget {
                     style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1.5),
                   ),
                   const SizedBox(height: 16),
-                  _buildProfileItem(context, Icons.phone_outlined, 'Nomor Telepon', user?.phone ?? '-', Colors.blue[600]!),
-                  _buildProfileItem(context, Icons.location_on_outlined, 'Alamat Utama', user?.alamat ?? 'Belum diset', Colors.orange[600]!),
-                  _buildProfileItem(context, Icons.security_outlined, 'Keamanan Akun', 'Ubah Password', Colors.purple[600]!),
+                  _buildProfileItem(
+                    context,
+                    Icons.phone_outlined,
+                    'Nomor Telepon',
+                    user?.phone ?? '-',
+                    Colors.blue[600]!,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const EditProfileScreen()),
+                    ),
+                  ),
+                  _buildProfileItem(
+                    context,
+                    Icons.location_on_outlined,
+                    'Alamat Utama',
+                    user?.alamat ?? 'Belum diset',
+                    Colors.orange[600]!,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const EditProfileScreen()),
+                    ),
+                  ),
+                  _buildProfileItem(
+                    context,
+                    Icons.security_outlined,
+                    'Keamanan Akun',
+                    'Ubah Password',
+                    Colors.purple[600]!,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const EditProfileScreen()),
+                    ),
+                  ),
                   
                   const SizedBox(height: 32),
                   Text(
@@ -169,32 +202,43 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileItem(BuildContext context, IconData icon, String title, String value, Color color) {
+  Widget _buildProfileItem(BuildContext context, IconData icon, String title,
+      String value, Color color,
+      {VoidCallback? onTap}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12)),
           child: Icon(icon, color: color, size: 22),
         ),
-        title: Text(title, style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
-        subtitle: Text(value, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
-        trailing: const Icon(Icons.chevron_right, size: 18, color: Color(0xFFCBD5E1)),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const EditProfileScreen()),
-          );
-        },
+        title: Text(title,
+            style: GoogleFonts.outfit(
+                fontSize: 14,
+                color: const Color(0xFF94A3B8),
+                fontWeight: FontWeight.bold)),
+        subtitle: Text(value,
+            style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1E293B))),
+        trailing:
+            const Icon(Icons.chevron_right, size: 18, color: Color(0xFFCBD5E1)),
+        onTap: onTap,
       ),
     );
   }
