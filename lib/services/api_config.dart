@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConfig {
   // Gunakan IP lokal yang sama untuk Web dan App agar sinkron
-  static const String baseUrl = 'http://192.168.1.9:8000/api';
+  static const String baseUrl = 'https://jerrie-lagoonal-cherryl.ngrok-free.dev/api';
   
   static Future<Map<String, String>> get headers async {
     final prefs = await SharedPreferences.getInstance();
@@ -11,6 +11,7 @@ class ApiConfig {
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
