@@ -323,6 +323,7 @@ class _HomeContentState extends State<HomeContent> {
         child: provider.logoUrl != null
             ? CachedNetworkImage(
                 imageUrl: ApiConfig.sanitizeUrl(provider.logoUrl!)!,
+                httpHeaders: ApiConfig.ngrokHeaders,
                 height: 32,
                 fit: BoxFit.contain,
                 placeholder: (context, url) => const SizedBox(
@@ -391,7 +392,10 @@ class _HomeContentState extends State<HomeContent> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   image: motor.imagePath != null
                       ? DecorationImage(
-                          image: CachedNetworkImageProvider(ApiConfig.sanitizeUrl(motor.imagePath!)!),
+                          image: CachedNetworkImageProvider(
+                            ApiConfig.sanitizeUrl(motor.imagePath!)!,
+                            headers: ApiConfig.ngrokHeaders,
+                          ),
                           fit: BoxFit.cover,
                         )
                       : DecorationImage(

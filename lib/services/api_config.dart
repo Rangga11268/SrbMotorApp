@@ -11,10 +11,14 @@ class ApiConfig {
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
+      ...ngrokHeaders,
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
+
+  static const Map<String, String> ngrokHeaders = {
+    'ngrok-skip-browser-warning': 'true',
+  };
 
   /// Sanitizes URLs by replacing localhost/127.0.0.1 with 10.0.2.2 for Android Emulator.
   /// Also ensures the path format is consistent.
@@ -23,11 +27,14 @@ class ApiConfig {
     
     String sanitized = url;
     
-    // Case-insensitive replacement for various local dev hostnames to the unified IP
-    sanitized = sanitized.replaceAll(RegExp(r'localhost', caseSensitive: false), '192.168.1.9');
-    sanitized = sanitized.replaceAll(RegExp(r'127\.0\.0\.1'), '192.168.1.9');
-    sanitized = sanitized.replaceAll(RegExp(r'10\.0\.2\.2'), '192.168.1.9');
-    sanitized = sanitized.replaceAll(RegExp(r'srbmotor\.test', caseSensitive: false), '192.168.1.9');
+    // Replace local dev hostnames with the host from the current baseUrl
+    final uri = Uri.parse(baseUrl);
+    final targetHost = uri.host;
+    
+    sanitized = sanitized.replaceAll(RegExp(r'localhost', caseSensitive: false), targetHost);
+    sanitized = sanitized.replaceAll(RegExp(r'127\.0\.0\.1'), targetHost);
+    sanitized = sanitized.replaceAll(RegExp(r'10\.0\.2\.2'), targetHost);
+    sanitized = sanitized.replaceAll(RegExp(r'srbmotor\.test', caseSensitive: false), targetHost);
     
     // Ensure we don't have double storage/
     if (sanitized.contains('/storage/storage/')) {

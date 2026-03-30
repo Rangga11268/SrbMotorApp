@@ -91,6 +91,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                     if (widget.motor.imagePath != null)
                       CachedNetworkImage(
                         imageUrl: ApiConfig.sanitizeUrl(widget.motor.imagePath!)!,
+                        httpHeaders: ApiConfig.ngrokHeaders,
                         fit: BoxFit.cover,
                         errorWidget: (context, url, error) => _buildPlaceholder(),
                       )
@@ -617,7 +618,10 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                             borderRadius: BorderRadius.circular(20),
                             image: motor.imagePath != null
                                 ? DecorationImage(
-                                    image: CachedNetworkImageProvider(ApiConfig.sanitizeUrl(motor.imagePath!)!), 
+                                    image: CachedNetworkImageProvider(
+                                      ApiConfig.sanitizeUrl(motor.imagePath!)!,
+                                      headers: ApiConfig.ngrokHeaders,
+                                    ), 
                                     fit: BoxFit.cover,
                                     onError: (e, s) => debugPrint('Related image load error: $e'),
                                   )

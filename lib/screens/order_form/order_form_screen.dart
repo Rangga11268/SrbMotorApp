@@ -394,6 +394,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             child: widget.motor.imagePath != null
                 ? CachedNetworkImage(
                     imageUrl: ApiConfig.sanitizeUrl(widget.motor.imagePath!)!,
+                    httpHeaders: ApiConfig.ngrokHeaders,
                     width: 100,
                     height: 80,
                     fit: BoxFit.cover,
