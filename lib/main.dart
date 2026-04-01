@@ -108,8 +108,24 @@ class _MyAppState extends State<MyApp> {
     }, onError: (err) => debugPrint('Deep link stream error: $err'));
   }
 
+  final Set<String> _processedLinks = {};
+
   void _handleDeepLink(Uri uri) {
-    if (uri.scheme != 'srbmotor') return;
+    // Only process srbmotor:// scheme
+    if (uri.scheme != 'srbmotor') {
+      debugPrint('Ignoring non-app deep link: $uri');
+      return;
+    }
+
+    // Guard against processing the same link multiple times in a short window
+    final linkKey = uri.toString();
+    if (_processedLinks.contains(linkKey)) {
+      debugPrint('Deep link already processed: $linkKey');
+      return;
+    }
+    _processedLinks.add(linkKey);
+    // Auto-clean after 5 seconds to allow legitimate re-clicks if needed
+    Timer(const Duration(seconds: 5), () => _processedLinks.remove(linkKey));
 
     Future.microtask(() async {
       if (!mounted) return;

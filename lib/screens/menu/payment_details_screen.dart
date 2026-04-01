@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import '../../models/order.dart';
 import '../../models/installment.dart';
 import '../../providers/order_provider.dart';
+import '../../main.dart'; // Added for global midtrans instance
 
 class PaymentDetailsScreen extends StatelessWidget {
   final OrderModel order;
@@ -15,15 +15,22 @@ class PaymentDetailsScreen extends StatelessWidget {
     final orderProvider = context.read<OrderProvider>();
     final result = await orderProvider.getInstallmentPaymentUrl(installment.id);
 
-    if (result['success'] && result['redirect_url'] != null) {
-      final uri = Uri.parse(result['redirect_url']);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (result['success'] && result['snap_token'] != null) {
+      try {
+        final token = result['snap_token'];
+        midtrans?.startPaymentUiFlow(token: token);
+      } catch (e) {
+        debugPrint('Error launching Midtrans SDK: $e');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal membuka halaman pembayaran native')),
+          );
+        }
       }
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Gagal membuat link pembayaran')),
+          SnackBar(content: Text(result['message'] ?? 'Gagal membuat token pembayaran')),
         );
       }
     }
