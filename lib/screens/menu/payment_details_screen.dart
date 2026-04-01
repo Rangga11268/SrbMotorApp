@@ -19,7 +19,10 @@ class PaymentDetailsScreen extends StatelessWidget {
       // 1. Close the Payment Details screen immediately
       Navigator.of(context).pop();
 
-      // 2. Launch the Native SDK flow over the main Detail screen
+      // 2. Start background status polling for this specific installment
+      orderProvider.startPollingStatus(installment.id);
+
+      // 3. Launch the Native SDK flow over the main Detail screen
       try {
         final token = result['snap_token'];
         midtrans?.startPaymentUiFlow(token: token);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../models/order.dart';
 import '../services/order_service.dart';
 
@@ -8,6 +9,7 @@ class OrderProvider with ChangeNotifier {
   String? _errorMessage;
   String? _successMessage;
   Map<String, dynamic>? _lastOrderResult;
+  Timer? _pollingTimer;
 
   List<OrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
@@ -150,5 +152,52 @@ class OrderProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Start background polling for a specific installment status
+  void startPollingStatus(int installmentId) {
+    // 1. Stop any existing timer first
+    stopPollingStatus();
+
+    debugPrint('Starting background polling for installment $installmentId');
+    
+    // 2. Poll every 5 seconds
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      debugPrint('Polling status for $installmentId...');
+      
+      final isPaid = await _orderService.checkInstallmentStatus(installmentId);
+      
+      if (isPaid) {
+        debugPrint('Payment detected as PAID in background! Refreshing history...');
+        timer.cancel();
+        _pollingTimer = null;
+        
+        // Refresh full history to update all UI parts
+        await fetchOrderHistory();
+      }
+    });
+
+    // 3. Auto-stop after 5 minutes to save resources if user leaves it forever
+    Timer(const Duration(minutes: 5), () {
+      if (_pollingTimer != null) {
+        debugPrint('Auto-stopping polling after timeout');
+        stopPollingStatus();
+      }
+    });
+  }
+
+  /// Explicitly stop status polling
+  void stopPollingStatus() {
+    if (_pollingTimer != null) {
+      _pollingTimer!.cancel();
+      _pollingTimer = null;
+      debugPrint('Polling status stopped manually.');
+    }
+  }
+
+  @override
+  void dispose() {
+    stopPollingStatus();
+    super.dispose();
   }
 }

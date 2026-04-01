@@ -190,13 +190,26 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     // 1. Switch to Order History tab globally
                     context.read<MainProvider>().setSelectedIndex(1);
 
-                    // 2. Clear navigation stack back to HomeScreen so form is gone
-                    // We pop 3 times: Dialog -> OrderForm -> MotorDetail
+                    // 2. Start background status polling for the first installment (Booking Fee)
+                    final orderProvider = context.read<OrderProvider>();
+                    final lastResult = orderProvider.lastOrderResult;
+                    if (lastResult != null && 
+                        lastResult['order'] != null && 
+                        lastResult['order']['installments'] != null &&
+                        (lastResult['order']['installments'] as List).isNotEmpty) {
+                      final firstInst = (lastResult['order']['installments'] as List).first;
+                      final instId = firstInst['id'];
+                      if (instId != null) {
+                        orderProvider.startPollingStatus(instId);
+                      }
+                    }
+
+                    // 3. Clear navigation stack back to HomeScreen so form is gone
                     Navigator.of(context).pop(); // Dialog
                     Navigator.of(context).pop(); // OrderForm
                     Navigator.of(context).pop(); // MotorDetail
 
-                    // 3. Start the Native SDK flow (it will open over HomeScreen)
+                    // 4. Start the Native SDK flow
                     try {
                       midtrans?.startPaymentUiFlow(token: token);
                     } catch (e) {

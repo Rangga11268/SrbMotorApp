@@ -50,6 +50,10 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     final result = await orderProvider.getInstallmentPaymentUrl(installment.id);
 
     if (result['success'] && result['snap_token'] != null) {
+      // 1. Start background status polling for this specific installment
+      orderProvider.startPollingStatus(installment.id);
+
+      // 2. Launch the Native SDK flow
       try {
         final token = result['snap_token'];
         midtrans?.startPaymentUiFlow(token: token);
