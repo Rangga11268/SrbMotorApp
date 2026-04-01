@@ -12,7 +12,6 @@ erDiagram
     TRANSACTIONS ||--o{ TRANSACTION_LOGS : "has"
     TRANSACTIONS ||--o{ DOCUMENTS : "requires"
     TRANSACTIONS ||--o| CREDIT_DETAILS : "has if credit"
-    LEASING_PROVIDERS ||--o{ CREDIT_DETAILS : "provides"
     CREDIT_DETAILS ||--o{ INSTALLMENTS : "has"
     CREDIT_DETAILS ||--o{ SURVEY_SCHEDULES : "has"
     USERS ||--o{ NOTIFICATIONS : "receives"
@@ -85,7 +84,7 @@ erDiagram
     CREDIT_DETAILS {
         bigint id PK
         bigint transaction_id FK
-        bigint leasing_provider_id FK
+        string leasing_provider
         string status
         string reference_number
         int tenor
@@ -152,14 +151,6 @@ erDiagram
         string icon
         int order
         boolean is_active
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    LEASING_PROVIDERS {
-        bigint id PK
-        string name
-        string logo_path
         timestamp created_at
         timestamp updated_at
     }
@@ -245,7 +236,6 @@ erDiagram
 | [installments](file:///d:/laragon/www/SrbMotor/app/Models/Transaction.php#106-113) | 21 | Payment Tracking & Deadlines |
 | `documents` | 15 | Identity Files & Verification |
 | `categories` | 9 | Article Grouping |
-| `leasing_providers` | 5 | Financing Partners |
 | `transaction_logs` | 12 | Audit Trail for Status Changes |
 | `survey_schedules` | 21 | Survey Coordination Detail |
 | `posts` | 12 | Blog/News Content Management |

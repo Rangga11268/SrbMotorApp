@@ -14,15 +14,15 @@ import './screens/auth/login_screen.dart';
 import './screens/menu/order_status_screen.dart';
 
 MidtransSDK? midtrans;
+const String MIDTRANS_CLIENT_KEY = "Mid-client-aAUNIuf1fCSll2qz";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Ganti 'YOUR_CLIENT_KEY' dan 'YOUR_BASE_URL' dengan kunci asli dari .env
   midtrans = await MidtransSDK.init(
     config: MidtransConfig(
-      clientKey: "YOUR_CLIENT_KEY",
-      merchantBaseUrl: "https://your-api.com/", // Placeholder
+      clientKey: MIDTRANS_CLIENT_KEY,
+      merchantBaseUrl: "https://jerrie-lagoonal-cherryl.ngrok-free.dev/api/",
       colorTheme: ColorTheme(
         colorPrimary: const Color(0xFF2563EB),
         colorPrimaryDark: const Color(0xFF1D4ED8),

@@ -5,7 +5,7 @@ import '../../models/motor.dart';
 import '../../providers/order_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/main_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../main.dart'; // Added for global midtrans instance
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/api_config.dart';
 
@@ -91,8 +91,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       if (success && mounted) {
         final lastResult = context.read<OrderProvider>().lastOrderResult;
         
-        if (_paymentMethod == 'Transfer Bank' && lastResult?['redirect_url'] != null) {
-          _handleMidtransRedirection(lastResult!['redirect_url']);
+        if (_paymentMethod == 'Transfer Bank' && lastResult?['snap_token'] != null) {
+          _handleMidtransNativePayment(lastResult!['snap_token']);
         } else {
           _showSuccessDialog();
         }
@@ -159,9 +159,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     );
   }
 
-  void _handleMidtransRedirection(String url) async {
-    final uri = Uri.parse(url);
-    
+  void _handleMidtransNativePayment(String token) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -180,7 +178,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Anda akan dialihkan ke halaman pembayaran aman Midtrans untuk menyelesaikan transaksi.',
+                'Anda akan diarahkan ke halaman pembayaran aman Midtrans untuk menyelesaikan transaksi.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey, height: 1.5),
               ),
@@ -191,16 +189,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   onPressed: () async {
                     context.read<MainProvider>().setSelectedIndex(1); // Go to Orders tab
                     Navigator.pop(context); // Close dialog
+                    
                     try {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                      // Removed manual pops here to prevent blank screen conflict on resume
+                      // Call the SDK global instance
+                      midtrans?.startPaymentUiFlow(token: token);
                     } catch (e) {
-                      debugPrint('Error launching URL: $e');
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Gagal membuka halaman pembayaran: $url')),
-                        );
-                      }
+                      debugPrint('Error launching Midtrans SDK: $e');
                     }
                   },
                   style: ElevatedButton.styleFrom(

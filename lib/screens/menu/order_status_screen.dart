@@ -49,36 +49,22 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     final orderProvider = context.read<OrderProvider>();
     final result = await orderProvider.getInstallmentPaymentUrl(installment.id);
 
-    if (result['success']) {
-      // Mengambil snap_token dari backend untuk Midtrans
-      String? snapToken = result['snap_token'] ?? result['token'];
-
-      // Jika snapToken tidak langsung tersedia, coba ekstrak dari URL
-      if (snapToken == null && result['redirect_url'] != null) {
-        final uri = Uri.parse(result['redirect_url']);
-        if (uri.pathSegments.isNotEmpty) {
-          snapToken = uri.pathSegments.last;
-        }
-      }
-
-      if (snapToken != null) {
-        // Membuka UI native Midtrans SDK
-        midtrans?.startPaymentUiFlow(token: snapToken);
-      } else {
+    if (result['success'] && result['snap_token'] != null) {
+      try {
+        final token = result['snap_token'];
+        midtrans?.startPaymentUiFlow(token: token);
+      } catch (e) {
+        debugPrint('Error launching Midtrans SDK: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Token pembayaran tidak ditemukan dari server'),
-            ),
+            const SnackBar(content: Text('Gagal membuka halaman pembayaran native')),
           );
         }
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? 'Gagal membuat link pembayaran'),
-          ),
+          SnackBar(content: Text(result['message'] ?? 'Gagal membuat token pembayaran')),
         );
       }
     }

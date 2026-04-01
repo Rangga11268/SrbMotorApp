@@ -26,26 +26,22 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             
-            <!-- Deep Link for Payment Return -->
+            <!-- Deep Link for Payment Return - Wildcard host to catch all payment events -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="srbmotor" android:host="payment-success" />
+                <data android:scheme="srbmotor" />
             </intent-filter>
         </activity>
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-    <!-- Required to query activities that can process text, see:
-         https://developer.android.com/training/package-visibility and
-         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
-
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    
     <queries>
+        <!-- Standard URL actions -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
@@ -54,6 +50,15 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="http" />
         </intent>
+        
+        <!-- Indonesian Bank & Payment Apps -->
+        <package android:name="com.gojek.app" /> <!-- GoPay -->
+        <package android:name="com.shopee.id" /> <!-- ShopeePay -->
+        <package android:name="com.telkom.nu.cash" /> <!-- LinkAja -->
+        <package android:name="id.dana" /> <!-- DANA -->
+        <package android:name="id.co.bca.mobile.client" /> <!-- BCA Mobile -->
+        <package android:name="com.btpn.pbt.bpp" /> <!-- Jenius -->
+        
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
