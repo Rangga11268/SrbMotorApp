@@ -69,10 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  color: Colors.blueGrey,
-                ),
+                style: GoogleFonts.outfit(fontSize: 16, color: Colors.blueGrey),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -153,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Masuk ke Akun SRB Motor Anda',
+                'Masuk ke Akun SRB Motor Anda\nDealer Resmi di bawah naungan SSM',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(color: Colors.blueGrey, fontSize: 16),
               ),

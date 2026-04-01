@@ -45,7 +45,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
 
   void _launchWhatsApp() async {
     final message = Uri.encodeComponent(
-      'Halo SRB Motors, saya tertarik dengan unit ${widget.motor.name} (${currencyFormat.format(widget.motor.price)}). Bisa minta info lebih lanjut?',
+      'Halo SRB Motor (Dealer SSM), saya tertarik dengan unit ${widget.motor.name} (${currencyFormat.format(widget.motor.price)}). Bisa minta info lebih lanjut?',
     );
     final url = Uri.parse('https://wa.me/628978638849?text=$message');
     if (await canLaunchUrl(url)) {
@@ -342,27 +342,33 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 color: const Color(0xFF2563EB),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    specs[index]['label'] as String,
-                    style: GoogleFonts.outfit(
-                      fontSize: 10,
-                      color: const Color(0xFF64748B),
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      specs[index]['label'] as String,
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Text(
-                    specs[index]['value'] as String,
-                    style: GoogleFonts.outfit(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1E293B),
+                    Text(
+                      specs[index]['value'] as String,
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

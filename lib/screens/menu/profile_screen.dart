@@ -21,7 +21,7 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 32),
-            
+
             // Profile Header
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -30,49 +30,81 @@ class ProfileScreen extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
                 ],
               ),
               child: Column(
                 children: [
-                   Stack(
+                  Stack(
                     alignment: Alignment.bottomRight,
                     children: [
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFF2563EB).withValues(alpha: 0.2), width: 3),
+                          border: Border.all(
+                            color: const Color(
+                              0xFF2563EB,
+                            ).withValues(alpha: 0.2),
+                            width: 3,
+                          ),
                         ),
                         child: const CircleAvatar(
                           radius: 50,
                           backgroundColor: Color(0xFFF1F5F9),
-                          child: Icon(Icons.person, size: 50, color: Color(0xFF2563EB)),
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Color(0xFF2563EB),
+                          ),
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle),
-                        child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 16),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2563EB),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_outlined,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
                   Text(
                     user?.name ?? 'Pengguna',
-                    style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     user?.email ?? 'email@example.com',
-                    style: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500),
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xFF94A3B8),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _buildHeaderStat('Unit', '1'),
-                      Container(height: 40, width: 1, color: const Color(0xFFF1F5F9), margin: const EdgeInsets.symmetric(horizontal: 30)),
+                      Container(
+                        height: 40,
+                        width: 1,
+                        color: const Color(0xFFF1F5F9),
+                        margin: const EdgeInsets.symmetric(horizontal: 30),
+                      ),
                       _buildHeaderStat('Status', 'Platinum'),
                     ],
                   ),
@@ -83,21 +115,33 @@ class ProfileScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfileScreen(),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB).withOpacity(0.05),
+                        backgroundColor: const Color(
+                          0xFF2563EB,
+                        ).withOpacity(0.05),
                         foregroundColor: const Color(0xFF2563EB),
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: const Color(0xFF2563EB).withOpacity(0.1)),
+                          side: BorderSide(
+                            color: const Color(0xFF2563EB).withOpacity(0.1),
+                          ),
                         ),
                       ),
                       icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: Text('EDIT PROFIL', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                      label: Text(
+                        'EDIT PROFIL',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -105,7 +149,7 @@ class ProfileScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 32),
-            
+
             // Menu List
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -114,7 +158,12 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Text(
                     'PENGATURAN AKUN',
-                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1.5),
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF94A3B8),
+                      letterSpacing: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _buildProfileItem(
@@ -126,7 +175,8 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const EditProfileScreen()),
+                        builder: (context) => const EditProfileScreen(),
+                      ),
                     ),
                   ),
                   _buildProfileItem(
@@ -138,7 +188,8 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const EditProfileScreen()),
+                        builder: (context) => const EditProfileScreen(),
+                      ),
                     ),
                   ),
                   _buildProfileItem(
@@ -150,14 +201,20 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const EditProfileScreen()),
+                        builder: (context) => const EditProfileScreen(),
+                      ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
                   Text(
                     'LAINNYA',
-                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w900, color: const Color(0xFF94A3B8), letterSpacing: 1.5),
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF94A3B8),
+                      letterSpacing: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _buildProfileItem(
@@ -179,9 +236,9 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 40),
-            
+
             // Logout Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -195,10 +252,15 @@ class ProfileScreen extends StatelessWidget {
                   minimumSize: const Size(double.infinity, 56),
                   foregroundColor: Colors.red[700],
                   backgroundColor: Colors.red[50],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 icon: const Icon(Icons.logout),
-                label: Text('KELUAR AKUN', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                label: Text(
+                  'KELUAR AKUN',
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 60),
@@ -211,15 +273,29 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildHeaderStat(String label, String value) {
     return Column(
       children: [
-        Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B))),
-        Text(label, style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF1E293B),
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            color: const Color(0xFF94A3B8),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
 
   void _launchHelpWhatsApp() async {
     final message = Uri.encodeComponent(
-      'Halo SRB Motors, saya butuh bantuan mengenai pengajuan atau unit di aplikasi.',
+      'Halo SRB Motor, saya butuh bantuan mengenai pengajuan atau unit di aplikasi.',
     );
     final url = Uri.parse('https://wa.me/628978638849?text=$message');
     if (await canLaunchUrl(url)) {
@@ -256,37 +332,45 @@ class ProfileScreen extends StatelessWidget {
                   color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Image.asset('assets/images/logos/logo_srb.png',
-                    width: 70,
-                    errorBuilder: (c, e, s) => const Icon(Icons.motorcycle,
-                        size: 32, color: Color(0xFF2563EB))),
+                child: Image.asset(
+                  'assets/images/logos/logo_srb.png',
+                  width: 70,
+                  errorBuilder: (c, e, s) => const Icon(
+                    Icons.motorcycle,
+                    size: 32,
+                    color: Color(0xFF2563EB),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
               Text(
                 'SRB Motor App',
                 style: GoogleFonts.outfit(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1E293B)),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1E293B),
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Versi 1.0.0 Stable',
                 style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    color: const Color(0xFF94A3B8),
-                    fontWeight: FontWeight.w500),
+                  fontSize: 14,
+                  color: const Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 24),
               const Divider(),
               const SizedBox(height: 24),
               Text(
-                '"Solusi Kendaraan Impian Anda"',
+                '"Solusi Kendaraan Impian Anda"\nDealer resmi di bawah naungan SSM.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
-                    fontSize: 15,
-                    fontStyle: FontStyle.italic,
-                    color: const Color(0xFF64748B)),
+                  fontSize: 15,
+                  fontStyle: FontStyle.italic,
+                  color: const Color(0xFF64748B),
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -298,11 +382,14 @@ class ProfileScreen extends StatelessWidget {
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('TUTUP',
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'TUTUP',
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -312,9 +399,14 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileItem(BuildContext context, IconData icon, String title,
-      String value, Color color,
-      {VoidCallback? onTap}) {
+  Widget _buildProfileItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String value,
+    Color color, {
+    VoidCallback? onTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -322,9 +414,10 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4)),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: ListTile(
@@ -332,22 +425,32 @@ class ProfileScreen extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12)),
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Icon(icon, color: color, size: 22),
         ),
-        title: Text(title,
-            style: GoogleFonts.outfit(
-                fontSize: 14,
-                color: const Color(0xFF94A3B8),
-                fontWeight: FontWeight.bold)),
-        subtitle: Text(value,
-            style: GoogleFonts.outfit(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1E293B))),
-        trailing:
-            const Icon(Icons.chevron_right, size: 18, color: Color(0xFFCBD5E1)),
+        title: Text(
+          title,
+          style: GoogleFonts.outfit(
+            fontSize: 14,
+            color: const Color(0xFF94A3B8),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          value,
+          style: GoogleFonts.outfit(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E293B),
+          ),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right,
+          size: 18,
+          color: Color(0xFFCBD5E1),
+        ),
         onTap: onTap,
       ),
     );
