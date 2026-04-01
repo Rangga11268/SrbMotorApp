@@ -107,7 +107,7 @@ class _MyAppState extends State<MyApp> {
 
         final transactionIdStr = uri.queryParameters['transaction_id'];
         final orderProvider = context.read<OrderProvider>();
-        final mainProvider = context.read<MainProvider>();
+        final mainProvider = context.read<MainProvider>(); 
 
         // Switch to Order History tab
         mainProvider.setSelectedIndex(1);
