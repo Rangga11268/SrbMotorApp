@@ -53,6 +53,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
       // Mengambil snap_token dari backend untuk Midtrans
       String? snapToken = result['snap_token'] ?? result['token'];
 
+      // Jika snapToken tidak langsung tersedia, coba ekstrak dari URL
       if (snapToken == null && result['redirect_url'] != null) {
         final uri = Uri.parse(result['redirect_url']);
         if (uri.pathSegments.isNotEmpty) {
@@ -63,11 +64,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
       if (snapToken != null) {
         // Membuka UI native Midtrans SDK
         midtrans?.startPaymentUiFlow(token: snapToken);
-      } else if (result['redirect_url'] != null) {
-        // Cadangan jika token gagal diekstrak
-        final uri = Uri.parse(result['redirect_url']);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Token pembayaran tidak ditemukan dari server'),
+            ),
+          );
         }
       }
     } else {

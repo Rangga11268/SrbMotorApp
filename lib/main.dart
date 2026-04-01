@@ -66,9 +66,25 @@ class _MyAppState extends State<MyApp> {
 
   void _initApp() {
     _initDeepLinks();
+    _initMidtransCallback();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<AuthProvider>().checkAuth();
+      }
+    });
+  }
+
+  void _initMidtransCallback() {
+    midtrans?.setTransactionFinishedCallback((result) {
+      debugPrint(
+        'Midtrans Transaction Finished: ${result.transactionId}, Status: ${result.status}',
+      );
+
+      // Ketika transaksi selesai (baik sukses, batal, atau pending),
+      // refresh riwayat pesanan
+      final orderProvider = context.read<OrderProvider>();
+      if (mounted && orderProvider.orders.isNotEmpty) {
+        orderProvider.fetchOrderHistory();
       }
     });
   }
@@ -194,6 +210,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _linkSubscription?.cancel();
+    midtrans?.removeTransactionFinishedCallback();
     super.dispose();
   }
 
