@@ -197,10 +197,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                         lastResult['order'] != null && 
                         lastResult['order']['installments'] != null &&
                         (lastResult['order']['installments'] as List).isNotEmpty) {
-                      final firstInst = (lastResult['order']['installments'] as List).first;
+                      final orderData = lastResult['order'];
+                      final firstInst = (orderData['installments'] as List).first;
                       final instId = firstInst['id'];
-                      if (instId != null) {
-                        orderProvider.startPollingStatus(instId);
+                      final orderId = orderData['id'];
+                      if (instId != null && orderId != null) {
+                        orderProvider.startPollingStatus(instId, orderId);
                       }
                     }
 

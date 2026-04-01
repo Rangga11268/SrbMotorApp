@@ -20,7 +20,7 @@ class PaymentDetailsScreen extends StatelessWidget {
       Navigator.of(context).pop();
 
       // 2. Start background status polling for this specific installment
-      orderProvider.startPollingStatus(installment.id);
+      orderProvider.startPollingStatus(installment.id, order.id);
 
       // 3. Launch the Native SDK flow over the main Detail screen
       try {

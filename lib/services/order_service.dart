@@ -18,6 +18,20 @@ class OrderService {
     }
   }
 
+  Future<OrderModel> getOrderDetails(int orderId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/orders/$orderId'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final dynamic data = jsonDecode(response.body);
+      return OrderModel.fromJson(data);
+    } else {
+      throw Exception('Gagal mengambil detail pesanan');
+    }
+  }
+
   Future<Map<String, dynamic>> placeCashOrder({
     required int motorId,
     required String name,

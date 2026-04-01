@@ -104,6 +104,20 @@ class OrderProvider with ChangeNotifier {
     return await _orderService.checkInstallmentStatus(installmentId);
   }
 
+  /// Syncs a single order and updates the local list to trigger UI rebuilds
+  Future<void> syncSingleOrder(int orderId) async {
+    try {
+      final updatedOrder = await _orderService.getOrderDetails(orderId);
+      final index = _orders.indexWhere((o) => o.id == orderId);
+      if (index != -1) {
+        _orders[index] = updatedOrder;
+        notifyListeners(); // This will trigger Specific Selectors immediately
+      }
+    } catch (e) {
+      debugPrint('Error syncing single order: $e');
+    }
+  }
+
   Future<void> syncOrderDetails(OrderModel order) async {
     _isLoading = true;
     notifyListeners();
@@ -114,8 +128,9 @@ class OrderProvider with ChangeNotifier {
           await _orderService.checkInstallmentStatus(inst.id);
         }
       }
-      // Reload final state from DB
-      await fetchOrderHistory();
+      // Reload this specific order only for speed, then reload history in background
+      await syncSingleOrder(order.id);
+      fetchOrderHistory(); // Background full refresh
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -155,11 +170,11 @@ class OrderProvider with ChangeNotifier {
   }
 
   /// Start background polling for a specific installment status
-  void startPollingStatus(int installmentId) {
+  void startPollingStatus(int installmentId, int orderId) {
     // 1. Stop any existing timer first
     stopPollingStatus();
 
-    debugPrint('Starting background polling for installment $installmentId');
+    debugPrint('Starting background polling for installment $installmentId (Order: $orderId)');
     
     // 2. Poll every 5 seconds
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
@@ -168,16 +183,19 @@ class OrderProvider with ChangeNotifier {
       final isPaid = await _orderService.checkInstallmentStatus(installmentId);
       
       if (isPaid) {
-        debugPrint('Payment detected as PAID in background! Refreshing history...');
+        debugPrint('Payment detected as PAID in background! Syncing order $orderId...');
         timer.cancel();
         _pollingTimer = null;
         
-        // Refresh full history to update all UI parts
-        await fetchOrderHistory();
+        // Refresh this single order for instant UI update
+        await syncSingleOrder(orderId);
+        
+        // Background full refresh
+        fetchOrderHistory();
       }
     });
 
-    // 3. Auto-stop after 5 minutes to save resources if user leaves it forever
+    // 3. Auto-stop after 5 minutes
     Timer(const Duration(minutes: 5), () {
       if (_pollingTimer != null) {
         debugPrint('Auto-stopping polling after timeout');

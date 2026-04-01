@@ -51,7 +51,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
     if (result['success'] && result['snap_token'] != null) {
       // 1. Start background status polling for this specific installment
-      orderProvider.startPollingStatus(installment.id);
+      orderProvider.startPollingStatus(installment.id, widget.order.id);
 
       // 2. Launch the Native SDK flow
       try {
