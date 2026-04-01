@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/motor.dart';
 import '../models/category.dart';
-import '../models/leasing_provider.dart';
 import '../services/motor_service.dart';
 
 class MotorProvider with ChangeNotifier {
   List<Motor> _motors = [];
   List<CategoryModel> _categories = [];
   List<String> _brands = [];
-  List<LeasingProvider> _leasingProviders = [];
+  final List<Map<String, String>> _leasingProviders = [
+    {"name": "Adira Finance", "logoUrl": "assets/images/logos/logo_adira.png"},
+    {"name": "BAF", "logoUrl": "assets/images/logos/logo_baf.png"},
+  ];
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
   bool _isBrandsLoading = false;
@@ -20,7 +22,7 @@ class MotorProvider with ChangeNotifier {
   List<Motor> get motors => _motors;
   List<CategoryModel> get categories => _categories;
   List<String> get brands => _brands;
-  List<LeasingProvider> get leasingProviders => _leasingProviders;
+  List<Map<String, String>> get leasingProviders => _leasingProviders;
   bool get isLoading => _isLoading || _isCategoriesLoading || _isBrandsLoading;
   bool get isInitialLoading => _isLoading && _motors.isEmpty;
   String? get errorMessage => _errorMessage;
@@ -79,21 +81,8 @@ class MotorProvider with ChangeNotifier {
   }
 
   Future<void> initializeData() async {
-    await Future.wait([
-      fetchBrands(),
-      fetchCategories(),
-    ]);
+    await Future.wait([fetchBrands(), fetchCategories()]);
     await fetchMotors();
-    fetchLeasingProviders(); // fire-and-forget
-  }
-
-  Future<void> fetchLeasingProviders() async {
-    try {
-      _leasingProviders = await _motorService.getLeasingProviders();
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error fetching leasing providers: $e');
-    }
   }
 
   void setCategory(String? category) {
