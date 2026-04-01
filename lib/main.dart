@@ -102,7 +102,17 @@ class _MyAppState extends State<MyApp> {
     // to browser), so when browser redirects to srbmotor://, uriLinkStream fires.
 
     // Handle links when app is resumed from background (e.g. after payment in browser).
+    bool isColdStart = true;
+    Timer(const Duration(seconds: 2), () {
+      isColdStart = false;
+      debugPrint('Cold start period ended, deep links now accepted');
+    });
+
     _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      if (isColdStart) {
+        debugPrint('Ignoring cold start deep link: $uri');
+        return;
+      }
       debugPrint('Foreground deep link received: $uri');
       _handleDeepLink(uri);
     }, onError: (err) => debugPrint('Deep link stream error: $err'));
