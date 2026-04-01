@@ -235,7 +235,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
     return Center(
       child: Opacity(
         opacity: 0.1,
-        child: Image.asset('assets/images/logo_srb.png', width: 200),
+        child: Image.asset('assets/images/logos/logo_srb.png', width: 200),
       ),
     );
   }

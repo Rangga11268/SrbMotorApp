@@ -193,10 +193,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     Navigator.pop(context); // Close dialog
                     try {
                       await launchUrl(uri, mode: LaunchMode.externalApplication);
-                      if (mounted) {
-                         Navigator.of(context).pop(); // Back from form
-                         Navigator.of(context).pop(); // Back from detail
-                      }
+                      // Removed manual pops here to prevent blank screen conflict on resume
                     } catch (e) {
                       debugPrint('Error launching URL: $e');
                       if (mounted) {
@@ -450,7 +447,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               ),
               child: Center(
                 child: Text(
-                  option.split(' ').first, // Show first word to keep it clean on mobile
+                  option, // Show full text for clarity
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: isSelected ? const Color(0xFF2563EB) : Colors.grey[600],

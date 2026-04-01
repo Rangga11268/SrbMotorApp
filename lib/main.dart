@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:midtrans_sdk/midtrans_sdk.dart';
 import './providers/auth_provider.dart';
 import './providers/motor_provider.dart';
 import './providers/order_provider.dart';
@@ -12,7 +13,24 @@ import './screens/home/home_screen.dart';
 import './screens/auth/login_screen.dart';
 import './screens/menu/order_status_screen.dart';
 
-void main() {
+MidtransSDK? midtrans;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Ganti 'YOUR_CLIENT_KEY' dan 'YOUR_BASE_URL' dengan kunci asli dari .env
+  midtrans = await MidtransSDK.init(
+    config: MidtransConfig(
+      clientKey: "YOUR_CLIENT_KEY",
+      merchantBaseUrl: "https://your-api.com/", // Placeholder
+      colorTheme: ColorTheme(
+        colorPrimary: const Color(0xFF2563EB),
+        colorPrimaryDark: const Color(0xFF1D4ED8),
+        colorSecondary: const Color(0xFF3B82F6),
+      ),
+    ),
+  );
+
   runApp(
     MultiProvider(
       providers: [
@@ -68,13 +86,10 @@ class _MyAppState extends State<MyApp> {
     // to browser), so when browser redirects to srbmotor://, uriLinkStream fires.
 
     // Handle links when app is resumed from background (e.g. after payment in browser).
-    _linkSubscription = _appLinks.uriLinkStream.listen(
-      (uri) {
-        debugPrint('Foreground deep link received: $uri');
-        _handleDeepLink(uri);
-      },
-      onError: (err) => debugPrint('Deep link stream error: $err'),
-    );
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      debugPrint('Foreground deep link received: $uri');
+      _handleDeepLink(uri);
+    }, onError: (err) => debugPrint('Deep link stream error: $err'));
   }
 
   void _handleDeepLink(Uri uri) {
@@ -98,43 +113,73 @@ class _MyAppState extends State<MyApp> {
         await Future.delayed(const Duration(milliseconds: 400));
         if (!mounted) return;
 
-        final isPaymentEvent = uri.host == 'payment-success' ||
+        final isPaymentEvent =
+            uri.host == 'payment-success' ||
             uri.host == 'payment-finish' ||
             uri.host == 'payment-error' ||
             uri.host == 'payment-pending';
 
         if (!isPaymentEvent) return;
 
+        // Auto-dismiss splash screen so we can navigate to HomeScreen/OrderStatus
+        if (_showSplash) {
+          setState(() {
+            _showSplash = false;
+          });
+        }
+
         final transactionIdStr = uri.queryParameters['transaction_id'];
         final orderProvider = context.read<OrderProvider>();
-        final mainProvider = context.read<MainProvider>(); 
+        final mainProvider = context.read<MainProvider>();
 
-        // Switch to Order History tab
+        // 1. Safely return to HomeScreen root by popping all overlays
+        final navState = _navigatorKey.currentState;
+        if (navState != null) {
+          while (navState.canPop()) {
+            navState.pop();
+          }
+        }
+
+        // 2. Switch to Order History tab via MainProvider
         mainProvider.setSelectedIndex(1);
 
-        // Fetch fresh order data
+        // 3. Fetch fresh order data
         await orderProvider.fetchOrderHistory();
         if (!mounted) return;
 
         if (transactionIdStr != null) {
           final orderId = int.tryParse(transactionIdStr);
           if (orderId != null) {
-            final order = orderProvider.orders.where((o) => o.id == orderId).firstOrNull;
+            final orderList = orderProvider.orders;
+            final order = orderList.where((o) => o.id == orderId).firstOrNull;
+
             if (order != null) {
-              // Sync installment status with Midtrans
+              // Sync installment status with Midtrans logic
               await orderProvider.syncOrderDetails(order);
               if (!mounted) return;
 
-              final refreshedOrder = orderProvider.orders
-                  .where((o) => o.id == orderId)
-                  .firstOrNull ?? order;
+              final refreshedOrder =
+                  orderProvider.orders
+                      .where((o) => o.id == orderId)
+                      .firstOrNull ??
+                  order;
 
-              // Push OrderStatusScreen on top of HomeScreen
-              _navigatorKey.currentState?.push(
-                MaterialPageRoute(
-                  builder: (_) => OrderStatusScreen(order: refreshedOrder),
-                ),
-              );
+              // Ensure a significant delay for UI state to settle after pop loop
+              // This is crucial to avoid "black screen" issues on slow devices
+              await Future.delayed(const Duration(milliseconds: 500));
+              if (!mounted) return;
+
+              // 4. Push OrderStatusScreen on top of HomeScreen
+              if (_navigatorKey.currentState != null) {
+                _navigatorKey.currentState!.push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        OrderStatusScreen(order: refreshedOrder),
+                  ),
+                );
+              }
+            } else {
+              debugPrint('Deep link: Order ID $orderId not found in history');
             }
           }
         }
@@ -160,9 +205,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
       ),
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {

@@ -17,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
     OnboardingData(
       title: 'Premium\nMotorcycle\nExperience.',
       description: 'Layanan jual beli motor premium dengan kualitas terbaik dan terpercaya di Indonesia.',
-      image: 'assets/images/logo_srb.png',
+      image: 'assets/images/logos/logo_srb.png',
       isLogo: true,
     ),
     OnboardingData(

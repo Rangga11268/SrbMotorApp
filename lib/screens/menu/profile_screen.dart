@@ -256,7 +256,7 @@ class ProfileScreen extends StatelessWidget {
                   color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Image.asset('assets/images/logo_srb.png',
+                child: Image.asset('assets/images/logos/logo_srb.png',
                     width: 70,
                     errorBuilder: (c, e, s) => const Icon(Icons.motorcycle,
                         size: 32, color: Color(0xFF2563EB))),

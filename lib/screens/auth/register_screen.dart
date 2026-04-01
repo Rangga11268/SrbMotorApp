@@ -57,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Hero(
                   tag: 'logo',
                   child: Image.asset(
-                    'assets/images/logo_srb.png',
+                    'assets/images/logos/logo_srb.png',
                     height: 80,
                     errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.motorcycle,

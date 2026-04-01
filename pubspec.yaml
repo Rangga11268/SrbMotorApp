@@ -48,6 +48,7 @@ dependencies:
   google_sign_in: ^6.2.1
   flutter_widget_from_html: ^0.15.2
   app_links: ^6.3.3
+  midtrans_sdk: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +85,7 @@ flutter:
     - assets/images/banner/
     - assets/images/honda/
     - assets/images/yamaha/
+    - assets/images/logos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

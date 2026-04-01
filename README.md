@@ -15,3 +15,11 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Aturan Pengembangan/Developer Notes
+1. Menulis kode dengan rapih.
+2. Jangan gunakan komentar // yang tidak berguna.
+3. Gunakan Bahasa Indonesia.
+4. Pastikan state managementnya bagus.
+5. Folder assets telah dirapikan.
+

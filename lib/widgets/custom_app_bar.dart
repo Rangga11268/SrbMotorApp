@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ? Row(
               children: [
                 Image.asset(
-                  'assets/images/logo_srb.png',
+                  'assets/images/logos/logo_srb.png',
                   height: 30,
                   errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                 ),

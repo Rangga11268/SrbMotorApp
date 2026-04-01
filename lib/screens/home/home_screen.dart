@@ -399,7 +399,7 @@ class _HomeContentState extends State<HomeContent> {
                           fit: BoxFit.cover,
                         )
                       : DecorationImage(
-                          image: const AssetImage('assets/images/logo_srb.png'),
+                          image: const AssetImage('assets/images/logos/logo_srb.png'),
                           fit: BoxFit.contain,
                           opacity: 0.1, // Subtle watermark look
                         ),
