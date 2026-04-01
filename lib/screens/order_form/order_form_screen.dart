@@ -187,11 +187,17 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    context.read<MainProvider>().setSelectedIndex(1); // Go to Orders tab
-                    Navigator.pop(context); // Close dialog
-                    
+                    // 1. Switch to Order History tab globally
+                    context.read<MainProvider>().setSelectedIndex(1);
+
+                    // 2. Clear navigation stack back to HomeScreen so form is gone
+                    // We pop 3 times: Dialog -> OrderForm -> MotorDetail
+                    Navigator.of(context).pop(); // Dialog
+                    Navigator.of(context).pop(); // OrderForm
+                    Navigator.of(context).pop(); // MotorDetail
+
+                    // 3. Start the Native SDK flow (it will open over HomeScreen)
                     try {
-                      // Call the SDK global instance
                       midtrans?.startPaymentUiFlow(token: token);
                     } catch (e) {
                       debugPrint('Error launching Midtrans SDK: $e');
@@ -201,9 +207,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape:
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('BAYAR SEKARANG', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child:
+                      const Text('BAYAR SEKARANG', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

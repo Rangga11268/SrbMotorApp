@@ -16,6 +16,10 @@ class PaymentDetailsScreen extends StatelessWidget {
     final result = await orderProvider.getInstallmentPaymentUrl(installment.id);
 
     if (result['success'] && result['snap_token'] != null) {
+      // 1. Close the Payment Details screen immediately
+      Navigator.of(context).pop();
+
+      // 2. Launch the Native SDK flow over the main Detail screen
       try {
         final token = result['snap_token'];
         midtrans?.startPaymentUiFlow(token: token);
