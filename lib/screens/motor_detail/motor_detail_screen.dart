@@ -21,7 +21,11 @@ class MotorDetailScreen extends StatefulWidget {
 class _MotorDetailScreenState extends State<MotorDetailScreen> {
   int _selectedTenor = 36;
   late double _dpAmount;
-  final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final currencyFormat = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
 
   @override
   void initState() {
@@ -90,10 +94,13 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   children: [
                     if (widget.motor.imagePath != null)
                       CachedNetworkImage(
-                        imageUrl: ApiConfig.sanitizeUrl(widget.motor.imagePath!)!,
+                        imageUrl: ApiConfig.sanitizeUrl(
+                          widget.motor.imagePath!,
+                        )!,
                         httpHeaders: ApiConfig.ngrokHeaders,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => _buildPlaceholder(),
+                        errorWidget: (context, url, error) =>
+                            _buildPlaceholder(),
                       )
                     else
                       _buildPlaceholder(),
@@ -128,7 +135,10 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0F2FE),
                           borderRadius: BorderRadius.circular(8),
@@ -144,9 +154,14 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                          color: widget.motor.tersedia ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                          color: widget.motor.tersedia
+                              ? const Color(0xFFDCFCE7)
+                              : const Color(0xFFFEE2E2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -154,7 +169,9 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: widget.motor.tersedia ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                            color: widget.motor.tersedia
+                                ? const Color(0xFF166534)
+                                : const Color(0xFF991B1B),
                           ),
                         ),
                       ),
@@ -162,27 +179,42 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                       if (widget.motor.type != null)
                         Text(
                           widget.motor.type!,
-                          style: GoogleFonts.outfit(color: Colors.blueGrey, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.outfit(
+                            color: Colors.blueGrey,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
                     widget.motor.name,
-                    style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                   const SizedBox(height: 8),
-                    Text(
-                      currencyFormat.format(widget.motor.price),
-                      style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[700]),
+                  Text(
+                    currencyFormat.format(widget.motor.price),
+                    style: GoogleFonts.outfit(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green[700],
                     ),
-                  
+                  ),
+
                   const SizedBox(height: 32),
-                  
+
                   // Specifications Grid
                   Text(
                     'Spesifikasi Utama',
-                    style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _buildSpecGrid(),
@@ -197,12 +229,21 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   // Description
                   Text(
                     'Deskripsi Unit',
-                    style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   HtmlWidget(
-                    widget.motor.details ?? 'Unit motor premium dengan kondisi terbaik.',
-                    textStyle: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF64748B), height: 1.6),
+                    widget.motor.details ??
+                        'Unit motor premium dengan kondisi terbaik.',
+                    textStyle: GoogleFonts.outfit(
+                      fontSize: 16,
+                      color: const Color(0xFF64748B),
+                      height: 1.6,
+                    ),
                   ),
 
                   const SizedBox(height: 32),
@@ -216,7 +257,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   _buildBenefits(),
 
                   const SizedBox(height: 32),
-                  
+
                   // Related Motors
                   _buildRelatedMotors(),
 
@@ -251,10 +292,28 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
 
   Widget _buildSpecGrid() {
     final specs = [
-      {'icon': Icons.calendar_today_outlined, 'label': 'Tahun', 'value': widget.motor.year.toString()},
-      {'icon': Icons.palette_outlined, 'label': 'Warna', 'value': _getColorsDisplay()},
-      {'icon': Icons.settings_outlined, 'label': 'Transmisi', 'value': widget.motor.type?.toLowerCase().contains('matic') ?? false ? 'Matic' : 'Manual'},
-      {'icon': Icons.verified_user_outlined, 'label': 'Status', 'value': widget.motor.tersedia ? 'Tersedia' : 'Terjual'},
+      {
+        'icon': Icons.calendar_today_outlined,
+        'label': 'Tahun',
+        'value': widget.motor.year.toString(),
+      },
+      {
+        'icon': Icons.palette_outlined,
+        'label': 'Warna',
+        'value': _getColorsDisplay(),
+      },
+      {
+        'icon': Icons.settings_outlined,
+        'label': 'Transmisi',
+        'value': widget.motor.type?.toLowerCase().contains('matic') ?? false
+            ? 'Matic'
+            : 'Manual',
+      },
+      {
+        'icon': Icons.verified_user_outlined,
+        'label': 'Status',
+        'value': widget.motor.tersedia ? 'Tersedia' : 'Terjual',
+      },
     ];
 
     return GridView.builder(
@@ -277,7 +336,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           ),
           child: Row(
             children: [
-              Icon(specs[index]['icon'] as IconData, size: 20, color: const Color(0xFF2563EB)),
+              Icon(
+                specs[index]['icon'] as IconData,
+                size: 20,
+                color: const Color(0xFF2563EB),
+              ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,14 +348,22 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 children: [
                   Text(
                     specs[index]['label'] as String,
-                    style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+                    style: GoogleFonts.outfit(
+                      fontSize: 10,
+                      color: const Color(0xFF64748B),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     specs[index]['value'] as String,
-                    style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         );
@@ -311,7 +382,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
         ),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF2563EB).withAlpha(51), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: const Color(0xFF2563EB).withAlpha(51),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
@@ -322,19 +397,40 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
             children: [
               Text(
                 'SIMULASI KREDIT',
-                style: GoogleFonts.outfit(color: Colors.blue[100], fontWeight: FontWeight.w900, letterSpacing: 1.5),
+                style: GoogleFonts.outfit(
+                  color: Colors.blue[100],
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.blue[500]!.withAlpha(51), borderRadius: BorderRadius.circular(20)),
-                child: Text('ESTIMASI', style: GoogleFonts.outfit(color: Colors.blue[200], fontSize: 10, fontWeight: FontWeight.bold)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue[500]!.withAlpha(51),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'ESTIMASI',
+                  style: GoogleFonts.outfit(
+                    color: Colors.blue[200],
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 24),
           Text(
             'Uang Muka (DP)',
-            style: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              color: const Color(0xFF64748B),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -353,14 +449,30 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(currencyFormat.format(_dpAmount), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
-              Text('Min 10%', style: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 10)),
+              Text(
+                currencyFormat.format(_dpAmount),
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Min 10%',
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF64748B),
+                  fontSize: 10,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
           Text(
             'Tenor (Bulan)',
-            style: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              color: const Color(0xFF64748B),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -375,15 +487,26 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF1E293B),
+                        color: isSelected
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFF1E293B),
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF2563EB).withAlpha(102), blurRadius: 10)] : null,
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF2563EB).withAlpha(102),
+                                  blurRadius: 10,
+                                ),
+                              ]
+                            : null,
                       ),
                       child: Center(
                         child: Text(
                           '$tenor bln',
                           style: GoogleFonts.outfit(
-                            color: isSelected ? Colors.white : const Color(0xFF64748B),
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF64748B),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -407,17 +530,29 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
               children: [
                 Text(
                   'ANGSURAN / BULAN',
-                  style: GoogleFonts.outfit(color: Colors.blue[200], fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                  style: GoogleFonts.outfit(
+                    color: Colors.blue[200],
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   currencyFormat.format(_monthlyInstallment),
-                  style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white),
+                  style: GoogleFonts.outfit(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '*Bunga Flat 1.5% - OTR Bekasi',
-                  style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF64748B)),
+                  style: GoogleFonts.outfit(
+                    fontSize: 10,
+                    color: const Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
@@ -429,38 +564,73 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
 
   Widget _buildBenefits() {
     final benefits = [
-      {'icon': Icons.verified_user_outlined, 'title': 'Garansi Mesin', 'desc': 'Jaminan 1 tahun unit'},
-      {'icon': Icons.description_outlined, 'title': 'Surat Lengkap', 'desc': 'STNK & BPKB ready'},
-      {'icon': Icons.build_outlined, 'title': 'Full Service', 'desc': 'Gratis servis pertama'},
+      {
+        'icon': Icons.verified_user_outlined,
+        'title': 'Garansi Mesin',
+        'desc': 'Jaminan 1 tahun unit',
+      },
+      {
+        'icon': Icons.description_outlined,
+        'title': 'Surat Lengkap',
+        'desc': 'STNK & BPKB ready',
+      },
+      {
+        'icon': Icons.build_outlined,
+        'title': 'Full Service',
+        'desc': 'Gratis servis pertama',
+      },
     ];
 
     return Column(
-      children: benefits.map((b) => Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFF1F5F9)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
-              child: Icon(b['icon'] as IconData, color: const Color(0xFF2563EB), size: 24),
+      children: benefits
+          .map(
+            (b) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFF1F5F9)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      b['icon'] as IconData,
+                      color: const Color(0xFF2563EB),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        b['title'] as String,
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        b['desc'] as String,
+                        style: GoogleFonts.outfit(
+                          color: const Color(0xFF64748B),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(b['title'] as String, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(b['desc'] as String, style: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 12)),
-              ],
-            )
-          ],
-        ),
-      )).toList(),
+          )
+          .toList(),
     );
   }
 
@@ -473,7 +643,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
       children: [
         Text(
           'Partner Pembiayaan',
-          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E293B),
+          ),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -487,16 +661,25 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFE2E8F0)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (p.logoUrl != null)
+                  if (p['logoUrl'] != null)
                     Padding(
                       padding: const EdgeInsets.only(right: 10),
-                      child: Image.network(p.logoUrl!, width: 32, height: 32, errorBuilder: (c, e, s) => const SizedBox.shrink()),
+                      child: Image.asset(
+                        p['logoUrl']!,
+                        width: 32,
+                        height: 32,
+                        errorBuilder: (c, e, s) => const SizedBox.shrink(),
+                      ),
                     )
                   else
                     Container(
@@ -507,11 +690,19 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                         color: const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.account_balance_outlined, size: 18, color: Color(0xFF2563EB)),
+                      child: const Icon(
+                        Icons.account_balance_outlined,
+                        size: 18,
+                        color: Color(0xFF2563EB),
+                      ),
                     ),
                   Text(
-                    p.name,
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF1E293B)),
+                    p['name']!,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: const Color(0xFF1E293B),
+                    ),
                   ),
                 ],
               ),
@@ -528,7 +719,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 20, offset: const Offset(0, -10)),
+          BoxShadow(
+            color: Colors.black.withAlpha(13),
+            blurRadius: 20,
+            offset: const Offset(0, -10),
+          ),
         ],
       ),
       child: Row(
@@ -547,25 +742,35 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: widget.motor.tersedia ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderFormScreen(motor: widget.motor),
-                  ),
-                );
-              } : null,
+              onPressed: widget.motor.tersedia
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              OrderFormScreen(motor: widget.motor),
+                        ),
+                      );
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: widget.motor.tersedia ? const Color(0xFF2563EB) : Colors.grey,
+                backgroundColor: widget.motor.tersedia
+                    ? const Color(0xFF2563EB)
+                    : Colors.grey,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
                 disabledBackgroundColor: Colors.grey.shade300,
               ),
               child: Text(
                 widget.motor.tersedia ? 'PESAN SEKARANG' : 'SUDAH DIPESAN',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1),
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
             ),
           ),
@@ -577,7 +782,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
   Widget _buildRelatedMotors() {
     final motorProvider = context.watch<MotorProvider>();
     final related = motorProvider.motors
-        .where((m) => m.id != widget.motor.id && (m.brand == widget.motor.brand || m.type == widget.motor.type))
+        .where(
+          (m) =>
+              m.id != widget.motor.id &&
+              (m.brand == widget.motor.brand || m.type == widget.motor.type),
+        )
         .take(4)
         .toList();
 
@@ -588,7 +797,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
       children: [
         Text(
           'Unit Terkait',
-          style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1E293B),
+          ),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -605,7 +818,9 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MotorDetailScreen(motor: motor)),
+                      MaterialPageRoute(
+                        builder: (context) => MotorDetailScreen(motor: motor),
+                      ),
                     );
                   },
                   child: Column(
@@ -621,18 +836,37 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                                     image: CachedNetworkImageProvider(
                                       ApiConfig.sanitizeUrl(motor.imagePath!)!,
                                       headers: ApiConfig.ngrokHeaders,
-                                    ), 
+                                    ),
                                     fit: BoxFit.cover,
-                                    onError: (e, s) => debugPrint('Related image load error: $e'),
+                                    onError: (e, s) => debugPrint(
+                                      'Related image load error: $e',
+                                    ),
                                   )
                                 : null,
                           ),
-                          child: motor.imagePath == null ? const Icon(Icons.motorcycle, color: Colors.grey) : null,
+                          child: motor.imagePath == null
+                              ? const Icon(Icons.motorcycle, color: Colors.grey)
+                              : null,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(motor.name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text(currencyFormat.format(motor.price), style: GoogleFonts.outfit(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text(
+                        motor.name,
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        currencyFormat.format(motor.price),
+                        style: GoogleFonts.outfit(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ),
