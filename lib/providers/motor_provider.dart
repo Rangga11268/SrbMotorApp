@@ -8,8 +8,11 @@ class MotorProvider with ChangeNotifier {
   List<CategoryModel> _categories = [];
   List<String> _brands = [];
   final List<Map<String, String>> _leasingProviders = [
-    {"name": "Adira Finance", "logoUrl": "assets/images/logos/logo_adira.png"},
-    {"name": "BAF", "logoUrl": "assets/images/logos/logo_baf.png"},
+    {"name": "ADIRA Finance", "logoUrl": "assets/images/logos/adira.webp"},
+    {"name": "FIF Group", "logoUrl": "assets/images/logos/fif.webp"},
+    {"name": "OTO Finance", "logoUrl": "assets/images/logos/oto.webp"},
+    {"name": "MUF Mandiri", "logoUrl": "assets/images/logos/muf.webp"},
+    {"name": "BAF", "logoUrl": "assets/images/logos/baf.webp"},
   ];
   bool _isLoading = false;
   bool _isCategoriesLoading = false;

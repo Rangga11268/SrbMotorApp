@@ -184,7 +184,7 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                     ],
                     image: const DecorationImage(
-                      image: AssetImage('assets/images/banner/banner.png'),
+                      image: AssetImage('assets/images/banner/banner.webp'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -360,7 +360,7 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildPartnerLogo(Map<String, String> provider) {
     return Container(
-      width: 140,
+      width: 120,
       margin: const EdgeInsets.only(right: 12, bottom: 8, top: 2),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -429,7 +429,7 @@ class _HomeContentState extends State<HomeContent> {
                             )
                           : DecorationImage(
                               image: const AssetImage(
-                                'assets/images/logos/logo_srb.png',
+                                'assets/images/logos/logo_srb.webp',
                               ),
                               fit: BoxFit.contain,
                               opacity: 0.1, // Subtle watermark look

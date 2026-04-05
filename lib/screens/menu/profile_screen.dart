@@ -333,7 +333,7 @@ class ProfileScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Image.asset(
-                  'assets/images/logos/logo_srb.png',
+                  'assets/images/logos/logo_srb.webp',
                   width: 70,
                   errorBuilder: (c, e, s) => const Icon(
                     Icons.motorcycle,
