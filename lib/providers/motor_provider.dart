@@ -7,10 +7,11 @@ import 'package:http/http.dart' as http;
 import '../services/api_config.dart';
 
 class MotorProvider with ChangeNotifier {
-  List<Motor> _motors = [];
+  List<Motor> _allMotors = []; // Data master dari API
   List<CategoryModel> _categories = [];
   List<String> _brands = [];
-  String? _contactPhone; // Nomor WA dari DB settings
+  String? _contactPhone;
+
   final List<Map<String, String>> _leasingProviders = [
     {"name": "ADIRA Finance", "logoUrl": "assets/images/logos/adira.webp"},
     {"name": "FIF Group", "logoUrl": "assets/images/logos/fif.webp"},
@@ -18,6 +19,7 @@ class MotorProvider with ChangeNotifier {
     {"name": "MUF Mandiri", "logoUrl": "assets/images/logos/muf.webp"},
     {"name": "BAF", "logoUrl": "assets/images/logos/baf.webp"},
   ];
+
   bool _isLoading = false;
   bool _isCategoriesLoading = false;
   bool _isBrandsLoading = false;
@@ -26,18 +28,31 @@ class MotorProvider with ChangeNotifier {
   String? _selectedBrand;
   String? _searchQuery;
 
-  List<Motor> get motors => _motors;
+  // Getter motors sekarang melakukan filtering lokal (Instant Caching)
+  List<Motor> get motors {
+    return _allMotors.where((motor) {
+      final matchesBrand = _selectedBrand == null || 
+          motor.brand.toLowerCase() == _selectedBrand!.toLowerCase();
+      
+      final matchesCategory = _selectedCategory == null || 
+          motor.type == _selectedCategory;
+
+      final matchesSearch = _searchQuery == null || _searchQuery!.isEmpty ||
+          motor.name.toLowerCase().contains(_searchQuery!.toLowerCase()) ||
+          motor.brand.toLowerCase().contains(_searchQuery!.toLowerCase());
+
+      return matchesBrand && matchesCategory && matchesSearch;
+    }).toList();
+  }
+
   List<CategoryModel> get categories => _categories;
   List<String> get brands => _brands;
   List<Map<String, String>> get leasingProviders => _leasingProviders;
   bool get isLoading => _isLoading || _isCategoriesLoading || _isBrandsLoading;
-  bool get isInitialLoading => _isLoading && _motors.isEmpty;
+  bool get isInitialLoading => _isLoading && _allMotors.isEmpty;
 
-  /// WA number dari DB, fallback ke hardcoded jika belum ter-fetch
   String get contactPhone => _contactPhone ?? '628978638849';
-
-  /// Guard: true jika data utama sudah pernah di-load
-  bool get hasData => _motors.isNotEmpty && _brands.isNotEmpty;
+  bool get hasData => _allMotors.isNotEmpty && _brands.isNotEmpty;
 
   String? get errorMessage => _errorMessage;
   String? get selectedCategory => _selectedCategory;
@@ -45,17 +60,15 @@ class MotorProvider with ChangeNotifier {
 
   final MotorService _motorService = MotorService();
 
+  // Memasukkan semua data ke _allMotors untuk filtering instan
   Future<void> fetchMotors() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _motors = await _motorService.getMotors(
-        category: _selectedCategory,
-        brand: _selectedBrand,
-        search: _searchQuery,
-      );
+      // Ambil semua motor tanpa filter API untuk caching lokal
+      _allMotors = await _motorService.getMotors();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -68,7 +81,6 @@ class MotorProvider with ChangeNotifier {
     _isCategoriesLoading = true;
     _errorMessage = null;
     notifyListeners();
-
     try {
       _categories = await _motorService.getCategories();
     } catch (e) {
@@ -83,7 +95,6 @@ class MotorProvider with ChangeNotifier {
     _isBrandsLoading = true;
     _errorMessage = null;
     notifyListeners();
-
     try {
       _brands = await _motorService.getBrands();
     } catch (e) {
@@ -94,7 +105,6 @@ class MotorProvider with ChangeNotifier {
     }
   }
 
-  /// Fetch nomor WA admin dari tabel settings di DB
   Future<void> fetchContactSettings() async {
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}/settings/contact');
@@ -102,18 +112,13 @@ class MotorProvider with ChangeNotifier {
       if (res.statusCode == 200) {
         final data = json.decode(res.body) as Map<String, dynamic>;
         final raw = data['contact_phone']?.toString() ?? '';
-        // Normalisasi: hilangkan +, spasi, dash → pastikan awalan 62
         final cleaned = raw.replaceAll(RegExp(r'[\s\-\+]'), '');
         if (cleaned.isNotEmpty) {
-          _contactPhone = cleaned.startsWith('0')
-              ? '62${cleaned.substring(1)}'
-              : cleaned;
+          _contactPhone = cleaned.startsWith('0') ? '62${cleaned.substring(1)}' : cleaned;
           notifyListeners();
         }
       }
-    } catch (_) {
-      // Gagal fetch → pakai fallback hardcoded
-    }
+    } catch (_) {}
   }
 
   Future<void> initializeData() async {
@@ -121,29 +126,27 @@ class MotorProvider with ChangeNotifier {
     await fetchMotors();
   }
 
-  /// Inisialisasi ringan: skip fetch jika data sudah ada di memori.
-  /// Gunakan di initState() agar tidak reload ulang saat back dari screen lain.
   Future<void> initializeIfNeeded() async {
     if (hasData) {
-      // Data sudah ada — hanya perbarui WA number jika belum di-fetch
       if (_contactPhone == null) fetchContactSettings();
       return;
     }
     await initializeData();
   }
 
+  // Filter tidak lagi panggil API (Instan)
   void setCategory(String? category) {
     _selectedCategory = category;
-    fetchMotors();
+    notifyListeners();
   }
 
   void setBrand(String? brand) {
     _selectedBrand = brand;
-    fetchMotors();
+    notifyListeners();
   }
 
   void setSearchQuery(String query) {
     _searchQuery = query;
-    fetchMotors();
+    notifyListeners();
   }
 }

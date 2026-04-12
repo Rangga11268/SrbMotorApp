@@ -239,61 +239,95 @@ class _HomeContentState extends State<HomeContent> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
-            // Brand Category Chips
+            // Brand Category Custom Selector
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 45,
+                height: 90,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: motorProvider.brands.length + 1,
                   itemBuilder: (context, index) {
                     final String brandName;
                     final bool isSelected;
+                    final IconData brandIcon;
 
                     if (index == 0) {
                       brandName = 'All';
                       isSelected = motorProvider.selectedBrand == null;
+                      brandIcon = _getIconData('all');
                     } else {
                       brandName = motorProvider.brands[index - 1];
                       isSelected = motorProvider.selectedBrand == brandName;
+                      brandIcon = _getIconData(brandName);
                     }
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ChoiceChip(
-                        avatar: Icon(
-                          _getIconData(index == 0 ? 'all' : brandName),
-                          size: 18,
-                          color: isSelected
-                              ? Colors.white
-                              : const Color(0xFF2563EB),
-                        ),
-                        label: Text(brandName),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          motorProvider.setBrand(index == 0 ? null : brandName);
-                        },
-                        selectedColor: const Color(0xFF2563EB),
-                        labelStyle: GoogleFonts.outfit(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(
-                            color: isSelected
-                                ? const Color(0xFF2563EB)
-                                : Colors.grey.withValues(alpha: 0.1),
+                    final bool hasLogo = _getBrandLogo(brandName) != null;
+
+                    return GestureDetector(
+                      onTap: () => motorProvider.setBrand(index == 0 ? null : brandName),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: 75,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFF2563EB) : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected 
+                                  ? const Color(0xFF2563EB).withValues(alpha: 0.3)
+                                  : Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: isSelected 
+                                ? const Color(0xFF2563EB) 
+                                : const Color(0xFFE2E8F0),
+                            width: 1.5,
                           ),
                         ),
-                        elevation: isSelected ? 4 : 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            isSelected && hasLogo
+                                ? Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Image.asset(
+                                      _getBrandLogo(brandName)!,
+                                      height: 24,
+                                      width: 24,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  )
+                                : hasLogo
+                                    ? Image.asset(
+                                        _getBrandLogo(brandName)!,
+                                        height: 32,
+                                        width: 32,
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Icon(
+                                        brandIcon,
+                                        color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                        size: 28,
+                                      ),
+                            const SizedBox(height: 8),
+                            Text(
+                              brandName,
+                              style: GoogleFonts.outfit(
+                                fontSize: 13,
+                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -384,6 +418,17 @@ class _HomeContentState extends State<HomeContent> {
         ),
       ),
     );
+  }
+
+  String? _getBrandLogo(String name) {
+    switch (name.toLowerCase()) {
+      case 'honda':
+        return 'assets/images/logos/Honda.webp';
+      case 'yamaha':
+        return 'assets/images/logos/yamaha.webp';
+      default:
+        return null;
+    }
   }
 
   IconData _getIconData(String name) {
