@@ -811,15 +811,32 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 220,
+          height: 245, // Slightly increased for better breathability
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: related.length,
+            padding: const EdgeInsets.symmetric(vertical: 4),
             itemBuilder: (context, index) {
               final motor = related[index];
               return Container(
-                width: 160,
+                width: 170,
                 margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(motor.tersedia ? 13 : 5),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: motor.tersedia 
+                        ? const Color(0xFFF1F5F9) 
+                        : const Color(0xFFE2E8F0),
+                  ),
+                ),
                 child: InkWell(
                   onTap: () {
                     Navigator.push(
@@ -829,48 +846,123 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                       ),
                     );
                   },
+                  borderRadius: BorderRadius.circular(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            image: motor.imagePath != null
-                                ? DecorationImage(
-                                    image: CachedNetworkImageProvider(
-                                      ApiConfig.sanitizeUrl(motor.imagePath!)!,
-                                      headers: ApiConfig.ngrokHeaders,
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24),
+                                ),
+                                child: ColorFiltered(
+                                  colorFilter: motor.tersedia
+                                      ? const ColorFilter.mode(
+                                          Colors.transparent,
+                                          BlendMode.multiply,
+                                        )
+                                      : const ColorFilter.matrix([
+                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                          0,      0,      0,      1, 0,
+                                        ]),
+                                  child: Opacity(
+                                    opacity: motor.tersedia ? 1.0 : 0.7,
+                                    child: motor.imagePath != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: ApiConfig.sanitizeUrl(motor.imagePath!)!,
+                                            httpHeaders: ApiConfig.ngrokHeaders,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                          )
+                                        : const Center(
+                                            child: Icon(
+                                              Icons.motorcycle,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (!motor.tersedia)
+                              Positioned(
+                                top: 12,
+                                right: 12,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF991B1B).withAlpha(230),
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(51),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    'STOK HABIS',
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
                                     ),
-                                    fit: BoxFit.cover,
-                                    onError: (e, s) => debugPrint(
-                                      'Related image load error: $e',
-                                    ),
-                                  )
-                                : null,
-                          ),
-                          child: motor.imagePath == null
-                              ? const Icon(Icons.motorcycle, color: Colors.grey)
-                              : null,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        motor.name,
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        currencyFormat.format(motor.price),
-                        style: GoogleFonts.outfit(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              motor.name,
+                              style: GoogleFonts.outfit(
+                                fontWeight: motor.tersedia 
+                                    ? FontWeight.bold 
+                                    : FontWeight.w600,
+                                fontSize: 13,
+                                color: motor.tersedia 
+                                    ? const Color(0xFF1E293B) 
+                                    : const Color(0xFF94A3B8),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              currencyFormat.format(motor.price),
+                              style: GoogleFonts.outfit(
+                                color: motor.tersedia
+                                    ? const Color(0xFF16A34A)
+                                    : const Color(0xFF94A3B8).withAlpha(128),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                decoration: motor.tersedia
+                                    ? null
+                                    : TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

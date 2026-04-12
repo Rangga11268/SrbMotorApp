@@ -169,10 +169,16 @@ class OrderProvider with ChangeNotifier {
     }
   }
 
+  int? _activePollingInstallmentId;
+  int? _activePollingOrderId;
+
   /// Start background polling for a specific installment status
   void startPollingStatus(int installmentId, int orderId) {
     // 1. Stop any existing timer first
     stopPollingStatus();
+    
+    _activePollingInstallmentId = installmentId;
+    _activePollingOrderId = orderId;
 
     debugPrint('Starting background polling for installment $installmentId (Order: $orderId)');
     
@@ -204,6 +210,33 @@ class OrderProvider with ChangeNotifier {
     });
   }
 
+  /// Force a sync immediately (useful when returning from native SDK)
+  Future<void> syncActivePayment() async {
+    if (_activePollingInstallmentId != null && _activePollingOrderId != null) {
+      debugPrint('Forcing instant sync for active payment: $_activePollingInstallmentId');
+      
+      _isLoading = true;
+      notifyListeners();
+      
+      try {
+        final isPaid = await _orderService.checkInstallmentStatus(_activePollingInstallmentId!);
+        await syncSingleOrder(_activePollingOrderId!);
+        if (isPaid) {
+          stopPollingStatus(); // Payment complete, no need to poll anymore
+        }
+        await fetchOrderHistory();
+      } catch (e) {
+        debugPrint('Error syncing active payment: $e');
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+    } else {
+      // Fallback
+      await fetchOrderHistory();
+    }
+  }
+
   /// Explicitly stop status polling
   void stopPollingStatus() {
     if (_pollingTimer != null) {
@@ -211,6 +244,8 @@ class OrderProvider with ChangeNotifier {
       _pollingTimer = null;
       debugPrint('Polling status stopped manually.');
     }
+    _activePollingInstallmentId = null;
+    _activePollingOrderId = null;
   }
 
   @override

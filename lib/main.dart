@@ -81,10 +81,10 @@ class _MyAppState extends State<MyApp> {
       );
 
       // Ketika transaksi selesai (baik sukses, batal, atau pending),
-      // refresh riwayat pesanan
+      // paksa pengecekan otomatis (sync) ke backend agar status "Lunas" instan
       final orderProvider = context.read<OrderProvider>();
-      if (mounted && orderProvider.orders.isNotEmpty) {
-        orderProvider.fetchOrderHistory();
+      if (mounted) {
+        orderProvider.syncActivePayment();
       }
     });
   }
