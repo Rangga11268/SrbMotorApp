@@ -84,7 +84,9 @@ class _HomeContentState extends State<HomeContent> {
     super.initState();
     Future.microtask(() {
       if (mounted) {
-        context.read<MotorProvider>().initializeData();
+        // initializeIfNeeded: skip fetch jika data sudah ada di memori
+        // sehingga kembali dari OrderForm/MotorDetail tidak loading ulang
+        context.read<MotorProvider>().initializeIfNeeded();
         context.read<NotificationProvider>().fetchNotifications();
       }
     });

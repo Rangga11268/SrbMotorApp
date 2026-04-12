@@ -44,17 +44,28 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
   }
 
   void _launchWhatsApp() async {
+    final phone = context.read<MotorProvider>().contactPhone;
     final message = Uri.encodeComponent(
       'Halo SRB Motor (Dealer SSM), saya tertarik dengan unit ${widget.motor.name} (${currencyFormat.format(widget.motor.price)}). Bisa minta info lebih lanjut?',
     );
-    final url = Uri.parse('https://wa.me/628978638849?text=$message');
+    final url = Uri.parse('https://wa.me/$phone?text=$message');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _launchWhatsAppCredit() async {
+    final phone = context.read<MotorProvider>().contactPhone;
+    final message = Uri.encodeComponent(
+      'Halo SRB Motor, saya ingin tanya info pengajuan KREDIT untuk unit ${widget.motor.name} (${currencyFormat.format(widget.motor.price)}). Boleh dibantu?',
+    );
+    final url = Uri.parse('https://wa.me/$phone?text=$message');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 
   void _launchWebCredit() async {
-    // Arahkan user ke website untuk pengajuan kredit
     final url = Uri.parse('https://srbmotor.test/motors/${widget.motor.id}');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -652,30 +663,61 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: _launchWebCredit,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.open_in_browser, size: 14, color: Color(0xFF7C3AED)),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Ajukan Kredit di Web',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF7C3AED),
-                          ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    GestureDetector(
+                      onTap: _launchWebCredit,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.open_in_browser, size: 14, color: Color(0xFF7C3AED)),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Ajukan di Website',
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF7C3AED),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    GestureDetector(
+                      onTap: _launchWhatsAppCredit,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25D366),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.chat_bubble_outline, size: 14, color: Colors.white),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Tanya via WA',
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

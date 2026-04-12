@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import '../models/motor.dart';
 import '../models/category.dart';
 import '../services/motor_service.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../services/api_config.dart';
 
 class MotorProvider with ChangeNotifier {
   List<Motor> _motors = [];
   List<CategoryModel> _categories = [];
   List<String> _brands = [];
+  String? _contactPhone; // Nomor WA dari DB settings
   final List<Map<String, String>> _leasingProviders = [
     {"name": "ADIRA Finance", "logoUrl": "assets/images/logos/adira.webp"},
     {"name": "FIF Group", "logoUrl": "assets/images/logos/fif.webp"},
@@ -28,6 +32,13 @@ class MotorProvider with ChangeNotifier {
   List<Map<String, String>> get leasingProviders => _leasingProviders;
   bool get isLoading => _isLoading || _isCategoriesLoading || _isBrandsLoading;
   bool get isInitialLoading => _isLoading && _motors.isEmpty;
+
+  /// WA number dari DB, fallback ke hardcoded jika belum ter-fetch
+  String get contactPhone => _contactPhone ?? '628978638849';
+
+  /// Guard: true jika data utama sudah pernah di-load
+  bool get hasData => _motors.isNotEmpty && _brands.isNotEmpty;
+
   String? get errorMessage => _errorMessage;
   String? get selectedCategory => _selectedCategory;
   String? get selectedBrand => _selectedBrand;
@@ -83,9 +94,42 @@ class MotorProvider with ChangeNotifier {
     }
   }
 
+  /// Fetch nomor WA admin dari tabel settings di DB
+  Future<void> fetchContactSettings() async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}/settings/contact');
+      final res = await http.get(url, headers: ApiConfig.ngrokHeaders);
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body) as Map<String, dynamic>;
+        final raw = data['contact_phone']?.toString() ?? '';
+        // Normalisasi: hilangkan +, spasi, dash → pastikan awalan 62
+        final cleaned = raw.replaceAll(RegExp(r'[\s\-\+]'), '');
+        if (cleaned.isNotEmpty) {
+          _contactPhone = cleaned.startsWith('0')
+              ? '62${cleaned.substring(1)}'
+              : cleaned;
+          notifyListeners();
+        }
+      }
+    } catch (_) {
+      // Gagal fetch → pakai fallback hardcoded
+    }
+  }
+
   Future<void> initializeData() async {
-    await Future.wait([fetchBrands(), fetchCategories()]);
+    await Future.wait([fetchBrands(), fetchCategories(), fetchContactSettings()]);
     await fetchMotors();
+  }
+
+  /// Inisialisasi ringan: skip fetch jika data sudah ada di memori.
+  /// Gunakan di initState() agar tidak reload ulang saat back dari screen lain.
+  Future<void> initializeIfNeeded() async {
+    if (hasData) {
+      // Data sudah ada — hanya perbarui WA number jika belum di-fetch
+      if (_contactPhone == null) fetchContactSettings();
+      return;
+    }
+    await initializeData();
   }
 
   void setCategory(String? category) {

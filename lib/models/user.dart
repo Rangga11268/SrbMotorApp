@@ -6,6 +6,7 @@ class User {
   final String? role;
   final String? nik;
   final String? alamat;
+  final String? profilePhotoPath;
 
   User({
     required this.id,
@@ -15,6 +16,7 @@ class User {
     this.role,
     this.nik,
     this.alamat,
+    this.profilePhotoPath,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class User {
       role: json['role'],
       nik: json['nik']?.toString(),
       alamat: json['alamat']?.toString(),
+      profilePhotoPath: json['profile_photo_path'] ?? json['profile_photo_url'],
     );
   }
 
@@ -38,6 +41,7 @@ class User {
       'role': role,
       'nik': nik,
       'alamat': alamat,
+      'profile_photo_path': profilePhotoPath,
     };
   }
 }
