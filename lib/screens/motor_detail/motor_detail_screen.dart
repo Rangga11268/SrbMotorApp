@@ -53,6 +53,14 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
     }
   }
 
+  void _launchWebCredit() async {
+    // Arahkan user ke website untuk pengajuan kredit
+    final url = Uri.parse('https://srbmotor.test/motors/${widget.motor.id}');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -223,6 +231,11 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
 
                   // Credit Simulation
                   _buildCreditSimulator(),
+
+                  const SizedBox(height: 16),
+
+                  // ── Banner Kredit Coming Soon ──
+                  _buildCreditComingSoonBanner(),
 
                   const SizedBox(height: 32),
 
@@ -568,6 +581,110 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
     );
   }
 
+  Widget _buildCreditComingSoonBanner() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4C1D95), Color(0xFF7C3AED)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7C3AED).withAlpha(60),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(30),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.description_outlined, color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Cicilan Kredit',
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.amber[400],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Web Only',
+                        style: GoogleFonts.outfit(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Fitur kredit belum tersedia di App. Ajukan melalui website resmi SRB Motor.',
+                  style: GoogleFonts.outfit(
+                    color: Colors.white.withAlpha(200),
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: _launchWebCredit,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.open_in_browser, size: 14, color: Color(0xFF7C3AED)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Ajukan Kredit di Web',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF7C3AED),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBenefits() {
     final benefits = [
       {
@@ -721,7 +838,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
 
   Widget _buildBottomBar() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -732,54 +849,89 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: IconButton(
-              onPressed: _launchWhatsApp,
-              icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-              tooltip: 'Chat WhatsApp',
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: widget.motor.tersedia
-                  ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              OrderFormScreen(motor: widget.motor),
-                        ),
-                      );
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: widget.motor.tersedia
-                    ? const Color(0xFF2563EB)
-                    : Colors.grey,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
+          Row(
+            children: [
+              // WA Button
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 0,
-                disabledBackgroundColor: Colors.grey.shade300,
-              ),
-              child: Text(
-                widget.motor.tersedia ? 'PESAN SEKARANG' : 'SUDAH DIPESAN',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+                child: IconButton(
+                  onPressed: _launchWhatsApp,
+                  icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+                  tooltip: 'Chat WhatsApp',
                 ),
               ),
-            ),
+              const SizedBox(width: 12),
+              // Pesan Cash Button
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: widget.motor.tersedia
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderFormScreen(motor: widget.motor),
+                            ),
+                          );
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.motor.tersedia
+                        ? const Color(0xFF2563EB)
+                        : Colors.grey,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                    disabledBackgroundColor: Colors.grey.shade300,
+                  ),
+                  child: Text(
+                    widget.motor.tersedia ? 'BELI CASH' : 'SUDAH DIPESAN',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
+          // Tombol Kredit via Web
+          if (widget.motor.tersedia) ...
+            [
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _launchWebCredit,
+                  icon: const Icon(Icons.open_in_browser, size: 18),
+                  label: Text(
+                    'AJUKAN KREDIT — Lanjut di Website',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF7C3AED),
+                    side: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+            ],
         ],
       ),
     );
