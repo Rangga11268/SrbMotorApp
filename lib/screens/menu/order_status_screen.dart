@@ -8,6 +8,7 @@ import '../../providers/order_provider.dart';
 import '../../main.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../providers/motor_provider.dart';
 import '../../services/api_config.dart';
 import 'payment_details_screen.dart';
 
@@ -167,6 +168,17 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
         );
       },
     );
+  }
+
+  void _contactAdmin(BuildContext context, OrderModel order) async {
+    final phone = context.read<MotorProvider>().contactPhone;
+    final message = Uri.encodeComponent(
+      'Halo Admin SRB Motor, saya ingin bertanya mengenai pesanan saya #SRB-${order.id} untuk unit ${order.motor?.name ?? 'Motor'}.',
+    );
+    final url = Uri.parse('https://wa.me/$phone?text=$message');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
   }
 
   Widget _buildHeaderSection(OrderModel _currentOrder) {

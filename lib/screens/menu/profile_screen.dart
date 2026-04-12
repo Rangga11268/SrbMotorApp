@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/motor_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import 'edit_profile_screen.dart';
 
@@ -53,14 +54,19 @@ class ProfileScreen extends StatelessWidget {
                             width: 3,
                           ),
                         ),
-                        child: const CircleAvatar(
+                        child: CircleAvatar(
                           radius: 50,
-                          backgroundColor: Color(0xFFF1F5F9),
-                          child: Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Color(0xFF2563EB),
-                          ),
+                          backgroundColor: const Color(0xFFF1F5F9),
+                          backgroundImage: (user?.profilePhotoPath != null)
+                              ? NetworkImage(user!.profilePhotoPath!)
+                              : null,
+                          child: (user?.profilePhotoPath == null)
+                              ? const Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Color(0xFF2563EB),
+                                )
+                              : null,
                         ),
                       ),
                       Container(
@@ -223,7 +229,7 @@ class ProfileScreen extends StatelessWidget {
                     'Pusat Bantuan',
                     'Hubungi CS',
                     Colors.teal[600]!,
-                    onTap: () => _launchHelpWhatsApp(),
+                    onTap: () => _launchHelpWhatsApp(context),
                   ),
                   _buildProfileItem(
                     context,
@@ -293,11 +299,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _launchHelpWhatsApp() async {
+  void _launchHelpWhatsApp(BuildContext context) async {
+    final phone = context.read<MotorProvider>().contactPhone;
     final message = Uri.encodeComponent(
       'Halo SRB Motor, saya butuh bantuan mengenai pengajuan atau unit di aplikasi.',
     );
-    final url = Uri.parse('https://wa.me/628978638849?text=$message');
+    final url = Uri.parse('https://wa.me/$phone?text=$message');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }

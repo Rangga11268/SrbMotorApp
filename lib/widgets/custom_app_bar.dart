@@ -31,14 +31,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'SRB MOTOR',
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1E293B),
-                    letterSpacing: 0.5,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'SRB MOTOR',
+                      style: GoogleFonts.outfit(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    Text(
+                      'Support by SSM',
+                      style: GoogleFonts.outfit(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             )

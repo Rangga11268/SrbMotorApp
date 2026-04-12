@@ -13,6 +13,7 @@ import '../motor_detail/motor_detail_screen.dart';
 import '../menu/order_history_screen.dart';
 import '../menu/profile_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,6 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final mainProvider = context.watch<MainProvider>();
     return Scaffold(
       body: _pages[mainProvider.selectedIndex],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _launchGlobalWhatsApp(context),
+        backgroundColor: const Color(0xFF25D366),
+        mini: true, // Biar gak terlalu besar/mengganggu pandangan
+        child: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           boxShadow: [
@@ -68,6 +75,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _launchGlobalWhatsApp(BuildContext context) async {
+    final phone = context.read<MotorProvider>().contactPhone;
+    final message = Uri.encodeComponent(
+      'Halo Admin SRB Motor, saya ingin bertanya mengenai layanan Dealer SSM.',
+    );
+    final url = Uri.parse('https://wa.me/$phone?text=$message');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
   }
 }
 
@@ -115,21 +133,46 @@ class _HomeContentState extends State<HomeContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Selamat Datang, ${user?.name ?? 'Pengguna'}',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        color: Colors.blueGrey,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Mau motor apa hari ini?',
-                      style: GoogleFonts.outfit(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E293B),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Selamat Datang, ${user?.name ?? 'Pengguna'}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 16,
+                                color: Colors.blueGrey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Mau motor apa hari ini?',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF1E293B),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (user?.profilePhotoPath != null)
+                          Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFF2563EB).withOpacity(0.1),
+                                width: 2,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 25,
+                              backgroundImage: NetworkImage(user!.profilePhotoPath!),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     // Search Bar

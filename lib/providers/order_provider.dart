@@ -17,6 +17,16 @@ class OrderProvider with ChangeNotifier {
   String? get successMessage => _successMessage;
   Map<String, dynamic>? get lastOrderResult => _lastOrderResult;
 
+  /// Guard: true jika data sudah pernah di-load
+  bool get hasData => _orders.isNotEmpty;
+
+  /// Inisialisasi ringan: skip fetch jika data sudah ada di memori.
+  /// Gunakan di initState() halaman riwayat pesanan.
+  Future<void> initializeIfNeeded() async {
+    if (hasData) return;
+    await fetchOrderHistory();
+  }
+
   final OrderService _orderService = OrderService();
 
   Future<void> fetchOrderHistory() async {

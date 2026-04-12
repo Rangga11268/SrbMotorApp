@@ -21,7 +21,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     super.initState();
     Future.microtask(() {
       if (mounted) {
-        context.read<OrderProvider>().fetchOrderHistory();
+        // initializeIfNeeded: skip fetch jika data sudah ada di memori
+        context.read<OrderProvider>().initializeIfNeeded();
       }
     });
   }
