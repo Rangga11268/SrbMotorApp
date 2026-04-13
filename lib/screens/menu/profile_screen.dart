@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import 'edit_profile_screen.dart';
+import 'change_password_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -207,7 +208,7 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const EditProfileScreen(),
+                        builder: (context) => const ChangePasswordScreen(),
                       ),
                     ),
                   ),

@@ -139,4 +139,33 @@ class AuthService {
       };
     }
   }
+
+  Future<Map<String, dynamic>> updatePassword({
+    required String currentPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await http.put(
+      Uri.parse('${ApiConfig.baseUrl}/password'),
+      headers: await ApiConfig.headers,
+      body: jsonEncode({
+        'current_password': currentPassword,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      }),
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'message': data['message'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal memperbarui password',
+      };
+    }
+  }
 }

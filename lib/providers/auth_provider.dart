@@ -195,4 +195,28 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await _authService.updatePassword(
+        currentPassword: currentPassword,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      );
+
+      if (!result['success']) {
+        throw Exception(result['message']);
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
