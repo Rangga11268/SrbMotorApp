@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
               Text(
                 'Gagal Masuk',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF1E293B),
@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(fontSize: 16, color: Colors.blueGrey),
+                style: GoogleFonts.inter(fontSize: 16, color: Colors.blueGrey),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text(
                     'SAYA MENGERTI',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
                     ),
@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               Text(
                 'Selamat Datang',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF1E293B),
@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Masuk ke Akun SRB Motor Anda\nDealer Resmi di bawah naungan SSM',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(color: Colors.blueGrey, fontSize: 16),
+                style: GoogleFonts.inter(color: Colors.blueGrey, fontSize: 16),
               ),
               const SizedBox(height: 32),
               Form(
@@ -161,10 +161,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     TextFormField(
                       controller: _emailController,
-                      style: GoogleFonts.outfit(),
+                      style: GoogleFonts.inter(),
                       decoration: InputDecoration(
                         labelText: 'Email',
-                        labelStyle: GoogleFonts.outfit(color: Colors.blueGrey),
+                        labelStyle: GoogleFonts.inter(color: Colors.blueGrey),
                         prefixIcon: const Icon(
                           Icons.email_outlined,
                           color: Color(0xFF2563EB),
@@ -197,10 +197,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
-                      style: GoogleFonts.outfit(),
+                      style: GoogleFonts.inter(),
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle: GoogleFonts.outfit(color: Colors.blueGrey),
+                        labelStyle: GoogleFonts.inter(color: Colors.blueGrey),
                         prefixIcon: const Icon(
                           Icons.lock_outline,
                           color: Color(0xFF2563EB),
@@ -250,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {},
                   child: Text(
                     'Lupa Password?',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       color: const Color(0xFF2563EB),
                       fontWeight: FontWeight.w600,
                     ),
@@ -281,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       )
                     : Text(
                         'MASUK',
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -295,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       'atau',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         color: Colors.blueGrey,
                         fontSize: 14,
                       ),
@@ -314,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 label: Text(
                   'Masuk dengan Google',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1E293B),
@@ -334,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     'Belum punya akun? ',
-                    style: GoogleFonts.outfit(color: Colors.blueGrey),
+                    style: GoogleFonts.inter(color: Colors.blueGrey),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -347,7 +347,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       'Daftar Sekarang',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         color: const Color(0xFF2563EB),
                         fontWeight: FontWeight.bold,
                       ),

@@ -50,7 +50,7 @@ class PaymentDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Halaman Pembayaran', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('Halaman Pembayaran', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 0,
@@ -102,15 +102,15 @@ class PaymentDetailsScreen extends StatelessWidget {
                             child: const Icon(Icons.receipt_long_outlined, color: Colors.blue, size: 32),
                           ),
                           const SizedBox(height: 16),
-                          Text('Rincian Tagihan', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
-                          Text('#SRB-${currentOrder.id}', style: GoogleFonts.outfit(color: Colors.grey)),
+                          Text('Rincian Tagihan', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold)),
+                          Text('#SRB-${currentOrder.id}', style: GoogleFonts.inter(color: Colors.grey)),
                         ],
                       ),
                     ),
                     const SizedBox(height: 40),
 
                     // 2. Breakdown Table
-                    Text('DETAIL PESANAN', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+                    Text('DETAIL PESANAN', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
                     const SizedBox(height: 16),
                     _buildRow('Unit Motor', currentOrder.motor?.name ?? 'Unit'),
                     if (currentOrder.motorColor != null) _buildRow('Warna', currentOrder.motorColor!),
@@ -118,7 +118,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                     
                     const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider(height: 1)),
                     
-                    Text('STATUS PEMBAYARAN', style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+                    Text('STATUS PEMBAYARAN', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
                     const SizedBox(height: 16),
                     
                     _buildPaymentCard(
@@ -150,7 +150,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Pembayaran diproses secara aman melalui Midtrans. Status akan otomatis diperbarui setelah pembayaran sukses.',
-                              style: GoogleFonts.outfit(fontSize: 12, color: Colors.orange[800], height: 1.4),
+                              style: GoogleFonts.inter(fontSize: 12, color: Colors.orange[800], height: 1.4),
                             ),
                           ),
                         ],
@@ -177,8 +177,8 @@ class PaymentDetailsScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.outfit(color: Colors.grey[600])),
-          Text(value, style: GoogleFonts.outfit(fontWeight: isBold ? FontWeight.bold : FontWeight.w500, fontSize: isBold ? 16 : 14)),
+          Text(label, style: GoogleFonts.inter(color: Colors.grey[600])),
+          Text(value, style: GoogleFonts.inter(fontWeight: isBold ? FontWeight.bold : FontWeight.w500, fontSize: isBold ? 16 : 14)),
         ],
       ),
     );
@@ -215,14 +215,14 @@ class PaymentDetailsScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[600])),
-                  Text(amount, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(label, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
+                  Text(amount, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
                 ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: Text(statusLabel, style: GoogleFonts.outfit(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                child: Text(statusLabel, style: GoogleFonts.inter(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -240,7 +240,7 @@ class PaymentDetailsScreen extends StatelessWidget {
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: Text('BAYAR SEKARANG', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                  child: Text('BAYAR SEKARANG', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                 ),
               ),
             ),

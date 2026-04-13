@@ -87,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   Text(
                     user?.name ?? 'Pengguna',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF1E293B),
@@ -96,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     user?.email ?? 'email@example.com',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       color: const Color(0xFF94A3B8),
                       fontWeight: FontWeight.w500,
                     ),
@@ -144,7 +144,7 @@ class ProfileScreen extends StatelessWidget {
                       icon: const Icon(Icons.edit_outlined, size: 18),
                       label: Text(
                         'EDIT PROFIL',
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),
@@ -165,7 +165,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Text(
                     'PENGATURAN AKUN',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                       color: const Color(0xFF94A3B8),
@@ -216,7 +216,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   Text(
                     'LAINNYA',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                       color: const Color(0xFF94A3B8),
@@ -266,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
                 icon: const Icon(Icons.logout),
                 label: Text(
                   'KELUAR AKUN',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -282,7 +282,7 @@ class ProfileScreen extends StatelessWidget {
       children: [
         Text(
           value,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w900,
             color: const Color(0xFF1E293B),
@@ -290,7 +290,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.inter(
             fontSize: 12,
             color: const Color(0xFF94A3B8),
             fontWeight: FontWeight.bold,
@@ -353,7 +353,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 'SRB Motor App',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF1E293B),
@@ -362,7 +362,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'Versi 1.0.0 Stable',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   color: const Color(0xFF94A3B8),
                   fontWeight: FontWeight.w500,
@@ -374,7 +374,7 @@ class ProfileScreen extends StatelessWidget {
               Text(
                 '"Solusi Kendaraan Impian Anda"\nDealer resmi di bawah naungan SSM.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontStyle: FontStyle.italic,
                   color: const Color(0xFF64748B),
@@ -396,7 +396,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Text(
                     'TUTUP',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -440,7 +440,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: const Color(0xFF94A3B8),
             fontWeight: FontWeight.bold,

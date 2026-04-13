@@ -54,7 +54,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'Belum ada notifikasi',
-                    style: GoogleFonts.outfit(fontSize: 18, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                    style: GoogleFonts.inter(fontSize: 18, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -122,7 +122,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       children: [
                         Text(
                           _getTitle(notification.type),
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF1E293B),
@@ -130,14 +130,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         ),
                         Text(
                           timeAgo,
-                          style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF94A3B8)),
+                          style: GoogleFonts.inter(fontSize: 10, color: const Color(0xFF94A3B8)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       notification.message,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: const Color(0xFF64748B),
                         height: 1.4,

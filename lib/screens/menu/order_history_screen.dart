@@ -49,7 +49,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'Belum ada pesanan',
-                            style: GoogleFonts.outfit(fontSize: 18, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                            style: GoogleFonts.inter(fontSize: 18, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -90,7 +90,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                       children: [
                                         Text(
                                           dateFormat.format(order.createdAt),
-                                          style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
                                         ),
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -100,7 +100,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                           ),
                                           child: Text(
                                             order.statusText,
-                                            style: GoogleFonts.outfit(fontSize: 10, color: statusColor, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                                            style: GoogleFonts.inter(fontSize: 10, color: statusColor, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                                           ),
                                         ),
                                       ],
@@ -132,14 +132,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                             children: [
                                               Text(
                                                 order.motor?.name ?? 'Unit SRB Motor',
-                                                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
+                                                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
                                                 currencyFormat.format(order.motor?.price ?? 0),
-                                                style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF2563EB)),
+                                                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF2563EB)),
                                               ),
                                             ],
                                           ),
@@ -156,12 +156,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                         const SizedBox(width: 6),
                                         Text(
                                           'ID Pesanan: #${order.id}',
-                                          style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
                                         ),
                                         const Spacer(),
                                         Text(
                                           'Lihat Detail',
-                                          style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF2563EB), fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),

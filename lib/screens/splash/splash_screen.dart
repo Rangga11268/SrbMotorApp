@@ -190,7 +190,7 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Text(
               isLastPage ? 'Mulai Sekarang' : 'Lanjutkan',
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -252,7 +252,7 @@ class OnboardingPage extends StatelessWidget {
           // Text Content
           Text(
             data.title,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.inter(
               fontSize: 40,
               fontWeight: FontWeight.bold,
               height: 1.1,
@@ -263,7 +263,7 @@ class OnboardingPage extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             data.description,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.inter(
               fontSize: 16,
               color: Colors.white.withValues(alpha: 0.7),
               height: 1.6,

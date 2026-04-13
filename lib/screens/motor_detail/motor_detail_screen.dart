@@ -164,7 +164,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                         ),
                         child: Text(
                           widget.motor.brand.toUpperCase(),
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF0369A1),
@@ -185,7 +185,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                         ),
                         child: Text(
                           widget.motor.tersedia ? 'Tersedia' : 'Sudah Dipesan',
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: widget.motor.tersedia
@@ -198,7 +198,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                       if (widget.motor.type != null)
                         Text(
                           widget.motor.type!,
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.inter(
                             color: Colors.blueGrey,
                             fontWeight: FontWeight.bold,
                           ),
@@ -208,7 +208,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   const SizedBox(height: 12),
                   Text(
                     widget.motor.name,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
                       color: const Color(0xFF1E293B),
@@ -217,7 +217,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     currencyFormat.format(widget.motor.price),
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.green[700],
@@ -229,7 +229,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   // Specifications Grid
                   Text(
                     'Spesifikasi Utama',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF1E293B),
@@ -253,7 +253,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   // Description
                   Text(
                     'Deskripsi Unit',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF1E293B),
@@ -263,7 +263,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   HtmlWidget(
                     widget.motor.details ??
                         'Unit motor premium dengan kondisi terbaik.',
-                    textStyle: GoogleFonts.outfit(
+                    textStyle: GoogleFonts.inter(
                       fontSize: 16,
                       color: const Color(0xFF64748B),
                       height: 1.6,
@@ -373,7 +373,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                   children: [
                     Text(
                       specs[index]['label'] as String,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         fontSize: 10,
                         color: const Color(0xFF64748B),
                         fontWeight: FontWeight.bold,
@@ -383,7 +383,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                     ),
                     Text(
                       specs[index]['value'] as String,
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1E293B),
@@ -427,7 +427,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
             children: [
               Text(
                 'SIMULASI KREDIT',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   color: Colors.blue[100],
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.5,
@@ -444,7 +444,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 ),
                 child: Text(
                   'ESTIMASI',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     color: Colors.blue[200],
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -456,7 +456,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           const SizedBox(height: 24),
           Text(
             'Uang Muka (DP)',
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.inter(
               color: const Color(0xFF64748B),
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -481,14 +481,14 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
             children: [
               Text(
                 currencyFormat.format(_dpAmount),
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 'Min 10%',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   color: const Color(0xFF64748B),
                   fontSize: 10,
                 ),
@@ -498,7 +498,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           const SizedBox(height: 24),
           Text(
             'Tenor (Bulan)',
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.inter(
               color: const Color(0xFF64748B),
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -533,7 +533,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                       child: Center(
                         child: Text(
                           '$tenor bln',
-                          style: GoogleFonts.outfit(
+                          style: GoogleFonts.inter(
                             color: isSelected
                                 ? Colors.white
                                 : const Color(0xFF64748B),
@@ -560,7 +560,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
               children: [
                 Text(
                   'ANGSURAN / BULAN',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     color: Colors.blue[200],
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -570,7 +570,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 const SizedBox(height: 8),
                 Text(
                   currencyFormat.format(_monthlyInstallment),
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
@@ -579,7 +579,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '*Bunga Flat 1.5% - OTR Bekasi',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 10,
                     color: const Color(0xFF64748B),
                   ),

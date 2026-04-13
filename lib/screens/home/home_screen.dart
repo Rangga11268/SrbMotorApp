@@ -112,7 +112,7 @@ class _HomeContentState extends State<HomeContent> {
                           children: [
                             Text(
                               'Selamat Datang, ${user?.name ?? 'Pengguna'}',
-                              style: GoogleFonts.outfit(
+                              style: GoogleFonts.inter(
                                 fontSize: 16,
                                 color: Colors.blueGrey,
                               ),
@@ -120,7 +120,7 @@ class _HomeContentState extends State<HomeContent> {
                             const SizedBox(height: 4),
                             Text(
                               'Mau motor apa hari ini?',
-                              style: GoogleFonts.outfit(
+                              style: GoogleFonts.inter(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF1E293B),

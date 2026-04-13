@@ -76,7 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('Edit Profil', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('Edit Profil', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 0,
@@ -144,7 +144,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             height: 24,
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                           )
-                        : Text('SIMPAN PERUBAHAN', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        : Text('SIMPAN PERUBAHAN', style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 1)),
                   ),
                 ),
               ],
@@ -160,7 +160,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         label,
-        style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
+        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
       ),
     );
   }
@@ -186,10 +186,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         keyboardType: keyboardType,
         maxLines: maxLines,
         validator: validator,
-        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1E293B)),
+        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1E293B)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF94A3B8)),
+          hintStyle: GoogleFonts.inter(fontSize: 16, color: const Color(0xFF94A3B8)),
           prefixIcon: Icon(icon, color: const Color(0xFF2563EB), size: 22),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
           filled: true,

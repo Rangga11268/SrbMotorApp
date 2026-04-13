@@ -124,13 +124,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               const SizedBox(height: 24),
               const Text(
                 'Pesanan Berhasil!',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Outfit'),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
               ),
               const SizedBox(height: 12),
               const Text(
                 'Terima kasih! Pesanan Anda telah kami terima. Tim kami akan segera menghubungi Anda melalui WhatsApp.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, height: 1.5, fontFamily: 'Outfit'),
+                style: TextStyle(color: Colors.grey, height: 1.5, fontFamily: 'Inter'),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -174,7 +174,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               const SizedBox(height: 24),
               const Text(
                 'Lanjutkan Pembayaran',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Outfit'),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
               ),
               const SizedBox(height: 12),
               const Text(
@@ -293,7 +293,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               // 2. Form Section
               const Text(
                 'Informasi Pelanggan',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Outfit'),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
               ),
               const SizedBox(height: 16),
               
@@ -428,7 +428,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(widget.motor.brand.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
-                Text(widget.motor.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Outfit')),
+                Text(widget.motor.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Inter')),
                 const SizedBox(height: 4),
                 Text(format.format(widget.motor.price), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
               ],

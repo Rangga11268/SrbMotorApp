@@ -131,7 +131,7 @@ class CustomBottomNav extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),

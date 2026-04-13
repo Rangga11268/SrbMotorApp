@@ -102,7 +102,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               appBar: AppBar(
                 title: Text(
                   'Detail Pesanan',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                 ),
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.white,
@@ -218,7 +218,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
           children: [
             Text(
               'ID PESANAN',
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 color: Colors.grey,
                 fontWeight: FontWeight.bold,
@@ -227,7 +227,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
             ),
             Text(
               '#SRB-${_currentOrder.id}',
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -243,7 +243,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
           ),
           child: Text(
             statusText,
-            style: GoogleFonts.outfit(
+            style: GoogleFonts.inter(
               color: statusColor,
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -298,7 +298,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               children: [
                 Text(
                   _currentOrder.motor?.brand.toUpperCase() ?? 'SRB MOTOR',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 10,
                     color: Colors.blue,
                     fontWeight: FontWeight.bold,
@@ -306,7 +306,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 ),
                 Text(
                   _currentOrder.motor?.name ?? 'Unit Motor',
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -314,7 +314,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 const SizedBox(height: 4),
                 Text(
                   format.format(_currentOrder.motor?.price ?? 0),
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     color: const Color(0xFF2563EB),
                     fontWeight: FontWeight.bold,
                   ),
@@ -322,7 +322,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 if (_currentOrder.motorColor != null)
                   Text(
                     'Warna: ${_currentOrder.motorColor}',
-                    style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                    style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                   ),
               ],
             ),
@@ -361,7 +361,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
           children: [
             Text(
               'RINCIAN PEMBAYARAN',
-              style: GoogleFonts.outfit(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[700],
@@ -427,7 +427,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     const SizedBox(width: 4),
                     Text(
                       'Lihat Invoice',
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: const Color(0xFF2563EB),
                         fontWeight: FontWeight.bold,
@@ -507,7 +507,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       const SizedBox(width: 8),
                       Text(
                         'Transaksi telah lunas sepenuhnya',
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.inter(
                           color: Colors.green[700],
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -529,11 +529,11 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(color: Colors.grey[600], fontSize: 14),
+          style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14),
         ),
         Text(
           value,
-          style: GoogleFonts.outfit(
+          style: GoogleFonts.inter(
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
             color: isBold ? Colors.black : Colors.grey[800],
@@ -581,14 +581,14 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: Colors.grey[600],
                   ),
                 ),
                 Text(
                   amount,
-                  style: GoogleFonts.outfit(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),

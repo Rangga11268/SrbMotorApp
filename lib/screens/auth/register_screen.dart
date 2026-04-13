@@ -70,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 32),
               Text(
                 'Buat Akun Baru',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.inter(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF1E293B),
@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text(
                 'Lengkapi data diri Anda untuk bergabung',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(color: Colors.blueGrey, fontSize: 15),
+                style: GoogleFonts.inter(color: Colors.blueGrey, fontSize: 15),
               ),
               const SizedBox(height: 40),
               Form(
@@ -111,7 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: isLoading
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text('DAFTAR SEKARANG', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                    : Text('DAFTAR SEKARANG', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
               ),
               const SizedBox(height: 30),
             ],
@@ -126,10 +126,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       controller: controller,
       obscureText: isPassword ? _obscurePassword : false,
       keyboardType: keyboardType,
-      style: GoogleFonts.outfit(),
+      style: GoogleFonts.inter(),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.outfit(color: Colors.blueGrey),
+        labelStyle: GoogleFonts.inter(color: Colors.blueGrey),
         prefixIcon: Icon(icon, color: const Color(0xFF2563EB)),
         suffixIcon: isPassword
             ? IconButton(
@@ -172,13 +172,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Gagal Daftar', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: Text(message, style: GoogleFonts.outfit()),
+        title: Text('Gagal Daftar', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        content: Text(message, style: GoogleFonts.inter()),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('OK', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF2563EB))),
+            child: Text('OK', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: const Color(0xFF2563EB))),
           ),
         ],
       ),

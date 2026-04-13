@@ -1,14 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
+import 'package:app_links/app_links.dart';
 import './providers/auth_provider.dart';
 import './providers/motor_provider.dart';
 import './providers/order_provider.dart';
 import './providers/main_provider.dart';
 import 'providers/notification_provider.dart';
 import './screens/splash/splash_screen.dart';
-import 'dart:async';
-import 'package:app_links/app_links.dart';
 import './screens/home/home_screen.dart';
 import './screens/auth/login_screen.dart';
 import './screens/menu/order_status_screen.dart';
@@ -92,16 +93,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // NOTE: We intentionally do NOT call getInitialLink() here.
-    // getInitialLink() caches the last received URI at the OS level and re-fires it
-    // on cold start, which causes it to navigate to OrderStatusScreen BEFORE the
-    // splash screen is dismissed — breaking normal app startup flow.
-    //
-    // For payment redirect flows, uriLinkStream is sufficient:
-    // the app is always running in the background during payment (user just switches
-    // to browser), so when browser redirects to srbmotor://, uriLinkStream fires.
-
-    // Handle links when app is resumed from background (e.g. after payment in browser).
     bool isColdStart = true;
     Timer(const Duration(seconds: 2), () {
       isColdStart = false;
@@ -249,6 +240,8 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
+        textTheme: GoogleFonts.interTextTheme(),
+        primaryTextTheme: GoogleFonts.interTextTheme(),
       ),
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
