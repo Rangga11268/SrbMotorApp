@@ -9,6 +9,7 @@ import '../../services/api_config.dart';
 import '../../models/motor.dart';
 import '../../providers/main_provider.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/custom_bottom_nav.dart';
 import '../motor_detail/motor_detail_screen.dart';
 import '../menu/order_history_screen.dart';
 import '../menu/profile_screen.dart';
@@ -37,42 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _launchGlobalWhatsApp(context),
         backgroundColor: const Color(0xFF25D366),
-        mini: true, // Biar gak terlalu besar/mengganggu pandangan
+        mini: true,
         child: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 0),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: mainProvider.selectedIndex,
-          onTap: (index) {
-            mainProvider.setSelectedIndex(index);
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_outlined),
-              activeIcon: Icon(Icons.assignment),
-              label: 'Pesanan',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profil',
-            ),
-          ],
-          selectedItemColor: const Color(0xFF2563EB),
-          unselectedItemColor: Colors.grey,
-          showUnselectedLabels: true,
-          type: BottomNavigationBarType.fixed,
-        ),
+      bottomNavigationBar: CustomBottomNav(
+        selectedIndex: mainProvider.selectedIndex,
+        onTap: (index) => mainProvider.setSelectedIndex(index),
       ),
     );
   }
