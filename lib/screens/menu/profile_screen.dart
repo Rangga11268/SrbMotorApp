@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/motor_provider.dart';
+import '../../providers/order_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
@@ -105,14 +106,20 @@ class ProfileScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildHeaderStat('Unit', '1'),
+                      _buildHeaderStat(
+                        'Pesanan',
+                        context.watch<OrderProvider>().orders.length.toString(),
+                      ),
                       Container(
                         height: 40,
                         width: 1,
                         color: const Color(0xFFF1F5F9),
                         margin: const EdgeInsets.symmetric(horizontal: 30),
                       ),
-                      _buildHeaderStat('Status', 'Platinum'),
+                      _buildHeaderStat(
+                        'Member',
+                        user?.role?.toUpperCase() ?? 'PELANGGAN',
+                      ),
                     ],
                   ),
                   const SizedBox(height: 32),
