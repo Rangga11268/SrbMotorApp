@@ -10,6 +10,7 @@ class OrderModel {
   final String? customerNik;
   final String? customerEmail;
   final String customerAddress;
+  final String? customerOccupation;
   final String? motorColor;
   final String? deliveryMethod;
   final String? paymentMethod;
@@ -31,6 +32,7 @@ class OrderModel {
     this.customerNik,
     this.customerEmail,
     required this.customerAddress,
+    this.customerOccupation,
     this.motorColor,
     this.deliveryMethod,
     this.paymentMethod,
@@ -59,6 +61,7 @@ class OrderModel {
       customerNik: json['nik'] ?? json['customer_nik'],
       customerEmail: json['email'] ?? json['customer_email'],
       customerAddress: json['address'] ?? json['customer_address'],
+      customerOccupation: json['occupation'] ?? json['customer_occupation'],
       motorColor: json['motor_color'],
       deliveryMethod: json['delivery_method'],
       paymentMethod: json['payment_method'],

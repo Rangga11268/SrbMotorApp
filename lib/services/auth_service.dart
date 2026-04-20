@@ -113,6 +113,7 @@ class AuthService {
     required String phone,
     required String nik,
     required String alamat,
+    required String occupation,
   }) async {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/profile'),
@@ -122,6 +123,7 @@ class AuthService {
         'phone': phone,
         'nik': nik,
         'alamat': alamat,
+        'occupation': occupation,
       }),
     ).timeout(const Duration(seconds: 10));
 

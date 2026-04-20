@@ -16,6 +16,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _phoneController;
   late TextEditingController _nikController;
   late TextEditingController _addressController;
+  late TextEditingController _occupationController;
 
   @override
   void initState() {
@@ -25,6 +26,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController = TextEditingController(text: user?.phone);
     _nikController = TextEditingController(text: user?.nik);
     _addressController = TextEditingController(text: user?.alamat);
+    _occupationController = TextEditingController(text: user?.occupation);
   }
 
   @override
@@ -33,6 +35,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController.dispose();
     _nikController.dispose();
     _addressController.dispose();
+    _occupationController.dispose();
     super.dispose();
   }
 
@@ -46,6 +49,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         phone: _phoneController.text,
         nik: _nikController.text,
         alamat: _addressController.text,
+        occupation: _occupationController.text,
       );
 
       if (mounted) {
@@ -114,6 +118,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   hint: 'Masukkan 16 digit NIK',
                   icon: Icons.badge_outlined,
                   keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 20),
+
+                _buildInputLabel('Pekerjaan'),
+                _buildTextField(
+                  controller: _occupationController,
+                  hint: 'Masukkan pekerjaan Anda',
+                  icon: Icons.work_outline,
                 ),
                 const SizedBox(height: 20),
 

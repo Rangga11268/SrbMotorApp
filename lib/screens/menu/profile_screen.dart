@@ -208,6 +208,19 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   _buildProfileItem(
                     context,
+                    Icons.work_outline,
+                    'Pekerjaan',
+                    user?.occupation ?? 'Belum diset',
+                    Colors.indigo[600]!,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfileScreen(),
+                      ),
+                    ),
+                  ),
+                  _buildProfileItem(
+                    context,
                     Icons.security_outlined,
                     'Keamanan Akun',
                     'Ubah Password',

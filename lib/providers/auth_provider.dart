@@ -173,6 +173,7 @@ class AuthProvider with ChangeNotifier {
     required String phone,
     required String nik,
     required String alamat,
+    required String occupation,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -183,6 +184,7 @@ class AuthProvider with ChangeNotifier {
         phone: phone,
         nik: nik,
         alamat: alamat,
+        occupation: occupation,
       );
 
       if (result['success']) {
