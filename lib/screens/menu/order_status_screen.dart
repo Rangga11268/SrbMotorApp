@@ -183,74 +183,134 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
   Widget _buildHeaderSection(OrderModel _currentOrder) {
     Color statusColor;
-    String statusText = _currentOrder.statusText;
+    String statusText = _currentOrder.status.toUpperCase();
 
     switch (_currentOrder.status.toLowerCase()) {
-      case 'new_order':
-        statusColor = Colors.blue;
+      case 'completed':
+      case 'selesai':
+        statusColor = Colors.green;
+        statusText = 'SELESAI';
         break;
       case 'pending':
-      case 'waiting_payment':
+      case 'new_order':
+      case 'pesanan_baru':
         statusColor = Colors.orange;
+        statusText = 'PESANAN BARU';
         break;
-      case 'completed':
-        statusColor = Colors.green;
+      case 'waiting_payment':
+      case 'menunggu_pembayaran':
+        statusColor = Color(0xFF2563EB);
+        statusText = 'MENUNGGU BAYAR';
         break;
       case 'cancelled':
       case 'dibatalkan':
         statusColor = Colors.red;
+        statusText = 'DIBATALKAN';
         break;
-      case 'pembayaran_dikonfirmasi':
-      case 'unit_preparation':
       case 'ready_for_delivery':
-      case 'dalam_pengiriman':
-        statusColor = Colors.blueAccent;
+      case 'siap_dikirim':
+        statusColor = Colors.teal;
+        statusText = 'SIAP KIRIM';
+        break;
+      case 'unit_preparation':
+      case 'persiapan_unit':
+        statusColor = Colors.indigo;
+        statusText = 'PERSIAPAN UNIT';
         break;
       default:
         statusColor = Colors.grey;
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'ID PESANAN',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: Colors.grey,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ID PESANAN',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+                Text(
+                  '#SRB-${_currentOrder.id}',
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '#SRB-${_currentOrder.id}',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: statusColor.withOpacity(0.3)),
+              ),
+              child: Text(
+                statusText,
+                style: GoogleFonts.inter(
+                  color: statusColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
               ),
             ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: statusColor.withOpacity(0.3)),
-          ),
-          child: Text(
-            statusText,
-            style: GoogleFonts.inter(
-              color: statusColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _buildSmallBadge(
+              _currentOrder.transactionType == 'CREDIT' ? 'KREDIT' : 'TUNAI',
+              _currentOrder.transactionType == 'CREDIT' ? Colors.deepPurple : Colors.blueGrey,
             ),
-          ),
+            const SizedBox(width: 8),
+            _buildSmallBadge(
+              _currentOrder.branchCode ?? 'Semua Cabang',
+              Colors.blue,
+              icon: Icons.store_rounded,
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildSmallBadge(String text, Color color, {IconData? icon}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: color,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

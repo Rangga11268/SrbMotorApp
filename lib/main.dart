@@ -4,11 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
 import 'package:app_links/app_links.dart';
-import './providers/auth_provider.dart';
-import './providers/motor_provider.dart';
-import './providers/order_provider.dart';
-import './providers/main_provider.dart';
-import 'providers/notification_provider.dart';
+import 'package:srb_motor_app/providers/auth_provider.dart';
+import 'package:srb_motor_app/providers/motor_provider.dart';
+import 'package:srb_motor_app/providers/order_provider.dart';
+import 'package:srb_motor_app/providers/main_provider.dart';
+import 'package:srb_motor_app/providers/notification_provider.dart';
+import 'package:srb_motor_app/providers/service_provider.dart';
 import './screens/splash/splash_screen.dart';
 import './screens/home/home_screen.dart';
 import './screens/auth/login_screen.dart';
@@ -40,6 +41,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => MainProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ServiceProvider()),
       ],
       child: const MyApp(),
     ),

@@ -152,10 +152,26 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                     const SizedBox(height: 16),
                                     Row(
                                       children: [
-                                        Icon(Icons.info_outline, size: 14, color: const Color(0xFF94A3B8)),
+                                        const Icon(Icons.store_rounded, size: 14, color: Color(0xFF94A3B8)),
                                         const SizedBox(width: 6),
                                         Text(
+                                          order.branchCode ?? 'Semua Cabang',
+                                          style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                                        ),
+                                        const Spacer(),
+                                        Text(
                                           'ID Pesanan: #${order.id}',
+                                          style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.info_outline, size: 14, color: Color(0xFF94A3B8)),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          order.transactionType == 'CREDIT' ? 'Pembelian Kredit' : 'Pembelian Tunai',
                                           style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold),
                                         ),
                                         const Spacer(),

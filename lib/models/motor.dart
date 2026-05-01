@@ -14,6 +14,9 @@ class Motor {
   final dynamic colors;
   final int year;
   final bool tersedia;
+  final String? branch;
+  final String? branchCode;
+  final double? min_dp_amount;
 
   Motor({
     required this.id,
@@ -29,6 +32,9 @@ class Motor {
     this.colors,
     required this.year,
     this.tersedia = true,
+    this.branch,
+    this.branchCode,
+    this.min_dp_amount,
   });
 
   factory Motor.fromJson(Map<String, dynamic> json) {
@@ -65,6 +71,9 @@ class Motor {
       colors: json['colors'],
       year: json['year'] ?? 0,
       tersedia: json['tersedia'] == 1 || json['tersedia'] == true,
+      branch: json['branch'],
+      branchCode: json['branch_code'],
+      min_dp_amount: json['min_dp_amount'] != null ? double.tryParse(json['min_dp_amount'].toString()) : null,
     );
   }
 
@@ -83,6 +92,9 @@ class Motor {
       'colors': colors,
       'year': year,
       'tersedia': tersedia ? 1 : 0,
+      'branch': branch,
+      'branch_code': branchCode,
+      'min_dp_amount': min_dp_amount,
     };
   }
 }

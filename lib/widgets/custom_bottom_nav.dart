@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -14,128 +15,83 @@ class CustomBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 12, left: 32, right: 32),
-      child: Container(
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 25,
-              offset: const Offset(0, 8),
+      height: 100,
+      color: Colors.transparent,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          height: 64,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: Colors.white,
+              width: 1.5,
             ),
-          ],
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final itemWidth = (constraints.maxWidth - 24) / 3;
-            return Stack(
-              children: [
-                // Animated Indicator Pill
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.easeOutBack,
-                  left: 12 + (itemWidth * selectedIndex),
-                  top: 11,
-                  child: Container(
-                    width: itemWidth,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB).withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-                // Indicator Dot/Bar at top or bottom (Optional - let's use a subtle top bar)
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOutExpo,
-                  left: 12 + (itemWidth * selectedIndex) + (itemWidth / 2) - 10,
-                  top: 0,
-                  child: Container(
-                    width: 20,
-                    height: 3,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2563EB),
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(3),
-                      ),
-                    ),
-                  ),
-                ),
-                // Navigation Items
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      _buildNavItem(
-                        index: 0,
-                        icon: Icons.home_outlined,
-                        activeIcon: Icons.home_rounded,
-                        label: 'Home',
-                        width: itemWidth,
-                      ),
-                      _buildNavItem(
-                        index: 1,
-                        icon: Icons.assignment_outlined,
-                        activeIcon: Icons.assignment_rounded,
-                        label: 'Pesanan',
-                        width: itemWidth,
-                      ),
-                      _buildNavItem(
-                        index: 2,
-                        icon: Icons.person_outline_rounded,
-                        activeIcon: Icons.person_rounded,
-                        label: 'Profil',
-                        width: itemWidth,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withOpacity(0.08),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+                  _buildNavItem(1, Icons.motorcycle_rounded, 'Katalog'),
+                  _buildNavItem(2, Icons.build_circle_rounded, 'Servis'),
+                  _buildNavItem(3, Icons.assignment_rounded, 'Pesanan'),
+                  _buildNavItem(4, Icons.person_rounded, 'Profil'),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem({
-    required int index,
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-    required double width,
-  }) {
+  Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = selectedIndex == index;
+    final Color activeColor = const Color(0xFF194291);
+    final Color inactiveColor = const Color(0xFF94A3B8);
+
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: width,
-        height: double.infinity,
+      child: Container(
+        width: 60,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedScale(
-              duration: const Duration(milliseconds: 200),
-              scale: isSelected ? 1.15 : 1.0,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubic,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected ? activeColor.withOpacity(0.08) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Icon(
-                isSelected ? activeIcon : icon,
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
+                icon,
+                color: isSelected ? activeColor : inactiveColor,
                 size: 26,
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
-                letterSpacing: 0.1,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: isSelected ? 4 : 0,
+              height: 4,
+              decoration: BoxDecoration(
+                color: activeColor,
+                shape: BoxShape.circle,
               ),
             ),
           ],

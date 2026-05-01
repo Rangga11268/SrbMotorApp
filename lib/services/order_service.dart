@@ -41,6 +41,7 @@ class OrderService {
     required String motorColor,
     required String deliveryMethod,
     required String paymentMethod,
+    String? branch,
     double? bookingFee,
     String? email,
     String? notes,
@@ -58,6 +59,7 @@ class OrderService {
         'motor_color': motorColor,
         'delivery_method': deliveryMethod,
         'payment_method': paymentMethod,
+        'branch': branch,
         'booking_fee': bookingFee,
         'notes': notes,
       }),
@@ -76,6 +78,62 @@ class OrderService {
       return {
         'success': false,
         'message': data['message'] ?? 'Gagal membuat pesanan',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> placeCreditOrder({
+    required int motorId,
+    required String name,
+    required String phone,
+    required String nik,
+    required String address,
+    required String motorColor,
+    required String deliveryMethod,
+    required String paymentMethod,
+    required String occupation,
+    required double monthlyIncome,
+    required String employmentDuration,
+    required double dpAmount,
+    required int tenor,
+    String? branch,
+    String? email,
+    String? notes,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/orders/credit'),
+      headers: await ApiConfig.headers,
+      body: jsonEncode({
+        'motor_id': motorId,
+        'customer_name': name,
+        'customer_phone': phone,
+        'customer_email': email,
+        'customer_nik': nik,
+        'customer_address': address,
+        'motor_color': motorColor,
+        'delivery_method': deliveryMethod,
+        'payment_method': paymentMethod,
+        'occupation': occupation,
+        'monthly_income': monthlyIncome,
+        'employment_duration': employmentDuration,
+        'dp_amount': dpAmount,
+        'tenor': tenor,
+        'branch': branch,
+        'notes': notes,
+      }),
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return {
+        'success': true,
+        'order_id': data['order_id'],
+        'message': data['message'] ?? 'Pengajuan kredit berhasil dibuat',
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal membuat pengajuan kredit',
       };
     }
   }

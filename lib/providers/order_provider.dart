@@ -53,6 +53,7 @@ class OrderProvider with ChangeNotifier {
     required String motorColor,
     required String deliveryMethod,
     required String paymentMethod,
+    String? branch,
     double? bookingFee,
     String? email,
     String? notes,
@@ -72,7 +73,71 @@ class OrderProvider with ChangeNotifier {
         motorColor: motorColor,
         deliveryMethod: deliveryMethod,
         paymentMethod: paymentMethod,
+        branch: branch,
         bookingFee: bookingFee,
+        email: email,
+        notes: notes,
+      );
+
+      if (result['success']) {
+        _successMessage = result['message'];
+        _lastOrderResult = result;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = result['message'];
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> submitCreditOrder({
+    required int motorId,
+    required String name,
+    required String phone,
+    required String nik,
+    required String address,
+    required String motorColor,
+    required String deliveryMethod,
+    required String paymentMethod,
+    required String occupation,
+    required double monthlyIncome,
+    required String employmentDuration,
+    required double dpAmount,
+    required int tenor,
+    String? branch,
+    String? email,
+    String? notes,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _successMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await _orderService.placeCreditOrder(
+        motorId: motorId,
+        name: name,
+        phone: phone,
+        nik: nik,
+        address: address,
+        motorColor: motorColor,
+        deliveryMethod: deliveryMethod,
+        paymentMethod: paymentMethod,
+        occupation: occupation,
+        monthlyIncome: monthlyIncome,
+        employmentDuration: employmentDuration,
+        dpAmount: dpAmount,
+        tenor: tenor,
+        branch: branch,
         email: email,
         notes: notes,
       );

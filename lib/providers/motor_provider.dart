@@ -27,6 +27,10 @@ class MotorProvider with ChangeNotifier {
   String? _selectedCategory;
   String? _selectedBrand;
   String? _searchQuery;
+  double? _minPrice;
+  double? _maxPrice;
+  List<Map<String, dynamic>> _branches = [];
+  String? _selectedBranch;
 
   // Getter motors sekarang melakukan filtering lokal (Instant Caching)
   List<Motor> get motors {
@@ -41,12 +45,20 @@ class MotorProvider with ChangeNotifier {
           motor.name.toLowerCase().contains(_searchQuery!.toLowerCase()) ||
           motor.brand.toLowerCase().contains(_searchQuery!.toLowerCase());
 
-      return matchesBrand && matchesCategory && matchesSearch;
+      final matchesMinPrice = _minPrice == null || motor.price >= _minPrice!;
+      final matchesMaxPrice = _maxPrice == null || motor.price <= _maxPrice!;
+
+      final matchesBranch = _selectedBranch == null || 
+          motor.branch == _selectedBranch;
+
+      return matchesBrand && matchesCategory && matchesSearch && 
+             matchesMinPrice && matchesMaxPrice && matchesBranch;
     }).toList();
   }
 
   List<CategoryModel> get categories => _categories;
   List<String> get brands => _brands;
+  List<Map<String, dynamic>> get branches => _branches;
   List<Map<String, String>> get leasingProviders => _leasingProviders;
   bool get isLoading => _isLoading || _isCategoriesLoading || _isBrandsLoading;
   bool get isInitialLoading => _isLoading && _allMotors.isEmpty;
@@ -57,6 +69,10 @@ class MotorProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String? get selectedCategory => _selectedCategory;
   String? get selectedBrand => _selectedBrand;
+  String? get selectedBranch => _selectedBranch;
+  String? get searchQuery => _searchQuery;
+  double? get minPrice => _minPrice;
+  double? get maxPrice => _maxPrice;
 
   final MotorService _motorService = MotorService();
 
@@ -105,6 +121,15 @@ class MotorProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchBranches() async {
+    try {
+      _branches = await _motorService.getBranches();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching branches: $e');
+    }
+  }
+
   Future<void> fetchContactSettings() async {
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}/settings/contact');
@@ -122,13 +147,19 @@ class MotorProvider with ChangeNotifier {
   }
 
   Future<void> initializeData() async {
-    await Future.wait([fetchBrands(), fetchCategories(), fetchContactSettings()]);
+    await Future.wait([
+      fetchBrands(), 
+      fetchCategories(), 
+      fetchContactSettings(),
+      fetchBranches(),
+    ]);
     await fetchMotors();
   }
 
   Future<void> initializeIfNeeded() async {
     if (hasData) {
       if (_contactPhone == null) fetchContactSettings();
+      if (_branches.isEmpty) fetchBranches();
       return;
     }
     await initializeData();
@@ -145,8 +176,33 @@ class MotorProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setBranch(String? branch) {
+    _selectedBranch = branch;
+    notifyListeners();
+  }
+
   void setSearchQuery(String query) {
     _searchQuery = query;
+    notifyListeners();
+  }
+
+  void setMinPrice(double? price) {
+    _minPrice = price;
+    notifyListeners();
+  }
+
+  void setMaxPrice(double? price) {
+    _maxPrice = price;
+    notifyListeners();
+  }
+
+  void resetFilters() {
+    _selectedCategory = null;
+    _selectedBrand = null;
+    _searchQuery = null;
+    _minPrice = null;
+    _maxPrice = null;
+    _selectedBranch = null;
     notifyListeners();
   }
 }

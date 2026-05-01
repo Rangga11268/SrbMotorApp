@@ -78,4 +78,21 @@ class MotorService {
       throw Exception('Gagal mengambil detail motor');
     }
   }
+
+  Future<List<Map<String, dynamic>>> getBranches() async {
+    final response = await http
+        .get(
+          Uri.parse('${ApiConfig.baseUrl}/branches'),
+          headers: await ApiConfig.headers,
+        )
+        .timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List<dynamic> branches = data['branches'] ?? [];
+      return branches.map((item) => item as Map<String, dynamic>).toList();
+    } else {
+      throw Exception('Gagal mengambil data cabang');
+    }
+  }
 }
