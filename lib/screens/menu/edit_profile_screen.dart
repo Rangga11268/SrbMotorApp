@@ -56,7 +56,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profil berhasil diperbarui'),
-            backgroundColor: Colors.green,
+            backgroundColor: Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
           ),
         );
         Navigator.pop(context);
@@ -67,6 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -80,11 +82,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('Edit Profil', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Edit Profil', 
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))
+        ),
         backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0F172A), size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -98,7 +106,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 _buildTextField(
                   controller: _nameController,
                   hint: 'Masukkan nama sesuai KTP',
-                  icon: Icons.person_outline,
+                  icon: Icons.person_outline_rounded,
                   validator: (v) => v!.isEmpty ? 'Nama wajib diisi' : null,
                 ),
                 const SizedBox(height: 20),
@@ -125,7 +133,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 _buildTextField(
                   controller: _occupationController,
                   hint: 'Masukkan pekerjaan Anda',
-                  icon: Icons.work_outline,
+                  icon: Icons.work_outline_rounded,
                 ),
                 const SizedBox(height: 20),
 
@@ -156,9 +164,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             height: 24,
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                           )
-                        : Text('SIMPAN PERUBAHAN', style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        : Text(
+                            'SIMPAN PERUBAHAN', 
+                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)
+                          ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -172,7 +184,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         label,
-        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
+        style: GoogleFonts.outfit(
+          fontSize: 14, 
+          fontWeight: FontWeight.bold, 
+          color: const Color(0xFF64748B)
+        ),
       ),
     );
   }
@@ -190,7 +206,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02), 
+            blurRadius: 10, 
+            offset: const Offset(0, 4)
+          ),
         ],
       ),
       child: TextFormField(
@@ -198,12 +218,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         keyboardType: keyboardType,
         maxLines: maxLines,
         validator: validator,
-        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF1E293B)),
+        style: GoogleFonts.outfit(
+          fontSize: 16, 
+          fontWeight: FontWeight.w600, 
+          color: const Color(0xFF0F172A)
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.inter(fontSize: 16, color: const Color(0xFF94A3B8)),
+          hintStyle: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF94A3B8)),
           prefixIcon: Icon(icon, color: const Color(0xFF2563EB), size: 22),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16), 
+            borderSide: BorderSide.none
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16), 
+            borderSide: BorderSide(color: const Color(0xFFE2E8F0), width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16), 
+            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+          ),
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(18),

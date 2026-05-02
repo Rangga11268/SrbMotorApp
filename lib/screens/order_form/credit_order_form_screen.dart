@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/motor.dart';
 import '../../providers/order_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/main_provider.dart';
 import '../../providers/motor_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../providers/main_provider.dart';
 import '../../services/api_config.dart';
+import '../../main.dart';
 
 class CreditOrderFormScreen extends StatefulWidget {
   final Motor motor;
@@ -33,6 +35,7 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
 
   String? _selectedColor;
   String? _selectedBranch;
+  bool _showAllBranches = false;
   String _deliveryMethod = 'Ambil di Dealer';
   String _paymentMethod = 'Transfer Bank';
   int _selectedTenor = 36;
@@ -58,7 +61,20 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
     _dpAmount = _minDP;
     _dpController = TextEditingController(text: NumberFormat.decimalPattern('id_ID').format(_dpAmount));
     
-    _selectedBranch = widget.motor.branch;
+    // Auto-select branch from motor data (Same as Web Flow)
+    if (widget.motor.branch != null) {
+      _selectedBranch = widget.motor.branch;
+    } else if (widget.motor.branchCode != null) {
+      // Try to find branch name by code
+      final motorProvider = context.read<MotorProvider>();
+      final branch = motorProvider.branches.firstWhere(
+        (b) => b['id'].toString() == widget.motor.branchCode.toString(),
+        orElse: () => <String, dynamic>{},
+      );
+      if (branch.isNotEmpty) {
+        _selectedBranch = branch['name'];
+      }
+    }
 
     // Initialize colors
     if (widget.motor.colors is List) {
@@ -72,6 +88,100 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
       _selectedColor = 'Beragam';
     } else if (_availableColors.length == 1) {
       _selectedColor = _availableColors.first;
+    }
+  }
+
+  Future<void> _checkNearestBranch() async {
+    try {
+      // Check permissions using Geolocator's built-in methods
+      LocationPermission permission = await Geolocator.checkPermission();
+      
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Izin lokasi ditolak. Silakan berikan izin untuk mencari dealer terdekat.')),
+            );
+          }
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Izin lokasi ditolak permanen. Silakan buka pengaturan aplikasi.')),
+          );
+        }
+        return;
+      }
+
+      // Get position with best possible accuracy
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      final provider = context.read<MotorProvider>();
+      
+      // 1. Get branches that actually have this unit in stock (Consistent with Web)
+      final availableBranchNames = provider.getBranchesWithMotor(widget.motor.name);
+      
+      Map<String, dynamic>? nearest;
+      
+      if (availableBranchNames.isNotEmpty) {
+        // Find nearest from available branches
+        double minDistance = double.infinity;
+        for (var branch in provider.branches) {
+          final bLat = double.tryParse(branch['latitude']?.toString() ?? '');
+          final bLon = double.tryParse(branch['longitude']?.toString() ?? '');
+          
+          if (bLat != null && bLon != null) {
+            // Calculate and save distance for ALL branches so UI can display it
+            final dist = provider.calculateDistance(position.latitude, position.longitude, bLat, bLon);
+            branch['distance'] = dist;
+
+            final bName = branch['name']?.toString().toLowerCase() ?? '';
+            final bCode = branch['code']?.toString().toLowerCase() ?? '';
+            final bId = branch['id']?.toString().toLowerCase() ?? '';
+            
+            bool hasStock = availableBranchNames.any((av) => 
+              av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId
+            );
+
+            if (hasStock) {
+              if (dist < minDistance) {
+                minDistance = dist;
+                nearest = branch;
+              }
+            }
+          }
+        }
+      }
+
+      // If no specifically available branch found, fallback to all branches nearest
+      if (nearest == null) {
+        nearest = await provider.findNearestBranch(position.latitude, position.longitude);
+      }
+
+      if (nearest != null && mounted) {
+        setState(() {
+          _selectedBranch = nearest!['name'];
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF10B981),
+            content: Text('Berhasil! Cabang terdekat dengan unit ready: ${nearest['name']} (${NumberFormat('#,##0.0', 'id_ID').format(nearest['distance'] ?? 0)} km)'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _selectedBranch = widget.motor.branch);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mendapatkan lokasi: $e')),
+        );
+      }
     }
   }
 
@@ -463,43 +573,234 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
   }
 
   Widget _buildBranchSelection(MotorProvider provider) {
+    final availableBranchNames = provider.getBranchesWithMotor(widget.motor.name);
+    
+    // Sort branches: Put available ones at top, then by distance
+    final sortedBranches = List<Map<String, dynamic>>.from(provider.branches);
+    sortedBranches.sort((a, b) {
+      final aName = a['name']?.toString().toLowerCase() ?? '';
+      final aCode = a['code']?.toString().toLowerCase() ?? '';
+      final aId = a['id']?.toString().toLowerCase() ?? '';
+      final aAvailable = availableBranchNames.any((av) => av.toLowerCase() == aName || av.toLowerCase() == aCode || av.toLowerCase() == aId);
+
+      final bName = b['name']?.toString().toLowerCase() ?? '';
+      final bCode = b['code']?.toString().toLowerCase() ?? '';
+      final bId = b['id']?.toString().toLowerCase() ?? '';
+      final bAvailable = availableBranchNames.any((av) => av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId);
+      
+      if (aAvailable && !bAvailable) return -1;
+      if (!aAvailable && bAvailable) return 1;
+      
+      // If both same availability, sort by distance if available
+      if (a['distance'] != null && b['distance'] != null) {
+        return (a['distance'] as double).compareTo(b['distance'] as double);
+      }
+      return 0;
+    });
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
-        children: provider.branches.map((branch) {
-          final isSelected = _selectedBranch == branch['name'];
-          return InkWell(
-            onTap: () => setState(() => _selectedBranch = branch['name']),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF2563EB).withOpacity(0.05) : Colors.transparent,
-                border: Border(bottom: BorderSide(color: branch == provider.branches.last ? Colors.transparent : const Color(0xFFF1F5F9))),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.location_on_rounded, size: 20, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B)),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(branch['name'], style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
-                        Text(branch['address'] ?? '', style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF64748B))),
-                      ],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Cabang Pengambilan',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: provider.isLocationLoading ? null : _checkNearestBranch,
+                      icon: provider.isLocationLoading 
+                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2563EB)))
+                        : const Icon(Icons.my_location_rounded, size: 16),
+                      label: Text(
+                        provider.isLocationLoading ? 'Mencari...' : 'Cek Lokasi',
+                        style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF2563EB),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        backgroundColor: const Color(0xFF2563EB).withOpacity(0.08),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_selectedBranch == null && !provider.isLocationLoading)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Silakan klik "Cek Lokasi" untuk mencari dealer terdekat',
+                      style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFFEF4444), fontWeight: FontWeight.w500),
                     ),
                   ),
-                  if (isSelected) const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 22),
-                ],
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          
+          // Logic: Show only selected branch OR show all if toggled
+          ...sortedBranches.where((b) => _showAllBranches || _selectedBranch?.toLowerCase() == b['name'].toString().toLowerCase()).map((branch) {
+            final isSelected = _selectedBranch?.toLowerCase() == branch['name'].toString().toLowerCase();
+            
+            final bName = branch['name']?.toString().toLowerCase() ?? '';
+            final bCode = branch['code']?.toString().toLowerCase() ?? '';
+            final bId = branch['id']?.toString().toLowerCase() ?? '';
+            final isAvailable = availableBranchNames.any((av) => av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId);
+
+            return InkWell(
+              onTap: () => setState(() {
+                _selectedBranch = branch['name'];
+                _showAllBranches = false; // Auto-collapse after select
+              }),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF2563EB).withOpacity(0.04) : Colors.transparent,
+                  border: Border(bottom: BorderSide(color: branch == sortedBranches.last || (!_showAllBranches && isSelected) ? Colors.transparent : const Color(0xFFF1F5F9))),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.location_on_rounded, 
+                        size: 18, 
+                        color: isSelected ? Colors.white : const Color(0xFF64748B)
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            branch['name'], 
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold, 
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A), 
+                              fontSize: 14
+                            )
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              if (isAvailable) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.check_circle_outline_rounded, size: 10, color: Color(0xFF059669)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'READY',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 9, 
+                                          fontWeight: FontWeight.w900, 
+                                          color: const Color(0xFF059669),
+                                          letterSpacing: 0.5
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              if (branch['distance'] != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2563EB).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '${NumberFormat('#,##0.0', 'id_ID').format(branch['distance'])} KM',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF2563EB),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            branch['address'] ?? '', 
+                            style: GoogleFonts.outfit(
+                              fontSize: 12, 
+                              color: const Color(0xFF64748B),
+                              height: 1.4
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isSelected && !_showAllBranches)
+                      const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 26),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+
+          // Button to show all
+          if (!_showAllBranches && _selectedBranch != null)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => setState(() => _showAllBranches = true),
+                  child: Text(
+                    'LIHAT CABANG LAINNYA',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF64748B),
+                      letterSpacing: 1
+                    ),
+                  ),
+                ),
               ),
             ),
-          );
-        }).toList(),
+        ],
       ),
     );
   }

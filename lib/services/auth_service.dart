@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../models/user.dart';
 import 'api_config.dart';
 
@@ -114,18 +116,30 @@ class AuthService {
     required String nik,
     required String alamat,
     required String occupation,
+    File? profilePhoto,
   }) async {
-    final response = await http.put(
+    final request = http.MultipartRequest(
+      'POST',
       Uri.parse('${ApiConfig.baseUrl}/profile'),
-      headers: await ApiConfig.headers,
-      body: jsonEncode({
-        'name': name,
-        'phone': phone,
-        'nik': nik,
-        'alamat': alamat,
-        'occupation': occupation,
-      }),
-    ).timeout(const Duration(seconds: 10));
+    );
+
+    request.headers.addAll(await ApiConfig.headers);
+    request.fields['name'] = name;
+    request.fields['phone'] = phone;
+    request.fields['nik'] = nik;
+    request.fields['alamat'] = alamat;
+    request.fields['occupation'] = occupation;
+
+    if (profilePhoto != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'profile_photo',
+        profilePhoto.path,
+        contentType: MediaType('image', 'jpeg'),
+      ));
+    }
+
+    final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+    final response = await http.Response.fromStream(streamedResponse);
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 200) {

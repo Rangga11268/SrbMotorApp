@@ -299,210 +299,264 @@ class _CatalogScreenState extends State<CatalogScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'FILTER',
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1,
-                    color: const Color(0xFF0F172A),
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.close_rounded, size: 20),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            
-            Text(
-              'KATEGORI',
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF64748B),
-                letterSpacing: 2,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: ['Semua', ...motorProvider.categories.map((c) => c.name)].map((cat) {
-                final isSelected = (motorProvider.selectedCategory ?? 'Semua') == cat;
-                return GestureDetector(
-                  onTap: () {
-                    motorProvider.setCategory(cat == 'Semua' ? null : cat);
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF2563EB) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Text(
-                      cat.toUpperCase(),
-                      style: GoogleFonts.outfit(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : const Color(0xFF475569),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            
-            const SizedBox(height: 32),
-            Text(
-              'RENTANG HARGA',
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF64748B),
-                letterSpacing: 2,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildPriceInput(
-                    'MIN', 
-                    'Rp 10jt', 
-                    motorProvider.minPrice, 
-                    (val) => motorProvider.setMinPrice(double.tryParse(val))
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildPriceInput(
-                    'MAX', 
-                    'Rp 100jt', 
-                    motorProvider.maxPrice, 
-                    (val) => motorProvider.setMaxPrice(double.tryParse(val))
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 32),
-            Text(
-              'LOKASI CABANG',
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF64748B),
-                letterSpacing: 2,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: ['Semua', ...motorProvider.branches.map((b) => b['name'])].map((branchName) {
-                final isSelected = (motorProvider.selectedBranch ?? 'Semua') == branchName;
-                return GestureDetector(
-                  onTap: () {
-                    motorProvider.setBranch(branchName == 'Semua' ? null : branchName);
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF0F172A) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.location_on_rounded, 
-                          size: 14, 
-                          color: isSelected ? Colors.white70 : Colors.blueAccent
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter Katalog',
+                        style: GoogleFonts.outfit(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          branchName.toString().toUpperCase(),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    children: [
+                      const SizedBox(height: 10),
+                      _buildFilterHeader('KATEGORI', () {
+                        motorProvider.setCategory(null);
+                        setModalState(() {});
+                      }),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _buildChoiceChip('Semua', motorProvider.selectedCategory == null, () {
+                            motorProvider.setCategory(null);
+                            setModalState(() {});
+                          }),
+                          ...motorProvider.categories.map((c) => _buildChoiceChip(c.name, motorProvider.selectedCategory == c.name, () {
+                                motorProvider.setCategory(c.name);
+                                setModalState(() {});
+                              })),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildFilterHeader('RENTANG HARGA', null),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPriceField(
+                              'MIN', 
+                              motorProvider.minPrice, 
+                              (val) => motorProvider.setMinPrice(double.tryParse(val.replaceAll('.', '')))
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildPriceField(
+                              'MAX', 
+                              motorProvider.maxPrice, 
+                              (val) => motorProvider.setMaxPrice(double.tryParse(val.replaceAll('.', '')))
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildFilterHeader('LOKASI CABANG', () {
+                        motorProvider.setBranch(null);
+                        setModalState(() {});
+                      }),
+                      const SizedBox(height: 12),
+                      Column(
+                        children: [
+                          _buildBranchItem('Semua Lokasi', motorProvider.selectedBranch == null, () {
+                            motorProvider.setBranch(null);
+                            setModalState(() {});
+                          }),
+                          ...motorProvider.branches.map((b) => _buildBranchItem(b['name'], motorProvider.selectedBranch == b['name'], () {
+                                motorProvider.setBranch(b['name']);
+                                setModalState(() {});
+                              })),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          minimumSize: const Size(double.infinity, 54),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Terapkan Filter',
+                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () {
+                          motorProvider.resetFilters();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'RESET SEMUA FILTER',
                           style: GoogleFonts.outfit(
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : const Color(0xFF475569),
+                            color: const Color(0xFFEF4444),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
-            
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'TERAPKAN FILTER',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                    color: Colors.white,
-                  ),
-                ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterHeader(String title, VoidCallback? onReset) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.outfit(
+            fontSize: 11,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF64748B),
+            letterSpacing: 1.5,
+          ),
+        ),
+        if (onReset != null)
+          GestureDetector(
+            onTap: onReset,
+            child: Text(
+              'RESET',
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFEF4444),
               ),
             ),
-            const SizedBox(height: 16),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  motorProvider.resetFilters();
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'RESET SEMUA DATA',
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFFEF4444),
-                  ),
-                ),
-              ),
-            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildChoiceChip(String label, bool isSelected, VoidCallback onSelected) {
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onSelected(),
+      backgroundColor: Colors.white,
+      selectedColor: const Color(0xFF2563EB),
+      checkmarkColor: Colors.white,
+      labelStyle: GoogleFonts.outfit(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+        color: isSelected ? Colors.white : const Color(0xFF475569),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriceField(String label, double? value, Function(String) onChanged) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: TextField(
+        onChanged: onChanged,
+        keyboardType: TextInputType.number,
+        controller: TextEditingController(text: value?.toStringAsFixed(0) ?? "")..selection = TextSelection.collapsed(offset: (value?.toStringAsFixed(0) ?? "").length),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: label,
+          hintStyle: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF94A3B8)),
+          prefixText: 'Rp ',
+          prefixStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBranchItem(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2563EB).withOpacity(0.05) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0), width: isSelected ? 1.5 : 1),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.location_on_rounded, size: 16, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8)),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF334155)))),
+            if (isSelected) const Icon(Icons.check_circle_rounded, size: 18, color: Color(0xFF2563EB)),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import '../services/motor_service.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../services/api_config.dart';
+import 'dart:math' as math;
 
 class MotorProvider with ChangeNotifier {
   List<Motor> _allMotors = []; // Data master dari API
@@ -31,6 +32,9 @@ class MotorProvider with ChangeNotifier {
   double? _maxPrice;
   List<Map<String, dynamic>> _branches = [];
   String? _selectedBranch;
+  bool _isLocationLoading = false;
+  
+  bool get isLocationLoading => _isLocationLoading;
 
   // Getter motors sekarang melakukan filtering lokal (Instant Caching)
   List<Motor> get motors {
@@ -55,6 +59,8 @@ class MotorProvider with ChangeNotifier {
              matchesMinPrice && matchesMaxPrice && matchesBranch;
     }).toList();
   }
+
+  List<Motor> get allMotors => _allMotors;
 
   List<CategoryModel> get categories => _categories;
   List<String> get brands => _brands;
@@ -204,5 +210,66 @@ class MotorProvider with ChangeNotifier {
     _maxPrice = null;
     _selectedBranch = null;
     notifyListeners();
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadius = 6371; // km
+    
+    // Convert to radians
+    double lat1Rad = lat1 * (math.pi / 180.0);
+    double lat2Rad = lat2 * (math.pi / 180.0);
+    double lonDiffRad = (lon2 - lon1) * (math.pi / 180.0);
+    
+    // Spherical Law of Cosines (Identical to Web PHP implementation)
+    double cosValue = math.cos(lat1Rad) * math.cos(lat2Rad) * math.cos(lonDiffRad) + 
+                      math.sin(lat1Rad) * math.sin(lat2Rad);
+    
+    // Guard against floating point errors that could lead to NaN
+    if (cosValue > 1.0) cosValue = 1.0;
+    if (cosValue < -1.0) cosValue = -1.0;
+    
+    return earthRadius * math.acos(cosValue);
+  }
+
+  Future<Map<String, dynamic>?> findNearestBranch(double userLat, double userLon, {int? motorId}) async {
+    if (_branches.isEmpty) await fetchBranches();
+    
+    _isLocationLoading = true;
+    notifyListeners();
+    
+    try {
+      Map<String, dynamic>? nearestBranch;
+      double shortestDistance = double.infinity;
+
+      for (var branch in _branches) {
+        final bLat = double.tryParse(branch['latitude']?.toString() ?? '');
+        final bLon = double.tryParse(branch['longitude']?.toString() ?? '');
+        
+        if (bLat == null || bLon == null) continue;
+
+        double distance = calculateDistance(userLat, userLon, bLat, bLon);
+        branch['distance'] = distance;
+
+        if (distance < shortestDistance) {
+          shortestDistance = distance;
+          nearestBranch = branch;
+        }
+      }
+      
+      return nearestBranch;
+    } finally {
+      _isLocationLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Find all branches that have a motor with the same name
+  List<String> getBranchesWithMotor(String motorName) {
+    return _allMotors
+        .where((m) => m.name.toLowerCase() == motorName.toLowerCase())
+        .map((m) => m.branch?.toString() ?? '')
+        .where((b) => b.isNotEmpty)
+        .toSet() // Remove duplicates
+        .toList();
   }
 }

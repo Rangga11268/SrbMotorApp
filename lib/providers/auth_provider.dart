@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user.dart';
@@ -174,6 +175,7 @@ class AuthProvider with ChangeNotifier {
     required String nik,
     required String alamat,
     required String occupation,
+    File? profilePhoto,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -185,6 +187,7 @@ class AuthProvider with ChangeNotifier {
         nik: nik,
         alamat: alamat,
         occupation: occupation,
+        profilePhoto: profilePhoto,
       );
 
       if (result['success']) {
