@@ -15,7 +15,7 @@ import 'package:srb_motor_app/screens/menu/order_history_screen.dart';
 import 'package:srb_motor_app/screens/menu/profile_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:srb_motor_app/screens/services/service_booking_screen.dart';
+import 'package:srb_motor_app/screens/services/service_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,9 +26,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
-    const HomeContent(),
     const CatalogScreen(isRoot: true),
-    const ServiceBookingScreen(isRoot: true),
+    const ServiceScreen(),
+    const HomeContent(),
     const OrderHistoryScreen(),
     const ProfileScreen(),
   ];
@@ -571,9 +571,9 @@ class _HomeContentState extends State<HomeContent> {
                   onTap: () {
                     final mainProvider = context.read<MainProvider>();
                     if (item['label'] == 'Katalog Motor') {
-                      mainProvider.setSelectedIndex(1);
+                      mainProvider.setSelectedIndex(0);
                     } else if (item['label'] == 'Servis') {
-                      mainProvider.setSelectedIndex(2);
+                      mainProvider.setSelectedIndex(1);
                     }
                   },
                   child: Column(

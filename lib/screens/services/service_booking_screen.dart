@@ -410,19 +410,32 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   }
 
   Widget _buildSubmitButton(ServiceProvider provider) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: provider.isLoading ? null : _submit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 0,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2563EB).withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: provider.isLoading ? null : _submit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2563EB),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
+          ),
+          child: provider.isLoading
+              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Text('KONFIRMASI BOOKING SEKARANG', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 13)),
         ),
-        child: provider.isLoading
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Text('PESAN SEKARANG', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1)),
       ),
     );
   }

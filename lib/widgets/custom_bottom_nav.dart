@@ -43,9 +43,9 @@ class CustomBottomNav extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildNavItem(0, Icons.home_rounded, 'Beranda'),
-                  _buildNavItem(1, Icons.motorcycle_rounded, 'Katalog'),
-                  _buildNavItem(2, Icons.build_circle_rounded, 'Servis'),
+                  _buildNavItem(0, Icons.motorcycle_rounded, 'Katalog'),
+                  _buildNavItem(1, Icons.build_circle_rounded, 'Servis'),
+                  _buildNavItem(2, Icons.home_rounded, 'Beranda'),
                   _buildNavItem(3, Icons.assignment_rounded, 'Pesanan'),
                   _buildNavItem(4, Icons.person_rounded, 'Profil'),
                 ],
@@ -81,7 +81,7 @@ class CustomBottomNav extends StatelessWidget {
               child: Icon(
                 icon,
                 color: isSelected ? activeColor : inactiveColor,
-                size: 26,
+                size: (index == 2 && isSelected) ? 30 : 26,
               ),
             ),
             const SizedBox(height: 4),

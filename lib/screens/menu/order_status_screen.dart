@@ -32,12 +32,10 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     setState(() => _isRefreshing = true);
     try {
       final orderProvider = context.read<OrderProvider>();
-      // Get the latest version of this order from provider
       final latestOrder = orderProvider.orders.firstWhere(
         (o) => o.id == widget.order.id,
         orElse: () => widget.order,
       );
-      // Proactively sync with Midtrans for all pending installments
       await orderProvider.syncOrderDetails(latestOrder);
     } catch (e) {
       debugPrint('Error refreshing order: $e');
@@ -51,10 +49,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     final result = await orderProvider.getInstallmentPaymentUrl(installment.id);
 
     if (result['success'] && result['snap_token'] != null) {
-      // 1. Start background status polling for this specific installment
       orderProvider.startPollingStatus(installment.id, widget.order.id);
-
-      // 2. Launch the Native SDK flow
       try {
         final token = result['snap_token'];
         midtrans?.startPaymentUiFlow(token: token);
@@ -77,11 +72,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final dateFormat = DateFormat('dd MMMM yyyy, HH:mm');
 
     return Selector<OrderProvider, OrderModel>(
@@ -90,10 +81,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
         orElse: () => widget.order,
       ),
       builder: (context, currentOrder, child) {
-        final _currentOrder = currentOrder; // Shadowing for sub-builders
-        final isLoading =
-            context.select<OrderProvider, bool>((p) => p.isLoading) ||
-            _isRefreshing;
+        final isLoading = context.select<OrderProvider, bool>((p) => p.isLoading) || _isRefreshing;
 
         return Stack(
           children: [
@@ -102,7 +90,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               appBar: AppBar(
                 title: Text(
                   'Detail Pesanan',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.white,
@@ -110,7 +98,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 centerTitle: true,
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.refresh, color: Color(0xFF2563EB)),
+                    icon: const Icon(Icons.refresh, color: Color(0xFF2563EB), size: 20),
                     onPressed: _refresh,
                     tooltip: 'Refresh Status',
                   ),
@@ -120,39 +108,37 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 onRefresh: _refresh,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 1. Transaction ID & Status Badge
-                      _buildHeaderSection(_currentOrder),
+                      _buildHeaderSection(currentOrder),
                       const SizedBox(height: 24),
 
                       // 2. Main Call to Action (Payment)
-                      if (_currentOrder.status != 'completed' &&
-                          _currentOrder.status != 'cancelled')
-                        _buildPaymentCTA(_currentOrder),
+                      if (currentOrder.status != 'completed' && currentOrder.status != 'cancelled')
+                        _buildPaymentCTA(currentOrder),
                       const SizedBox(height: 24),
 
                       // 3. Motor Info Card
-                      _buildMotorCard(_currentOrder, currencyFormat),
+                      _buildMotorCard(currentOrder, currencyFormat),
                       const SizedBox(height: 24),
 
-                      // 4. Payment Summary (Booking Fee & Pelunasan)
-                      _buildPaymentSection(_currentOrder, currencyFormat),
+                      // 4. Timeline Status
+                      _buildTimelineSection(currentOrder, dateFormat),
                       const SizedBox(height: 24),
 
-                      // 5. Timeline Status
-                      _buildTimelineSection(_currentOrder, dateFormat),
+                      // 5. Payment Summary
+                      _buildPaymentSection(currentOrder, currencyFormat),
                       const SizedBox(height: 24),
 
                       // 6. Customer Details Card
-                      _buildCustomerInfoCard(_currentOrder),
+                      _buildCustomerInfoCard(currentOrder),
                       const SizedBox(height: 24),
 
-                      // 7. Cancel Button (conditional)
-                      if (_isCancellable(_currentOrder))
-                        _buildCancelButton(_currentOrder),
+                      // 7. Cancel Button
+                      if (_isCancellable(currentOrder)) _buildCancelButton(currentOrder),
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -170,186 +156,153 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  void _contactAdmin(BuildContext context, OrderModel order) async {
-    final phone = context.read<MotorProvider>().contactPhone;
-    final message = Uri.encodeComponent(
-      'Halo Admin SRB Motor, saya ingin bertanya mengenai pesanan saya #SRB-${order.id} untuk unit ${order.motor?.name ?? 'Motor'}.',
-    );
-    final url = Uri.parse('https://wa.me/$phone?text=$message');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  Widget _buildHeaderSection(OrderModel _currentOrder) {
+  Widget _buildHeaderSection(OrderModel currentOrder) {
     Color statusColor;
-    String statusText = _currentOrder.status.toUpperCase();
+    String statusText = currentOrder.status.toUpperCase();
 
-    switch (_currentOrder.status.toLowerCase()) {
+    switch (currentOrder.status.toLowerCase()) {
       case 'completed':
       case 'selesai':
-        statusColor = Colors.green;
+        statusColor = const Color(0xFF10B981);
         statusText = 'SELESAI';
         break;
       case 'pending':
       case 'new_order':
-      case 'pesanan_baru':
-        statusColor = Colors.orange;
+        statusColor = const Color(0xFFF59E0B);
         statusText = 'PESANAN BARU';
         break;
       case 'waiting_payment':
       case 'menunggu_pembayaran':
-        statusColor = Color(0xFF2563EB);
+        statusColor = const Color(0xFF2563EB);
         statusText = 'MENUNGGU BAYAR';
         break;
       case 'cancelled':
       case 'dibatalkan':
-        statusColor = Colors.red;
+        statusColor = const Color(0xFFEF4444);
         statusText = 'DIBATALKAN';
         break;
       case 'ready_for_delivery':
       case 'siap_dikirim':
-        statusColor = Colors.teal;
+        statusColor = const Color(0xFF06B6D4);
         statusText = 'SIAP KIRIM';
         break;
-      case 'unit_preparation':
-      case 'persiapan_unit':
-        statusColor = Colors.indigo;
-        statusText = 'PERSIAPAN UNIT';
-        break;
       default:
-        statusColor = Colors.grey;
+        statusColor = const Color(0xFF64748B);
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ID PESANAN',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ID PESANAN',
+                    style: GoogleFonts.inter(fontSize: 10, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),
-                ),
-                Text(
-                  '#SRB-${_currentOrder.id}',
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  Text(
+                    '#SRB-${currentOrder.id}',
+                    style: GoogleFonts.jetBrainsMono(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
                   ),
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: statusColor.withOpacity(0.3)),
+                ],
               ),
-              child: Text(
-                statusText,
-                style: GoogleFonts.inter(
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: statusColor.withOpacity(0.2)),
+                ),
+                child: Text(
+                  statusText,
+                  style: GoogleFonts.inter(color: statusColor, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 0.5),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            _buildSmallBadge(
-              _currentOrder.transactionType == 'CREDIT' ? 'KREDIT' : 'TUNAI',
-              _currentOrder.transactionType == 'CREDIT' ? Colors.deepPurple : Colors.blueGrey,
-            ),
-            const SizedBox(width: 8),
-            _buildSmallBadge(
-              _currentOrder.branchCode ?? 'Semua Cabang',
-              Colors.blue,
-              icon: Icons.store_rounded,
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _buildSmallBadge(
+                currentOrder.transactionType == 'CREDIT' ? 'PEMBELIAN KREDIT' : 'PEMBELIAN TUNAI',
+                currentOrder.transactionType == 'CREDIT' ? Colors.deepPurple : Colors.blueGrey,
+              ),
+              const SizedBox(width: 8),
+              _buildSmallBadge(
+                currentOrder.branchCode ?? 'SEMUA CABANG',
+                const Color(0xFF2563EB),
+                icon: Icons.store_rounded,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSmallBadge(String text, Color color, {IconData? icon}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.1)),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 12, color: color),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
           ],
           Text(
             text,
-            style: GoogleFonts.inter(
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: color,
-              letterSpacing: 0.5,
-            ),
+            style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMotorCard(OrderModel _currentOrder, NumberFormat format) {
+  Widget _buildMotorCard(OrderModel currentOrder, NumberFormat format) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Row(
         children: [
           Container(
             width: 100,
-            height: 80,
+            height: 100,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(12),
-              image: _currentOrder.motor?.imagePath != null
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(16),
+              image: currentOrder.motor?.imagePath != null
                   ? DecorationImage(
-                      image: CachedNetworkImageProvider(
-                        ApiConfig.sanitizeUrl(_currentOrder.motor!.imagePath!)!,
-                      ),
+                      image: CachedNetworkImageProvider(ApiConfig.sanitizeUrl(currentOrder.motor!.imagePath!)!),
                       fit: BoxFit.cover,
-                      onError: (exception, stackTrace) =>
-                          debugPrint('Image load error: $exception'),
                     )
                   : null,
             ),
-            child: _currentOrder.motor?.imagePath == null
-                ? const Icon(Icons.motorcycle, color: Colors.grey)
-                : null,
+            child: currentOrder.motor?.imagePath == null ? const Icon(Icons.motorcycle, color: Color(0xFFCBD5E1)) : null,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -357,33 +310,30 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _currentOrder.motor?.brand.toUpperCase() ?? 'SRB MOTOR',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  _currentOrder.motor?.name ?? 'Unit Motor',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  currentOrder.motor?.brand.toUpperCase() ?? 'SRB MOTOR',
+                  style: GoogleFonts.inter(fontSize: 10, color: const Color(0xFF2563EB), fontWeight: FontWeight.bold, letterSpacing: 1),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  format.format(_currentOrder.motor?.price ?? 0),
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF2563EB),
-                    fontWeight: FontWeight.bold,
-                  ),
+                  currentOrder.motor?.name ?? 'Unit Motor',
+                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B)),
                 ),
-                if (_currentOrder.motorColor != null)
-                  Text(
-                    'Warna: ${_currentOrder.motorColor}',
-                    style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                const SizedBox(height: 4),
+                Text(
+                  format.format(currentOrder.motor?.price ?? 0),
+                  style: GoogleFonts.inter(color: const Color(0xFF2563EB), fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+                if (currentOrder.motorColor != null) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(6)),
+                    child: Text(
+                      'Warna: ${currentOrder.motorColor}',
+                      style: GoogleFonts.inter(fontSize: 10, color: const Color(0xFF64748B), fontWeight: FontWeight.bold),
+                    ),
                   ),
+                ],
               ],
             ),
           ),
@@ -392,537 +342,67 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildPaymentSection(OrderModel _currentOrder, NumberFormat format) {
-    double total = _currentOrder.motor?.price ?? 0;
-    double bFee = _currentOrder.bookingFee;
-    double remaining = total - bFee;
-
-    InstallmentModel? bookingInstallment;
-    InstallmentModel? remainingInstallment;
-
-    if (_currentOrder.installments.isNotEmpty) {
-      bookingInstallment = _currentOrder.installments.firstWhere(
-        (i) => i.installmentNumber == 0,
-        orElse: () => _currentOrder.installments.first,
-      );
-      if (_currentOrder.installments.length > 1) {
-        remainingInstallment = _currentOrder.installments.firstWhere(
-          (i) => i.installmentNumber == 1,
-          orElse: () => _currentOrder.installments.last,
-        );
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'RINCIAN PEMBAYARAN',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
-                letterSpacing: 0.5,
-              ),
-            ),
-            GestureDetector(
-              onTap: () async {
-                debugPrint(
-                  'Fetching invoice for order ID: ${_currentOrder.id}',
-                );
-                final orderProvider = context.read<OrderProvider>();
-                final result = await orderProvider.getInvoiceUrl(
-                  _currentOrder.id,
-                );
-
-                debugPrint('Invoice result: $result');
-
-                if (result['success'] && result['url'] != null) {
-                  final rawUrl = result['url'];
-                  final sanitizedUrl = ApiConfig.sanitizeUrl(rawUrl);
-                  debugPrint('Sanitized URL: $sanitizedUrl');
-
-                  if (sanitizedUrl != null) {
-                    final uri = Uri.parse(sanitizedUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(
-                        uri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } else {
-                      debugPrint('Could not launch URL: $sanitizedUrl');
-                    }
-                  }
-                } else {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result['message'] ?? 'Gagal memuat invoice',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.description_outlined,
-                      size: 14,
-                      color: Color(0xFF2563EB),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Lihat Invoice',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF2563EB),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              _buildPaymentRow(
-                'Harga Unit',
-                format.format(total),
-                isBold: true,
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-              ),
-
-              const SizedBox(height: 8),
-              _buildPaymentItemWithStatus(
-                label: 'Booking Fee',
-                amount: format.format(bFee),
-                status: bookingInstallment?.status ?? 'Pending',
-                canPay:
-                    bookingInstallment != null &&
-                    _canPayInstallment(bookingInstallment.status),
-                onPay: () => _handlePayment(bookingInstallment!),
-              ),
-
-              const SizedBox(height: 16),
-              _buildPaymentItemWithStatus(
-                label: 'Sisa Pelunasan',
-                amount: format.format(remaining),
-                status:
-                    remainingInstallment?.status ??
-                    (_currentOrder.status == 'completed' ? 'paid' : 'unpaid'),
-                canPay:
-                    remainingInstallment != null &&
-                    _canPayInstallment(remainingInstallment.status),
-                onPay: () => _handlePayment(remainingInstallment!),
-              ),
-
-              if (_currentOrder.status == 'completed')
-                Container(
-                  margin: const EdgeInsets.only(top: 20),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green[50],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.verified_user,
-                        color: Colors.green,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Transaksi telah lunas sepenuhnya',
-                        style: GoogleFonts.inter(
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentRow(String label, String value, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 14),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.inter(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            fontSize: 14,
-            color: isBold ? Colors.black : Colors.grey[800],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentItemWithStatus({
-    required String label,
-    required String amount,
-    required String status,
-    bool canPay = false,
-    VoidCallback? onPay,
-  }) {
-    Color statusColor;
-    String statusLabel = status.toUpperCase();
-
-    switch (status.toLowerCase()) {
-      case 'paid':
-        statusColor = Colors.green;
-        statusLabel = 'LUNAS';
-        break;
-      case 'pending':
-      case 'pending_payment':
-        statusColor = Colors.orange;
-        statusLabel = 'MENUNGGU';
-        break;
-      case 'unpaid':
-        statusColor = Colors.red;
-        statusLabel = 'BELUM BAYAR';
-        break;
-      default:
-        statusColor = Colors.grey;
-    }
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                Text(
-                  amount,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: statusColor.withOpacity(0.2)),
-              ),
-              child: Text(
-                statusLabel,
-                style: GoogleFonts.outfit(
-                  color: statusColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (canPay)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onPay,
-                icon: const Icon(Icons.payment, size: 18),
-                label: const Text('BAYAR SEKARANG'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
-                  shadowColor: Colors.blue.withOpacity(0.3),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildTimelineSection(OrderModel _currentOrder, DateFormat format) {
-    final currentStatusRaw = _currentOrder.status.toLowerCase();
-    final isCancelled =
-        currentStatusRaw == 'cancelled' || currentStatusRaw == 'dibatalkan';
-    final isRejected = currentStatusRaw == 'ditolak';
-    final isTerminal = isCancelled || isRejected;
-
-    // Full status ordered list — matches Transaction model statusMap
+  Widget _buildTimelineSection(OrderModel currentOrder, DateFormat format) {
     final List<Map<String, dynamic>> cashSteps = [
-      {
-        'key': 'new_order',
-        'label': 'Pesanan Masuk',
-        'icon': Icons.assignment_outlined,
-      },
-      {
-        'key': 'waiting_payment',
-        'label': 'Menunggu Pembayaran',
-        'icon': Icons.account_balance_wallet_outlined,
-      },
-      {
-        'key': 'pembayaran_dikonfirmasi',
-        'label': 'Pembayaran Dikonfirmasi',
-        'icon': Icons.verified_outlined,
-      },
-      {
-        'key': 'unit_preparation',
-        'label': 'Motor Disiapkan',
-        'icon': Icons.settings_suggest_outlined,
-      },
-      {
-        'key': 'ready_for_delivery',
-        'label': 'Motor Siap Dikirim/Ambil',
-        'icon': Icons.inventory_2_outlined,
-      },
-      {
-        'key': 'dalam_pengiriman',
-        'label': 'Dalam Pengiriman',
-        'icon': Icons.local_shipping_outlined,
-      },
-      {
-        'key': 'completed',
-        'label': 'Pesanan Selesai',
-        'icon': Icons.check_circle_outline,
-      },
+      {'key': 'new_order', 'label': 'Pesanan Masuk', 'icon': Icons.assignment_outlined},
+      {'key': 'waiting_payment', 'label': 'Menunggu Pembayaran', 'icon': Icons.account_balance_wallet_outlined},
+      {'key': 'pembayaran_dikonfirmasi', 'label': 'Pembayaran Dikonfirmasi', 'icon': Icons.verified_outlined},
+      {'key': 'unit_preparation', 'label': 'Motor Disiapkan', 'icon': Icons.settings_suggest_outlined},
+      {'key': 'ready_for_delivery', 'label': 'Motor Siap Dikirim/Ambil', 'icon': Icons.inventory_2_outlined},
+      {'key': 'completed', 'label': 'Pesanan Selesai', 'icon': Icons.check_circle_outline},
     ];
 
     final List<Map<String, dynamic>> creditSteps = [
-      {
-        'key': 'new_order',
-        'label': 'Pesanan Masuk',
-        'icon': Icons.assignment_outlined,
-      },
-      {
-        'key': 'menunggu_persetujuan',
-        'label': 'Verifikasi Berkas',
-        'icon': Icons.folder_open_outlined,
-      },
-      {
-        'key': 'data_tidak_valid',
-        'label': 'Perbaiki Dokumen',
-        'icon': Icons.edit_document,
-        'isWarning': true,
-      },
-      {
-        'key': 'dikirim_ke_surveyor',
-        'label': 'Proses Surveyor',
-        'icon': Icons.person_search_outlined,
-      },
-      {
-        'key': 'jadwal_survey',
-        'label': 'Jadwal Survey',
-        'icon': Icons.calendar_month_outlined,
-      },
-      {
-        'key': 'waiting_credit_approval',
-        'label': 'Menunggu Persetujuan',
-        'icon': Icons.fact_check_outlined,
-      },
-      {
-        'key': 'disetujui',
-        'label': 'Kredit Disetujui',
-        'icon': Icons.thumb_up_outlined,
-      },
-      {
-        'key': 'unit_preparation',
-        'label': 'Motor Disiapkan',
-        'icon': Icons.settings_suggest_outlined,
-      },
-      {
-        'key': 'ready_for_delivery',
-        'label': 'Motor Siap Dikirim/Ambil',
-        'icon': Icons.inventory_2_outlined,
-      },
-      {
-        'key': 'dalam_pengiriman',
-        'label': 'Dalam Pengiriman',
-        'icon': Icons.local_shipping_outlined,
-      },
-      {
-        'key': 'completed',
-        'label': 'Pesanan Selesai',
-        'icon': Icons.check_circle_outline,
-      },
+      {'key': 'new_order', 'label': 'Pesanan Masuk', 'icon': Icons.assignment_outlined},
+      {'key': 'menunggu_persetujuan', 'label': 'Verifikasi Berkas', 'icon': Icons.folder_open_outlined},
+      {'key': 'dikirim_ke_surveyor', 'label': 'Proses Surveyor', 'icon': Icons.person_search_outlined},
+      {'key': 'waiting_credit_approval', 'label': 'Menunggu Persetujuan', 'icon': Icons.fact_check_outlined},
+      {'key': 'disetujui', 'label': 'Kredit Disetujui', 'icon': Icons.thumb_up_outlined},
+      {'key': 'unit_preparation', 'label': 'Motor Disiapkan', 'icon': Icons.settings_suggest_outlined},
+      {'key': 'completed', 'label': 'Pesanan Selesai', 'icon': Icons.check_circle_outline},
     ];
 
-    // Select steps based on transaction type
-    final steps = (_currentOrder.transactionType?.toUpperCase() == 'CREDIT')
-        ? creditSteps
-        : cashSteps;
-
-    final currentStatus = _currentOrder.status.toLowerCase();
+    final steps = (currentOrder.transactionType?.toUpperCase() == 'CREDIT') ? creditSteps : cashSteps;
+    final currentStatus = currentOrder.status.toLowerCase();
     final currentIdx = steps.indexWhere((s) => s['key'] == currentStatus);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'PROGRESS PESANAN',
-          style: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[700],
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'PROGRES PESANAN',
+            style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF64748B), letterSpacing: 1),
           ),
         ),
-        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
+              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
             ],
           ),
-          child: isTerminal
-              ? Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: (isRejected ? Colors.orange : Colors.red)
-                            .withOpacity(0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isRejected
-                            ? Icons.block_flipped
-                            : Icons.cancel_outlined,
-                        color: isRejected ? Colors.orange : Colors.red,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isRejected
-                                ? 'Kredit Ditolak'
-                                : 'Pesanan Dibatalkan',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: isRejected ? Colors.orange : Colors.red,
-                            ),
-                          ),
-                          Text(
-                            isRejected
-                                ? 'Maaf, pengajuan kredit Anda belum disetujui.'
-                                : 'Pesanan ini tidak dapat dilanjutkan.',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            format.format(_currentOrder.createdAt),
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              : Column(
-                  children: steps.asMap().entries.map((entry) {
-                    final idx = entry.key;
-                    final step = entry.value;
-                    final isCompleted = currentIdx >= idx;
-                    final isCurrent = currentIdx == idx;
-                    final isLast = idx == steps.length - 1;
-                    final isWarning = step['isWarning'] == true;
+          child: Column(
+            children: steps.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final step = entry.value;
+              final isCompleted = currentIdx >= idx;
+              final isCurrent = currentIdx == idx;
+              final isLast = idx == steps.length - 1;
 
-                    Color dotColor = isCompleted
-                        ? (isWarning && isCurrent
-                              ? Colors.orange
-                              : const Color(0xFF2563EB))
-                        : Colors.grey.shade200;
-
-                    return _buildTimelineTile(
-                      title: step['label'] as String,
-                      subtitle: isCurrent
-                          ? 'Status saat ini'
-                          : isCompleted
-                          ? 'Selesai'
-                          : 'Menunggu',
-                      icon: step['icon'] as IconData,
-                      isFirst: idx == 0,
-                      isLast: isLast,
-                      isCompleted: isCompleted,
-                      isCurrent: isCurrent,
-                      dotColor: dotColor,
-                    );
-                  }).toList(),
-                ),
+              return _buildTimelineTile(
+                title: step['label'] as String,
+                subtitle: isCurrent ? 'Status saat ini' : (isCompleted ? 'Selesai' : 'Menunggu'),
+                icon: step['icon'] as IconData,
+                isLast: isLast,
+                isCompleted: isCompleted,
+                isCurrent: isCurrent,
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
@@ -932,15 +412,12 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     required String title,
     required String subtitle,
     required IconData icon,
-    bool isFirst = false,
     bool isLast = false,
     bool isCompleted = false,
     bool isCurrent = false,
-    Color? dotColor,
   }) {
-    final color =
-        dotColor ??
-        (isCompleted ? const Color(0xFF2563EB) : Colors.grey.shade200);
+    final Color activeColor = const Color(0xFF2563EB);
+    final Color inactiveColor = const Color(0xFFE2E8F0);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -948,140 +425,186 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
         Column(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color,
-                border: isCurrent
-                    ? Border.all(color: const Color(0xFF2563EB), width: 2.5)
-                    : null,
-                boxShadow: isCurrent
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.3),
-                          blurRadius: 8,
-                        ),
-                      ]
-                    : null,
+                color: isCompleted ? activeColor : Colors.white,
+                border: Border.all(color: isCompleted ? activeColor : inactiveColor, width: 2),
+                boxShadow: isCurrent ? [BoxShadow(color: activeColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))] : null,
               ),
               child: Icon(
                 isCompleted ? Icons.check : icon,
-                size: 15,
-                color: isCompleted ? Colors.white : Colors.grey.shade400,
+                size: 16,
+                color: isCompleted ? Colors.white : const Color(0xFF94A3B8),
               ),
             ),
             if (!isLast)
               Container(
                 width: 2,
-                height: 44,
-                color: isCompleted
-                    ? const Color(0xFF2563EB).withOpacity(0.3)
-                    : Colors.grey.shade100,
+                height: 40,
+                color: isCompleted ? activeColor.withOpacity(0.2) : inactiveColor,
               ),
           ],
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    fontWeight: isCurrent ? FontWeight.w900 : FontWeight.w600,
-                    color: isCompleted ? Colors.black87 : Colors.grey.shade400,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 6),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                  color: isCompleted ? const Color(0xFF1E293B) : const Color(0xFF94A3B8),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.outfit(
-                    fontSize: 11,
-                    color: isCurrent
-                        ? const Color(0xFF2563EB)
-                        : isCompleted
-                        ? Colors.grey.shade500
-                        : Colors.grey.shade300,
-                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                  ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: isCurrent ? activeColor : const Color(0xFF94A3B8),
+                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                 ),
-              ],
-            ),
+              ),
+              if (!isLast) const SizedBox(height: 20),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCustomerInfoCard(OrderModel _currentOrder) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildPaymentSection(OrderModel currentOrder, NumberFormat format) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.person_pin_outlined, color: Colors.blue),
-              const SizedBox(width: 12),
               Text(
-                'Informasi Pelanggan',
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                'RINCIAN PEMBAYARAN',
+                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF64748B), letterSpacing: 1),
+              ),
+              TextButton.icon(
+                onPressed: () => _handleInvoice(currentOrder),
+                icon: const Icon(Icons.description_outlined, size: 14),
+                label: Text('Invoice', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                style: TextButton.styleFrom(foregroundColor: const Color(0xFF2563EB), padding: EdgeInsets.zero),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          _buildInfoRow('Nama', _currentOrder.customerName),
-          _buildInfoRow('Nomor HP', _currentOrder.customerPhone),
-          if (_currentOrder.customerNik != null)
-            _buildInfoRow('NIK', _currentOrder.customerNik!),
-          _buildInfoRow('Alamat', _currentOrder.customerAddress),
-          if (_currentOrder.deliveryMethod != null)
-            _buildInfoRow('Metode', _currentOrder.deliveryMethod!),
-          if (_currentOrder.notes != null && _currentOrder.notes!.isNotEmpty)
-            _buildInfoRow('Catatan', _currentOrder.notes!),
-        ],
-      ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildPaymentItem('Harga Unit', format.format(currentOrder.motor?.price ?? 0), isBold: true),
+              const SizedBox(height: 16),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              const SizedBox(height: 16),
+              _buildPaymentStatusItem('Booking Fee', format.format(currentOrder.bookingFee), currentOrder.installments.isNotEmpty ? currentOrder.installments.first.status : 'Pending'),
+              const SizedBox(height: 16),
+              _buildPaymentStatusItem('Sisa Pelunasan', format.format((currentOrder.motor?.price ?? 0) - currentOrder.bookingFee), currentOrder.status == 'completed' ? 'PAID' : 'UNPAID'),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildPaymentItem(String label, String value, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B))),
+        Text(value, style: GoogleFonts.inter(fontSize: 14, fontWeight: isBold ? FontWeight.w800 : FontWeight.w500, color: const Color(0xFF1E293B))),
+      ],
+    );
+  }
+
+  Widget _buildPaymentStatusItem(String label, String value, String status) {
+    Color statusColor = status.toLowerCase() == 'paid' ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF64748B))),
+            Text(value, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+          ],
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+          child: Text(status.toUpperCase(), style: GoogleFonts.inter(fontSize: 9, color: statusColor, fontWeight: FontWeight.w900)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomerInfoCard(OrderModel currentOrder) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'INFORMASI PENGIRIMAN',
+            style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF64748B), letterSpacing: 1),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10)),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildInfoRow(Icons.person_outline, 'Nama Penerima', currentOrder.customerName),
+              _buildInfoRow(Icons.phone_android_outlined, 'Nomor Telepon', currentOrder.customerPhone),
+              _buildInfoRow(Icons.location_on_outlined, 'Alamat Lengkap', currentOrder.customerAddress),
+              if (currentOrder.deliveryMethod != null) _buildInfoRow(Icons.local_shipping_outlined, 'Metode Pengiriman', currentOrder.deliveryMethod!),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey),
-            ),
-          ),
+          Icon(icon, size: 18, color: const Color(0xFF94A3B8)),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              value,
-              style: GoogleFonts.outfit(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text(value, style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+              ],
             ),
           ),
         ],
@@ -1089,66 +612,33 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildPaymentCTA(OrderModel _currentOrder) {
+  Widget _buildPaymentCTA(OrderModel currentOrder) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    PaymentDetailsScreen(order: _currentOrder),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentDetailsScreen(order: currentOrder)));
           },
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                const Icon(
-                  Icons.payment_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                const Icon(Icons.payment_rounded, color: Colors.white, size: 28),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Lanjutkan Pembayaran',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Selesaikan cicilan / booking fee Anda',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 12,
-                        ),
-                      ),
+                      Text('Lanjutkan Pembayaran', style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text('Selesaikan tagihan pesanan Anda', style: GoogleFonts.inter(color: Colors.white.withOpacity(0.8), fontSize: 12)),
                     ],
                   ),
                 ),
@@ -1161,237 +651,58 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  bool _isCancellable(OrderModel _currentOrder) {
-    final status = _currentOrder.status.toLowerCase();
-    // Cash statuses
-    if (status == 'new_order' || status == 'waiting_payment') return true;
-    // Credit statuses
-    if (status == 'menunggu_persetujuan' || status == 'waiting_credit_approval')
-      return true;
-    return false;
-  }
-
-  /// Returns true if the given installment status allows payment
-  bool _canPayInstallment(String status) {
-    final s = status.toLowerCase();
-    return s == 'unpaid' ||
-        s == 'pending' ||
-        s == 'pending_payment' ||
-        s == 'waiting_approval';
-  }
-
-  Widget _buildCancelButton(OrderModel _currentOrder) {
+  Widget _buildCancelButton(OrderModel currentOrder) {
     return SizedBox(
       width: double.infinity,
-      child: TextButton.icon(
-        onPressed: () => _showCancelDialog(_currentOrder),
-        icon: const Icon(Icons.cancel_outlined, color: Colors.red),
-        label: Text(
-          'Batalkan Pesanan',
-          style: GoogleFonts.outfit(
-            color: Colors.red,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.red.withOpacity(0.2)),
-          ),
-        ),
+      child: TextButton(
+        onPressed: () => _showCancelDialog(currentOrder),
+        style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444), padding: const EdgeInsets.symmetric(vertical: 16)),
+        child: Text('Batalkan Pesanan', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
       ),
     );
   }
 
-  void _showCancelDialog(OrderModel _currentOrder) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.red,
-                  size: 40,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Batalkan Pesanan?',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1E293B),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Gunakan pembatalan hanya jika Anda yakin. Tindakan ini tidak dapat diurungkan.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: const Color(0xFF64748B),
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Kembali',
-                        style: GoogleFonts.outfit(
-                          color: const Color(0xFF94A3B8),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _handleCancel(_currentOrder);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Ya, Batalkan',
-                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleCancel(OrderModel _currentOrder) async {
+  void _handleInvoice(OrderModel currentOrder) async {
     final orderProvider = context.read<OrderProvider>();
-    final result = await orderProvider.cancelOrder(
-      _currentOrder.id,
-      "Dibatalkan melalui aplikasi mobile",
-    );
-
-    if (mounted) {
-      if (result['success']) {
-        _showSuccessCancelDialog();
-        await orderProvider.fetchOrderHistory();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message']),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-      }
+    final result = await orderProvider.getInvoiceUrl(currentOrder.id);
+    if (result['success'] && result['url'] != null) {
+      final uri = Uri.parse(ApiConfig.sanitizeUrl(result['url'])!);
+      if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
-  void _showSuccessCancelDialog() {
+  bool _isCancellable(OrderModel currentOrder) {
+    final status = currentOrder.status.toLowerCase();
+    return status == 'new_order' || status == 'waiting_payment' || status == 'menunggu_persetujuan';
+  }
+
+  void _showCancelDialog(OrderModel currentOrder) {
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
+      builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle_outline_rounded,
-                  color: Colors.green,
-                  size: 48,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Berhasil Dibatalkan',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1E293B),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Pesanan Anda telah berhasil dibatalkan dari sistem kami.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: const Color(0xFF64748B),
-                ),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close dialog
-                    Navigator.pop(context); // Back to history
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'OK, MENGERTI',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
+        title: Text('Konfirmasi Pembatalan', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        content: Text('Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat diurungkan.', style: GoogleFonts.inter(fontSize: 14)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Kembali', style: GoogleFonts.inter(color: Colors.grey))),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _handleCancel(currentOrder);
+            },
+            child: Text('Ya, Batalkan', style: GoogleFonts.inter(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  void _handleCancel(OrderModel currentOrder) async {
+    final orderProvider = context.read<OrderProvider>();
+    final result = await orderProvider.cancelOrder(currentOrder.id, "Dibatalkan oleh pengguna");
+    if (mounted && result['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pesanan berhasil dibatalkan')));
+      Navigator.pop(context);
+    }
   }
 }
