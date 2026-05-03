@@ -195,31 +195,38 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            order.transactionType == 'CREDIT' ? Icons.credit_card : Icons.payments_outlined,
+                            size: 14,
+                            color: const Color(0xFF64748B),
+                          ),
                         ),
-                        child: Icon(
-                          order.transactionType == 'CREDIT' ? Icons.credit_card : Icons.payments_outlined,
-                          size: 14,
-                          color: const Color(0xFF64748B),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            dateFormat.format(order.createdAt),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: const Color(0xFF94A3B8),
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        dateFormat.format(order.createdAt),
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: const Color(0xFF94A3B8),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(

@@ -272,12 +272,24 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 20, color: const Color(0xFF2563EB)),
           const SizedBox(height: 8),
-          Text(label, style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF64748B), fontWeight: FontWeight.w600)),
+          Text(
+            label, 
+            style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF64748B), fontWeight: FontWeight.w600),
+            maxLines: 1,
+          ),
           const SizedBox(height: 2),
-          Text(value, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)), maxLines: 1, overflow: TextOverflow.ellipsis),
+          Flexible(
+            child: Text(
+              value, 
+              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)), 
+              maxLines: 1, 
+              overflow: TextOverflow.ellipsis
+            ),
+          ),
         ],
       ),
     );
