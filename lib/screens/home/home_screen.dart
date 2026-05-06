@@ -16,6 +16,7 @@ import 'package:srb_motor_app/screens/menu/profile_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:srb_motor_app/screens/services/service_screen.dart';
+import 'package:srb_motor_app/screens/menu/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -220,7 +221,12 @@ class _HomeContentState extends State<HomeContent> {
                             color: Colors.white,
                             size: 24,
                           ),
-                          onPressed: () => _showNotifications(context),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                            );
+                          },
                         ),
                       ),
                       if (unreadCount > 0)

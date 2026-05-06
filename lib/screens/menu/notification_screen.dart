@@ -165,6 +165,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (type.contains('Credit')) return Icons.verified_user_outlined;
     if (type.contains('Survey')) return Icons.calendar_today_outlined;
     if (type.contains('Installment')) return Icons.payment_outlined;
+    if (type.contains('DocumentReady')) return Icons.description_outlined;
     return Icons.notifications_outlined;
   }
 
@@ -173,6 +174,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (type.contains('Credit')) return Colors.green;
     if (type.contains('Survey')) return Colors.orange;
     if (type.contains('Installment')) return Colors.purple;
+    if (type.contains('DocumentReady')) return Colors.teal;
     return Colors.grey;
   }
 
@@ -181,6 +183,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (type.contains('TransactionStatusChanged')) return 'Update Status';
     if (type.contains('SurveyScheduled')) return 'Jadwal Survey';
     if (type.contains('InstallmentReminder')) return 'Tagihan Cicilan';
+    if (type.contains('DocumentReady')) return 'Dokumen Siap';
     return 'Notifikasi';
   }
 

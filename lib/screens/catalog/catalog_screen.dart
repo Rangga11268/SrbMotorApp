@@ -114,29 +114,29 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       letterSpacing: 2,
                     ),
                   ),
-                  Text(
-                    'SRB Motors',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/images/logos/logo_srb.webp',
+                        height: 24,
+                        fit: BoxFit.contain,
+                        errorBuilder: (c, e, s) => const SizedBox(),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'SRB MOTORS',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
-          ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.shopping_bag_outlined,
-              color: Colors.white,
-              size: 22,
-            ),
           ),
         ],
       ),
@@ -253,36 +253,49 @@ class _CatalogScreenState extends State<CatalogScreen> {
     required Function(String) onSelected,
   }) {
     return SizedBox(
-      height: 44,
+      height: 48,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
+        physics: const BouncingScrollPhysics(),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final isSelected = selectedValue == items[index];
+          final String label = items[index].toUpperCase();
+          
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => onSelected(items[index]),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isSelected ? Colors.white : Colors.white24,
-                    width: 1.5,
+            padding: const EdgeInsets.only(right: 12),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => onSelected(items[index]),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFF2563EB) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                      width: 1.5,
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    items[index].toUpperCase(),
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
-                      color: isSelected ? const Color(0xFF1E293B) : Colors.white,
+                  child: Center(
+                    child: Text(
+                      label,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                        color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                      ),
                     ),
                   ),
                 ),
@@ -709,7 +722,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           crossAxisCount: 2,
           mainAxisSpacing: 20,
           crossAxisSpacing: 20,
-          childAspectRatio: 0.62,
+          childAspectRatio: 0.58,
         ),
         delegate: SliverChildBuilderDelegate((context, index) {
           return _buildCatalogCard(motorProvider.motors[index], context);
@@ -741,7 +754,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           children: [
             // Image Section
             Expanded(
-              flex: 5,
+              flex: 4,
               child: Stack(
                 children: [
                   Container(
@@ -850,51 +863,59 @@ class _CatalogScreenState extends State<CatalogScreen> {
             Expanded(
               flex: 4,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      motor.brand.toUpperCase(),
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF2563EB),
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          motor.brand.toUpperCase(),
+                          style: GoogleFonts.outfit(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF2563EB),
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          motor.name,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          currencyFormat.format(motor.price),
+                          style: GoogleFonts.outfit(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      motor.name,
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0F172A),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      currencyFormat.format(motor.price),
-                      style: GoogleFonts.outfit(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF1E293B),
-                      ),
-                    ),
-                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildMiniSpec(Icons.flash_on_rounded, '${motor.engine ?? 155}cc'),
-                          _buildMiniSpec(Icons.settings_outlined, 'Matic'),
-                        ],
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          children: [
+                            _buildMiniSpec(Icons.flash_on_rounded, '${motor.engine ?? 155}cc'),
+                            const SizedBox(width: 12),
+                            _buildMiniSpec(Icons.settings_outlined, 'Matic'),
+                          ],
+                        ),
                       ),
                     ),
                   ],

@@ -157,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           ),
           
           Positioned(
-            bottom: 60,
+            bottom: 40,
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Column(
@@ -171,13 +171,38 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       letterSpacing: 2,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/images/logos/yamaha.webp', height: 25, color: Colors.white.withOpacity(0.8)),
-                      const SizedBox(width: 30),
-                      Image.asset('assets/images/logos/Honda.webp', height: 25, color: Colors.white.withOpacity(0.8)),
+                      Image.asset('assets/images/logos/yamaha.webp', height: 22, color: Colors.white.withOpacity(0.8)),
+                      const SizedBox(width: 24),
+                      Image.asset('assets/images/logos/Honda.webp', height: 22, color: Colors.white.withOpacity(0.8)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'FINANCING PARTNERS',
+                    style: GoogleFonts.outfit(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white.withOpacity(0.3),
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildMiniLeasingLogo('assets/images/logos/adira.webp'),
+                      const SizedBox(width: 12),
+                      _buildMiniLeasingLogo('assets/images/logos/fif.webp'),
+                      const SizedBox(width: 12),
+                      _buildMiniLeasingLogo('assets/images/logos/baf.webp'),
+                      const SizedBox(width: 12),
+                      _buildMiniLeasingLogo('assets/images/logos/oto.webp'),
+                      const SizedBox(width: 12),
+                      _buildMiniLeasingLogo('assets/images/logos/muf.webp'),
                     ],
                   ),
                 ],
@@ -186,6 +211,17 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMiniLeasingLogo(String path) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Image.asset(path, height: 10, color: Colors.white.withOpacity(0.6)),
     );
   }
 
