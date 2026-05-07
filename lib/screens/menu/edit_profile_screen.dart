@@ -83,14 +83,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
-          'Edit Profil', 
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))
+          'Edit Profil',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0F172A),
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0F172A), size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -155,18 +162,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       disabledBackgroundColor: Colors.grey[300],
                     ),
                     child: isLoading
                         ? const SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
                           )
                         : Text(
-                            'SIMPAN PERUBAHAN', 
-                            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)
+                            'SIMPAN PERUBAHAN',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
                           ),
                   ),
                 ),
@@ -185,9 +200,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Text(
         label,
         style: GoogleFonts.outfit(
-          fontSize: 14, 
-          fontWeight: FontWeight.bold, 
-          color: const Color(0xFF64748B)
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF64748B),
         ),
       ),
     );
@@ -201,47 +216,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02), 
-            blurRadius: 10, 
-            offset: const Offset(0, 4)
-          ),
-        ],
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      validator: validator,
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        validator: validator,
-        style: GoogleFonts.outfit(
-          fontSize: 16, 
-          fontWeight: FontWeight.w600, 
-          color: const Color(0xFF0F172A)
+      decoration: InputDecoration(
+        labelText: hint,
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
         ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: GoogleFonts.outfit(fontSize: 16, color: const Color(0xFF94A3B8)),
-          prefixIcon: Icon(icon, color: const Color(0xFF2563EB), size: 22),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16), 
-            borderSide: BorderSide.none
+        hintText: hint,
+        hintStyle: GoogleFonts.outfit(
+          fontSize: 15,
+          color: const Color(0xFF94A3B8),
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16), 
-            borderSide: BorderSide(color: const Color(0xFFE2E8F0), width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16), 
-            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.all(18),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
         ),
       ),
     );

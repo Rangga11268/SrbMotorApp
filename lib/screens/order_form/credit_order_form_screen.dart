@@ -56,11 +56,13 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
     _occupationController = TextEditingController();
     _incomeController = TextEditingController();
     _durationController = TextEditingController();
-    
+
     _minDP = widget.motor.min_dp_amount ?? (widget.motor.price * 0.2);
     _dpAmount = _minDP;
-    _dpController = TextEditingController(text: NumberFormat.decimalPattern('id_ID').format(_dpAmount));
-    
+    _dpController = TextEditingController(
+      text: NumberFormat.decimalPattern('id_ID').format(_dpAmount),
+    );
+
     // Auto-select branch from motor data (Same as Web Flow)
     if (widget.motor.branch != null) {
       _selectedBranch = widget.motor.branch;
@@ -79,7 +81,8 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
     // Initialize colors
     if (widget.motor.colors is List) {
       _availableColors = List<String>.from(widget.motor.colors);
-    } else if (widget.motor.colors != null && widget.motor.colors.toString().isNotEmpty) {
+    } else if (widget.motor.colors != null &&
+        widget.motor.colors.toString().isNotEmpty) {
       _availableColors = [widget.motor.colors.toString()];
     }
 
@@ -95,23 +98,31 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
     try {
       // Check permissions using Geolocator's built-in methods
       LocationPermission permission = await Geolocator.checkPermission();
-      
+
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Izin lokasi ditolak. Silakan berikan izin untuk mencari dealer terdekat.')),
+              const SnackBar(
+                content: Text(
+                  'Izin lokasi ditolak. Silakan berikan izin untuk mencari dealer terdekat.',
+                ),
+              ),
             );
           }
           return;
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Izin lokasi ditolak permanen. Silakan buka pengaturan aplikasi.')),
+            const SnackBar(
+              content: Text(
+                'Izin lokasi ditolak permanen. Silakan buka pengaturan aplikasi.',
+              ),
+            ),
           );
         }
         return;
@@ -123,30 +134,40 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
       );
 
       final provider = context.read<MotorProvider>();
-      
+
       // 1. Get branches that actually have this unit in stock (Consistent with Web)
-      final availableBranchNames = provider.getBranchesWithMotor(widget.motor.name);
-      
+      final availableBranchNames = provider.getBranchesWithMotor(
+        widget.motor.name,
+      );
+
       Map<String, dynamic>? nearest;
-      
+
       if (availableBranchNames.isNotEmpty) {
         // Find nearest from available branches
         double minDistance = double.infinity;
         for (var branch in provider.branches) {
           final bLat = double.tryParse(branch['latitude']?.toString() ?? '');
           final bLon = double.tryParse(branch['longitude']?.toString() ?? '');
-          
+
           if (bLat != null && bLon != null) {
             // Calculate and save distance for ALL branches so UI can display it
-            final dist = provider.calculateDistance(position.latitude, position.longitude, bLat, bLon);
+            final dist = provider.calculateDistance(
+              position.latitude,
+              position.longitude,
+              bLat,
+              bLon,
+            );
             branch['distance'] = dist;
 
             final bName = branch['name']?.toString().toLowerCase() ?? '';
             final bCode = branch['code']?.toString().toLowerCase() ?? '';
             final bId = branch['id']?.toString().toLowerCase() ?? '';
-            
-            bool hasStock = availableBranchNames.any((av) => 
-              av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId
+
+            bool hasStock = availableBranchNames.any(
+              (av) =>
+                  av.toLowerCase() == bName ||
+                  av.toLowerCase() == bCode ||
+                  av.toLowerCase() == bId,
             );
 
             if (hasStock) {
@@ -161,7 +182,10 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
 
       // If no specifically available branch found, fallback to all branches nearest
       if (nearest == null) {
-        nearest = await provider.findNearestBranch(position.latitude, position.longitude);
+        nearest = await provider.findNearestBranch(
+          position.latitude,
+          position.longitude,
+        );
       }
 
       if (nearest != null && mounted) {
@@ -171,16 +195,18 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: const Color(0xFF10B981),
-            content: Text('Berhasil! Cabang terdekat dengan unit ready: ${nearest['name']} (${NumberFormat('#,##0.0', 'id_ID').format(nearest['distance'] ?? 0)} km)'),
+            content: Text(
+              'Berhasil! Cabang terdekat dengan unit ready: ${nearest['name']} (${NumberFormat('#,##0.0', 'id_ID').format(nearest['distance'] ?? 0)} km)',
+            ),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _selectedBranch = widget.motor.branch);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mendapatkan lokasi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal mendapatkan lokasi: $e')));
       }
     }
   }
@@ -216,33 +242,39 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
       }
 
       if (_dpAmount < _minDP) {
-        _showErrorDialog('DP minimal adalah Rp ${NumberFormat.decimalPattern('id_ID').format(_minDP)}');
+        _showErrorDialog(
+          'DP minimal adalah Rp ${NumberFormat.decimalPattern('id_ID').format(_minDP)}',
+        );
         return;
       }
 
       final success = await context.read<OrderProvider>().submitCreditOrder(
-            motorId: widget.motor.id,
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            nik: _nikController.text.trim(),
-            address: _addressController.text.trim(),
-            motorColor: _selectedColor ?? 'Default',
-            deliveryMethod: _deliveryMethod,
-            paymentMethod: _paymentMethod,
-            occupation: _occupationController.text.trim(),
-            monthlyIncome: double.tryParse(_incomeController.text.replaceAll('.', '')) ?? 0,
-            employmentDuration: _durationController.text.trim(),
-            dpAmount: _dpAmount,
-            tenor: _selectedTenor,
-            branch: _selectedBranch,
-            email: _emailController.text.trim(),
-            notes: _notesController.text.trim(),
-          );
+        motorId: widget.motor.id,
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        nik: _nikController.text.trim(),
+        address: _addressController.text.trim(),
+        motorColor: _selectedColor ?? 'Default',
+        deliveryMethod: _deliveryMethod,
+        paymentMethod: _paymentMethod,
+        occupation: _occupationController.text.trim(),
+        monthlyIncome:
+            double.tryParse(_incomeController.text.replaceAll('.', '')) ?? 0,
+        employmentDuration: _durationController.text.trim(),
+        dpAmount: _dpAmount,
+        tenor: _selectedTenor,
+        branch: _selectedBranch,
+        email: _emailController.text.trim(),
+        notes: _notesController.text.trim(),
+      );
 
       if (success && mounted) {
         _showSuccessDialog();
       } else if (!success && mounted) {
-        _showErrorDialog(context.read<OrderProvider>().errorMessage ?? 'Gagal membuat pengajuan kredit');
+        _showErrorDialog(
+          context.read<OrderProvider>().errorMessage ??
+              'Gagal membuat pengajuan kredit',
+        );
       }
     }
   }
@@ -264,18 +296,30 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                   color: const Color(0xFF10B981).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.description_rounded, color: Color(0xFF10B981), size: 50),
+                child: const Icon(
+                  Icons.description_rounded,
+                  color: Color(0xFF10B981),
+                  size: 50,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Pengajuan Terkirim!',
-                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                style: GoogleFonts.outfit(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Pengajuan kredit Anda sedang kami proses. Mohon segera lengkapi dokumen pendukung (KTP, KK, Slip Gaji) di halaman detail pesanan.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(color: const Color(0xFF64748B), height: 1.5, fontSize: 14),
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF64748B),
+                  height: 1.5,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -291,10 +335,18 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                     backgroundColor: const Color(0xFF0F172A),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('LIHAT STATUS PENGAJUAN', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  child: Text(
+                    'LIHAT STATUS PENGAJUAN',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -320,16 +372,36 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                   color: const Color(0xFFEF4444).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 40),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 40,
+                ),
               ),
               const SizedBox(height: 16),
-              Text('Gagal Mengajukan', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                'Gagal Mengajukan',
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 12),
-              Text(message, textAlign: TextAlign.center, style: GoogleFonts.outfit(color: const Color(0xFF64748B))),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(color: const Color(0xFF64748B)),
+              ),
               const SizedBox(height: 24),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('TUTUP', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFEF4444))),
+                child: Text(
+                  'TUTUP',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFEF4444),
+                  ),
+                ),
               ),
             ],
           ),
@@ -342,17 +414,33 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
   Widget build(BuildContext context) {
     final isLoading = context.watch<OrderProvider>().isLoading;
     final motorProvider = context.watch<MotorProvider>();
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('PENGAJUAN KREDIT', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 16, letterSpacing: 1)),
+        title: Text(
+          'PENGAJUAN KREDIT',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0F172A),
+            fontSize: 16,
+            letterSpacing: 1,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF0F172A), size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -366,7 +454,7 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
               children: [
                 _buildMotorSummary(currencyFormat),
                 const SizedBox(height: 32),
-                
+
                 _buildSectionHeader('SIMULASI KREDIT'),
                 const SizedBox(height: 16),
                 _buildCreditSimulator(currencyFormat),
@@ -379,24 +467,59 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
 
                 _buildSectionHeader('INFORMASI PRIBADI'),
                 const SizedBox(height: 16),
-                _buildTextField(_nameController, 'Nama Lengkap', Icons.person_rounded, hint: 'Sesuai KTP'),
+                _buildTextField(
+                  _nameController,
+                  'Nama Lengkap',
+                  Icons.person_rounded,
+                  hint: 'Sesuai KTP',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_phoneController, 'WhatsApp', Icons.phone_android_rounded, keyboardType: TextInputType.phone, hint: '0812...'),
+                _buildTextField(
+                  _phoneController,
+                  'WhatsApp',
+                  Icons.phone_android_rounded,
+                  keyboardType: TextInputType.phone,
+                  hint: '0812...',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_nikController, 'NIK', Icons.badge_rounded, keyboardType: TextInputType.number, maxLength: 16, hint: '16 digit KTP'),
+                _buildTextField(
+                  _nikController,
+                  'NIK',
+                  Icons.badge_rounded,
+                  keyboardType: TextInputType.number,
+                  maxLength: 16,
+                  hint: '16 digit KTP',
+                ),
                 const SizedBox(height: 16),
                 _buildDropdownColor(),
                 const SizedBox(height: 32),
 
                 _buildSectionHeader('INFORMASI PEKERJAAN'),
                 const SizedBox(height: 16),
-                _buildTextField(_occupationController, 'Pekerjaan', Icons.work_rounded, hint: 'Contoh: Karyawan Swasta'),
+                _buildTextField(
+                  _occupationController,
+                  'Pekerjaan',
+                  Icons.work_rounded,
+                  hint: 'Contoh: Karyawan Swasta',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_incomeController, 'Pendapatan per Bulan', Icons.account_balance_wallet_rounded, keyboardType: TextInputType.number, isCurrency: true, hint: 'Rp'),
+                _buildTextField(
+                  _incomeController,
+                  'Pendapatan per Bulan',
+                  Icons.account_balance_wallet_rounded,
+                  keyboardType: TextInputType.number,
+                  isCurrency: true,
+                  hint: 'Rp',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_durationController, 'Lama Bekerja', Icons.access_time_rounded, hint: 'Contoh: 2 Tahun'),
+                _buildTextField(
+                  _durationController,
+                  'Lama Bekerja',
+                  Icons.access_time_rounded,
+                  hint: 'Contoh: 2 Tahun',
+                ),
                 const SizedBox(height: 32),
-                
+
                 _buildSectionHeader('PENGIRIMAN'),
                 const SizedBox(height: 16),
                 _buildToggleSelection(
@@ -415,23 +538,44 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                   hint: 'Alamat domisili saat ini...',
                 ),
                 const SizedBox(height: 16),
-                _buildTextField(_notesController, 'Catatan (Opsional)', Icons.chat_bubble_rounded, maxLines: 2),
-                
+                _buildTextField(
+                  _notesController,
+                  'Catatan (Opsional)',
+                  Icons.chat_bubble_rounded,
+                  maxLines: 2,
+                ),
+
                 const SizedBox(height: 48),
-                
+
                 ElevatedButton(
                   onPressed: isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F172A),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                     elevation: 4,
                     shadowColor: const Color(0xFF0F172A).withOpacity(0.4),
                   ),
                   child: isLoading
-                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text('AJUKAN KREDIT SEKARANG', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'AJUKAN KREDIT SEKARANG',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 40),
               ],
@@ -449,12 +593,20 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
         color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
         children: [
-          _buildSimulationRow('Uang Muka (DP)', format.format(_dpAmount), isBold: true),
+          _buildSimulationRow(
+            'Uang Muka (DP)',
+            format.format(_dpAmount),
+            isBold: true,
+          ),
           const SizedBox(height: 8),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -471,7 +623,9 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
               onChanged: (val) {
                 setState(() {
                   _dpAmount = val;
-                  _dpController.text = NumberFormat.decimalPattern('id_ID').format(val.toInt());
+                  _dpController.text = NumberFormat.decimalPattern(
+                    'id_ID',
+                  ).format(val.toInt());
                 });
               },
             ),
@@ -487,12 +641,25 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                     margin: EdgeInsets.only(right: t == 36 ? 0 : 12),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF2563EB) : Colors.white.withOpacity(0.05),
+                      color: isSelected
+                          ? const Color(0xFF2563EB)
+                          : Colors.white.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: isSelected ? const Color(0xFF2563EB) : Colors.white.withOpacity(0.1)),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF2563EB)
+                            : Colors.white.withOpacity(0.1),
+                      ),
                     ),
                     child: Center(
-                      child: Text('$t bln', style: GoogleFonts.outfit(color: isSelected ? Colors.white : Colors.white60, fontWeight: FontWeight.bold, fontSize: 13)),
+                      child: Text(
+                        '$t bln',
+                        style: GoogleFonts.outfit(
+                          color: isSelected ? Colors.white : Colors.white60,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -509,10 +676,31 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
             ),
             child: Column(
               children: [
-                Text('ESTIMASI ANGSURAN', style: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                Text(
+                  'ESTIMASI ANGSURAN',
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(format.format(_monthlyInstallment), style: GoogleFonts.outfit(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-                Text('*Bunga Flat 1.5%', style: GoogleFonts.outfit(color: Colors.white38, fontSize: 10)),
+                Text(
+                  format.format(_monthlyInstallment),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  '*Bunga Flat 1.5%',
+                  style: GoogleFonts.outfit(
+                    color: Colors.white38,
+                    fontSize: 10,
+                  ),
+                ),
               ],
             ),
           ),
@@ -521,12 +709,26 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
     );
   }
 
-  Widget _buildSimulationRow(String label, String value, {bool isBold = false}) {
+  Widget _buildSimulationRow(
+    String label,
+    String value, {
+    bool isBold = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13)),
-        Text(value, style: GoogleFonts.outfit(color: Colors.white, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, fontSize: 15)),
+        Text(
+          label,
+          style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            fontSize: 15,
+          ),
+        ),
       ],
     );
   }
@@ -551,15 +753,34 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                     height: 80,
                     fit: BoxFit.cover,
                   )
-                : Container(width: 100, height: 80, color: const Color(0xFFF1F5F9), child: const Icon(Icons.motorcycle_rounded)),
+                : Container(
+                    width: 100,
+                    height: 80,
+                    color: const Color(0xFFF1F5F9),
+                    child: const Icon(Icons.motorcycle_rounded),
+                  ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.motor.name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
-                Text(format.format(widget.motor.price), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF2563EB))),
+                Text(
+                  widget.motor.name,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  format.format(widget.motor.price),
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2563EB),
+                  ),
+                ),
               ],
             ),
           ),
@@ -569,28 +790,48 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
   }
 
   Widget _buildSectionHeader(String title) {
-    return Text(title, style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF64748B), letterSpacing: 1.5));
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF64748B),
+        letterSpacing: 1.5,
+      ),
+    );
   }
 
   Widget _buildBranchSelection(MotorProvider provider) {
-    final availableBranchNames = provider.getBranchesWithMotor(widget.motor.name);
-    
+    final availableBranchNames = provider.getBranchesWithMotor(
+      widget.motor.name,
+    );
+
     // Sort branches: Put available ones at top, then by distance
     final sortedBranches = List<Map<String, dynamic>>.from(provider.branches);
     sortedBranches.sort((a, b) {
       final aName = a['name']?.toString().toLowerCase() ?? '';
       final aCode = a['code']?.toString().toLowerCase() ?? '';
       final aId = a['id']?.toString().toLowerCase() ?? '';
-      final aAvailable = availableBranchNames.any((av) => av.toLowerCase() == aName || av.toLowerCase() == aCode || av.toLowerCase() == aId);
+      final aAvailable = availableBranchNames.any(
+        (av) =>
+            av.toLowerCase() == aName ||
+            av.toLowerCase() == aCode ||
+            av.toLowerCase() == aId,
+      );
 
       final bName = b['name']?.toString().toLowerCase() ?? '';
       final bCode = b['code']?.toString().toLowerCase() ?? '';
       final bId = b['id']?.toString().toLowerCase() ?? '';
-      final bAvailable = availableBranchNames.any((av) => av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId);
-      
+      final bAvailable = availableBranchNames.any(
+        (av) =>
+            av.toLowerCase() == bName ||
+            av.toLowerCase() == bCode ||
+            av.toLowerCase() == bId,
+      );
+
       if (aAvailable && !bAvailable) return -1;
       if (!aAvailable && bAvailable) return 1;
-      
+
       // If both same availability, sort by distance if available
       if (a['distance'] != null && b['distance'] != null) {
         return (a['distance'] as double).compareTo(b['distance'] as double);
@@ -633,19 +874,40 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: provider.isLocationLoading ? null : _checkNearestBranch,
-                      icon: provider.isLocationLoading 
-                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2563EB)))
-                        : const Icon(Icons.my_location_rounded, size: 16),
+                      onPressed: provider.isLocationLoading
+                          ? null
+                          : _checkNearestBranch,
+                      icon: provider.isLocationLoading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF2563EB),
+                              ),
+                            )
+                          : const Icon(Icons.my_location_rounded, size: 16),
                       label: Text(
-                        provider.isLocationLoading ? 'Mencari...' : 'Cek Lokasi',
-                        style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                        provider.isLocationLoading
+                            ? 'Mencari...'
+                            : 'Cek Lokasi',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       style: TextButton.styleFrom(
                         foregroundColor: const Color(0xFF2563EB),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        backgroundColor: const Color(0xFF2563EB).withOpacity(0.08),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        backgroundColor: const Color(
+                          0xFF2563EB,
+                        ).withOpacity(0.08),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
@@ -655,130 +917,183 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       'Silakan klik "Cek Lokasi" untuk mencari dealer terdekat',
-                      style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFFEF4444), fontWeight: FontWeight.w500),
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: const Color(0xFFEF4444),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
               ],
             ),
           ),
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
-          
-          // Logic: Show only selected branch OR show all if toggled
-          ...sortedBranches.where((b) => _showAllBranches || _selectedBranch?.toLowerCase() == b['name'].toString().toLowerCase()).map((branch) {
-            final isSelected = _selectedBranch?.toLowerCase() == branch['name'].toString().toLowerCase();
-            
-            final bName = branch['name']?.toString().toLowerCase() ?? '';
-            final bCode = branch['code']?.toString().toLowerCase() ?? '';
-            final bId = branch['id']?.toString().toLowerCase() ?? '';
-            final isAvailable = availableBranchNames.any((av) => av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId);
 
-            return InkWell(
-              onTap: () => setState(() {
-                _selectedBranch = branch['name'];
-                _showAllBranches = false; // Auto-collapse after select
-              }),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF2563EB).withOpacity(0.04) : Colors.transparent,
-                  border: Border(bottom: BorderSide(color: branch == sortedBranches.last || (!_showAllBranches && isSelected) ? Colors.transparent : const Color(0xFFF1F5F9))),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 2),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.location_on_rounded, 
-                        size: 18, 
-                        color: isSelected ? Colors.white : const Color(0xFF64748B)
+          // Logic: Show only selected branch OR show all if toggled
+          ...sortedBranches
+              .where(
+                (b) =>
+                    _showAllBranches ||
+                    _selectedBranch?.toLowerCase() ==
+                        b['name'].toString().toLowerCase(),
+              )
+              .map((branch) {
+                final isSelected =
+                    _selectedBranch?.toLowerCase() ==
+                    branch['name'].toString().toLowerCase();
+
+                final bName = branch['name']?.toString().toLowerCase() ?? '';
+                final bCode = branch['code']?.toString().toLowerCase() ?? '';
+                final bId = branch['id']?.toString().toLowerCase() ?? '';
+                final isAvailable = availableBranchNames.any(
+                  (av) =>
+                      av.toLowerCase() == bName ||
+                      av.toLowerCase() == bCode ||
+                      av.toLowerCase() == bId,
+                );
+
+                return InkWell(
+                  onTap: () => setState(() {
+                    _selectedBranch = branch['name'];
+                    _showAllBranches = false; // Auto-collapse after select
+                  }),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF2563EB).withOpacity(0.04)
+                          : Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
+                          color:
+                              branch == sortedBranches.last ||
+                                  (!_showAllBranches && isSelected)
+                              ? Colors.transparent
+                              : const Color(0xFFF1F5F9),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            branch['name'], 
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.bold, 
-                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A), 
-                              fontSize: 14
-                            )
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFF2563EB)
+                                : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(height: 6),
-                          Row(
+                          child: Icon(
+                            Icons.location_on_rounded,
+                            size: 18,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (isAvailable) ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.check_circle_outline_rounded, size: 10, color: Color(0xFF059669)),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'READY',
+                              Text(
+                                branch['name'],
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected
+                                      ? const Color(0xFF2563EB)
+                                      : const Color(0xFF0F172A),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  if (isAvailable) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF10B981,
+                                        ).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_outline_rounded,
+                                            size: 10,
+                                            color: Color(0xFF059669),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'READY',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w900,
+                                              color: const Color(0xFF059669),
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  if (branch['distance'] != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF2563EB,
+                                        ).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        '${NumberFormat('#,##0.0', 'id_ID').format(branch['distance'])} KM',
                                         style: GoogleFonts.outfit(
-                                          fontSize: 9, 
-                                          fontWeight: FontWeight.w900, 
-                                          color: const Color(0xFF059669),
-                                          letterSpacing: 0.5
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF2563EB),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              if (branch['distance'] != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2563EB).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    '${NumberFormat('#,##0.0', 'id_ID').format(branch['distance'])} KM',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF2563EB),
                                     ),
-                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                branch['address'] ?? '',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  color: const Color(0xFF64748B),
+                                  height: 1.4,
                                 ),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            branch['address'] ?? '', 
-                            style: GoogleFonts.outfit(
-                              fontSize: 12, 
-                              color: const Color(0xFF64748B),
-                              height: 1.4
-                            )
+                        ),
+                        if (isSelected && !_showAllBranches)
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF2563EB),
+                            size: 26,
                           ),
-                        ],
-                      ),
+                      ],
                     ),
-                    if (isSelected && !_showAllBranches)
-                      const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 26),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
+                  ),
+                );
+              })
+              .toList(),
 
           // Button to show all
           if (!_showAllBranches && _selectedBranch != null)
@@ -794,7 +1109,7 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF64748B),
-                      letterSpacing: 1
+                      letterSpacing: 1,
                     ),
                   ),
                 ),
@@ -805,11 +1120,23 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
     );
   }
 
-  Widget _buildToggleSelection({required String label, required List<String> options, required String currentValue, required Function(String) onChanged}) {
+  Widget _buildToggleSelection({
+    required String label,
+    required List<String> options,
+    required String currentValue,
+    required Function(String) onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF475569))),
+        Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF475569),
+          ),
+        ),
         const SizedBox(height: 10),
         Row(
           children: options.map((option) {
@@ -818,17 +1145,31 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
               child: GestureDetector(
                 onTap: () => onChanged(option),
                 child: Container(
-                  margin: EdgeInsets.only(right: option == options.first ? 10 : 0, left: option == options.last ? 10 : 0),
+                  margin: EdgeInsets.only(
+                    right: option == options.first ? 10 : 0,
+                    left: option == options.last ? 10 : 0,
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFF0F172A) : Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0), width: 1.5),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFE2E8F0),
+                      width: 1.5,
+                    ),
                   ),
                   child: Center(
                     child: Text(
                       option.toUpperCase(),
-                      style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : const Color(0xFF475569)),
+                      style: GoogleFonts.outfit(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF475569),
+                      ),
                     ),
                   ),
                 ),
@@ -841,59 +1182,159 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
   }
 
   Widget _buildDropdownColor() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE2E8F0))),
-      child: DropdownButtonFormField<String>(
-        value: _selectedColor,
-        decoration: InputDecoration(
-          labelText: 'Pilih Warna Motor',
-          labelStyle: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 14),
-          prefixIcon: const Icon(Icons.palette_rounded, color: Color(0xFF64748B)),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-        items: _availableColors.map((color) => DropdownMenuItem(value: color, child: Text(color, style: GoogleFonts.outfit()))).toList(),
-        onChanged: (val) => setState(() => _selectedColor = val),
-        validator: (value) => value == null ? 'Warna wajib dipilih' : null,
+    return DropdownButtonFormField<String>(
+      value: _selectedColor,
+      icon: const Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: Color(0xFF64748B),
       ),
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
+      ),
+      decoration: InputDecoration(
+        labelText: 'Pilih Warna Motor',
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.palette_rounded,
+              color: Color(0xFF2563EB),
+              size: 20,
+            ),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+      ),
+      dropdownColor: Colors.white,
+      items: _availableColors
+          .map(
+            (color) => DropdownMenuItem(
+              value: color,
+              child: Text(color, style: GoogleFonts.outfit()),
+            ),
+          )
+          .toList(),
+      onChanged: (val) => setState(() => _selectedColor = val),
+      validator: (value) => value == null ? 'Warna wajib dipilih' : null,
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {TextInputType? keyboardType, int maxLines = 1, int? maxLength, bool isCurrency = false, String? hint}) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE2E8F0))),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        maxLength: maxLength,
-        style: GoogleFonts.outfit(fontSize: 15),
-        onChanged: (value) {
-          if (isCurrency) {
-            String cleaned = value.replaceAll('.', '').replaceAll(RegExp(r'[^0-9]'), '');
-            if (cleaned.isNotEmpty) {
-              final formatter = NumberFormat.decimalPattern('id_ID');
-              String formatted = formatter.format(int.parse(cleaned));
-              controller.value = TextEditingValue(text: formatted, selection: TextSelection.collapsed(offset: formatted.length));
-            }
-          }
-        },
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 14),
-          hintText: hint,
-          prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 22),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          counterText: '',
-        ),
-        validator: (value) {
-          if (label.contains('Catatan')) return null;
-          if (value == null || value.isEmpty) return '$label wajib diisi';
-          return null;
-        },
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    int? maxLength,
+    bool isCurrency = false,
+    String? hint,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      maxLength: maxLength,
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
       ),
+      onChanged: (value) {
+        if (isCurrency) {
+          String cleaned = value
+              .replaceAll('.', '')
+              .replaceAll(RegExp(r'[^0-9]'), '');
+          if (cleaned.isNotEmpty) {
+            final formatter = NumberFormat.decimalPattern('id_ID');
+            String formatted = formatter.format(int.parse(cleaned));
+            controller.value = TextEditingValue(
+              text: formatted,
+              selection: TextSelection.collapsed(offset: formatted.length),
+            );
+          }
+        }
+      },
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
+        ),
+        hintText: hint,
+        hintStyle: GoogleFonts.outfit(
+          color: const Color(0xFF94A3B8),
+          fontSize: 15,
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+        ),
+        counterText: '',
+      ),
+      validator: (value) {
+        if (label.contains('Catatan')) return null;
+        if (value == null || value.isEmpty) return '$label wajib diisi';
+        return null;
+      },
     );
   }
 }

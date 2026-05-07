@@ -20,18 +20,18 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   String? _selectedBranch;
   DateTime? _selectedDate;
   String? _selectedTime;
-  
+
   final _plateController = TextEditingController();
   final _modelController = TextEditingController();
   final _complaintController = TextEditingController();
-  
+
   String _selectedServiceType = 'Servis Berkala';
   final List<String> _serviceTypes = [
     'Servis Berkala',
     'Servis Berat',
     'Ganti Oli',
     'Cek Kelistrikan',
-    'Lainnya'
+    'Lainnya',
   ];
 
   @override
@@ -91,7 +91,10 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
       if (success && mounted) {
         _showSuccess();
       } else if (!success && mounted) {
-        _showError(context.read<ServiceProvider>().errorMessage ?? 'Gagal memesan servis');
+        _showError(
+          context.read<ServiceProvider>().errorMessage ??
+              'Gagal memesan servis',
+        );
       }
     }
   }
@@ -113,11 +116,18 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.check_circle_rounded, color: Colors.green, size: 64),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.green,
+                size: 64,
+              ),
               const SizedBox(height: 24),
               Text(
                 'Booking Berhasil!',
-                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
+                style: GoogleFonts.outfit(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -134,15 +144,22 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
                     if (!widget.isRoot) {
                       Navigator.pop(context); // Pop screen
                     } else {
-                      context.read<MainProvider>().setSelectedIndex(0); // Back to Home
+                      context.read<MainProvider>().setSelectedIndex(
+                        0,
+                      ); // Back to Home
                     }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F172A),
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text('OK', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],
@@ -161,7 +178,10 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('BOOKING SERVIS', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
+        title: Text(
+          'BOOKING SERVIS',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -179,27 +199,40 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
               const SizedBox(height: 12),
               _buildBranchSelector(motorProvider),
               const SizedBox(height: 32),
-              
+
               _buildSectionTitle('INFORMASI KENDARAAN'),
               const SizedBox(height: 12),
-              _buildTextField(_plateController, 'Nomor Plat (e.g. B 1234 ABC)', Icons.pin_outlined),
+              _buildTextField(
+                _plateController,
+                'Nomor Plat (e.g. B 1234 ABC)',
+                Icons.pin_outlined,
+              ),
               const SizedBox(height: 16),
-              _buildTextField(_modelController, 'Model Motor (e.g. Vario 160)', Icons.motorcycle_outlined),
+              _buildTextField(
+                _modelController,
+                'Model Motor (e.g. Vario 160)',
+                Icons.motorcycle_outlined,
+              ),
               const SizedBox(height: 16),
               _buildServiceTypeDropdown(),
               const SizedBox(height: 32),
-              
+
               _buildSectionTitle('JADWAL KUNJUNGAN'),
               const SizedBox(height: 12),
               _buildDatePicker(),
               const SizedBox(height: 16),
               if (_selectedDate != null) _buildTimeSlotGrid(serviceProvider),
               const SizedBox(height: 32),
-              
+
               _buildSectionTitle('CATATAN / KELUHAN (OPSIONAL)'),
               const SizedBox(height: 12),
-              _buildTextField(_complaintController, 'Tulis keluhan jika ada...', Icons.note_add_outlined, maxLines: 3),
-              
+              _buildTextField(
+                _complaintController,
+                'Tulis keluhan jika ada...',
+                Icons.note_add_outlined,
+                maxLines: 3,
+              ),
+
               const SizedBox(height: 48),
               _buildSubmitButton(serviceProvider),
               const SizedBox(height: 40),
@@ -223,13 +256,20 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   }
 
   Widget _buildBranchSelector(MotorProvider provider) {
-    final branches = provider.branches.where((b) => b['can_service'] == true || b['can_service'] == 1).toList();
-    
+    final branches = provider.branches
+        .where((b) => b['can_service'] == true || b['can_service'] == 1)
+        .toList();
+
     if (branches.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.amber[50], borderRadius: BorderRadius.circular(12)),
-        child: const Text('Maaf, tidak ada cabang yang tersedia untuk servis saat ini.'),
+        decoration: BoxDecoration(
+          color: Colors.amber[50],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Text(
+          'Maaf, tidak ada cabang yang tersedia untuk servis saat ini.',
+        ),
       );
     }
 
@@ -253,24 +293,45 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF2563EB).withOpacity(0.05) : Colors.white,
+                color: isSelected
+                    ? const Color(0xFF2563EB).withOpacity(0.05)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0)),
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFFE2E8F0),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.location_on_rounded, color: isSelected ? const Color(0xFF2563EB) : Colors.grey),
+                  Icon(
+                    Icons.location_on_rounded,
+                    color: isSelected ? const Color(0xFF2563EB) : Colors.grey,
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(branch['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text(branch['address'] ?? '', style: TextStyle(fontSize: 12, color: Colors.grey[600]), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          branch['name'],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          branch['address'] ?? '',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
-                  if (isSelected) const Icon(Icons.check_circle, color: Color(0xFF2563EB)),
+                  if (isSelected)
+                    const Icon(Icons.check_circle, color: Color(0xFF2563EB)),
                 ],
               ),
             ),
@@ -280,49 +341,128 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {int maxLines = 1}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
       ),
-      child: TextFormField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, size: 20, color: const Color(0xFF64748B)),
-          hintText: label,
-          hintStyle: const TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
         ),
-        validator: (val) {
-          if (label.contains('Opsional')) return null;
-          if (val == null || val.isEmpty) return 'Wajib diisi';
-          return null;
-        },
+        hintText: label,
+        hintStyle: GoogleFonts.outfit(
+          color: const Color(0xFF94A3B8),
+          fontSize: 15,
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+        ),
       ),
+      validator: (val) {
+        if (label.contains('Opsional')) return null;
+        if (val == null || val.isEmpty) return 'Wajib diisi';
+        return null;
+      },
     );
   }
 
   Widget _buildServiceTypeDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+    return DropdownButtonFormField<String>(
+      value: _selectedServiceType,
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
       ),
-      child: DropdownButtonFormField<String>(
-        value: _selectedServiceType,
-        decoration: const InputDecoration(
-          prefixIcon: Icon(Icons.settings_outlined, size: 20, color: Color(0xFF64748B)),
-          border: InputBorder.none,
+      decoration: InputDecoration(
+        labelText: 'Tipe Layanan',
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
         ),
-        items: _serviceTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-        onChanged: (val) => setState(() => _selectedServiceType = val!),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.settings_outlined,
+              color: Color(0xFF2563EB),
+              size: 20,
+            ),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+        ),
       ),
+      items: _serviceTypes
+          .map(
+            (t) => DropdownMenuItem(
+              value: t,
+              child: Text(t, style: GoogleFonts.outfit(fontSize: 15)),
+            ),
+          )
+          .toList(),
+      onChanged: (val) => setState(() => _selectedServiceType = val!),
     );
   }
 
@@ -346,14 +486,28 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_rounded, size: 20, color: Color(0xFF64748B)),
+            const Icon(
+              Icons.calendar_today_rounded,
+              size: 20,
+              color: Color(0xFF64748B),
+            ),
             const SizedBox(width: 16),
             Text(
-              _selectedDate == null ? 'Pilih Tanggal' : DateFormat('EEEE, d MMMM yyyy').format(_selectedDate!),
-              style: TextStyle(color: _selectedDate == null ? const Color(0xFF94A3B8) : Colors.black),
+              _selectedDate == null
+                  ? 'Pilih Tanggal'
+                  : DateFormat('EEEE, d MMMM yyyy').format(_selectedDate!),
+              style: TextStyle(
+                color: _selectedDate == null
+                    ? const Color(0xFF94A3B8)
+                    : Colors.black,
+              ),
             ),
             const Spacer(),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFF94A3B8)),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: Color(0xFF94A3B8),
+            ),
           ],
         ),
       ),
@@ -361,13 +515,18 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   }
 
   Widget _buildTimeSlotGrid(ServiceProvider provider) {
-    if (provider.isLoading) return const Center(child: CircularProgressIndicator());
-    if (provider.availableSlots.isEmpty) return const Text('Tidak ada slot tersedia untuk tanggal ini.');
+    if (provider.isLoading)
+      return const Center(child: CircularProgressIndicator());
+    if (provider.availableSlots.isEmpty)
+      return const Text('Tidak ada slot tersedia untuk tanggal ini.');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Pilih Jam Kedatangan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        const Text(
+          'Pilih Jam Kedatangan',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
         const SizedBox(height: 12),
         GridView.builder(
           shrinkWrap: true,
@@ -385,18 +544,28 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
             final bool isSelected = _selectedTime == slot['time'];
 
             return InkWell(
-              onTap: available ? () => setState(() => _selectedTime = slot['time']) : null,
+              onTap: available
+                  ? () => setState(() => _selectedTime = slot['time'])
+                  : null,
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0F172A) : (available ? Colors.white : Colors.grey[200]),
+                  color: isSelected
+                      ? const Color(0xFF0F172A)
+                      : (available ? Colors.white : Colors.grey[200]),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0)),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFFE2E8F0),
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     slot['time'],
                     style: TextStyle(
-                      color: isSelected ? Colors.white : (available ? Colors.black : Colors.grey),
+                      color: isSelected
+                          ? Colors.white
+                          : (available ? Colors.black : Colors.grey),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -429,12 +598,28 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
             backgroundColor: const Color(0xFF2563EB),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
           ),
           child: provider.isLoading
-              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Text('KONFIRMASI BOOKING SEKARANG', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 13)),
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text(
+                  'KONFIRMASI BOOKING SEKARANG',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                    fontSize: 13,
+                  ),
+                ),
         ),
       ),
     );

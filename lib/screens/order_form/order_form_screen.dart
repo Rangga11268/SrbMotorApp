@@ -49,7 +49,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     _nikController = TextEditingController(text: user?.nik);
     _addressController = TextEditingController(text: user?.alamat);
     _sisaPembayaran = widget.motor.price;
-    
+
     // Auto-select branch from motor data (Same as Web Flow)
     if (widget.motor.branch != null) {
       _selectedBranch = widget.motor.branch;
@@ -68,7 +68,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     // Initialize colors
     if (widget.motor.colors is List) {
       _availableColors = List<String>.from(widget.motor.colors);
-    } else if (widget.motor.colors != null && widget.motor.colors.toString().isNotEmpty) {
+    } else if (widget.motor.colors != null &&
+        widget.motor.colors.toString().isNotEmpty) {
       _availableColors = [widget.motor.colors.toString()];
     }
 
@@ -84,23 +85,31 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     try {
       // Check permissions using Geolocator's built-in methods
       LocationPermission permission = await Geolocator.checkPermission();
-      
+
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Izin lokasi ditolak. Silakan berikan izin untuk mencari dealer terdekat.')),
+              const SnackBar(
+                content: Text(
+                  'Izin lokasi ditolak. Silakan berikan izin untuk mencari dealer terdekat.',
+                ),
+              ),
             );
           }
           return;
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Izin lokasi ditolak permanen. Silakan buka pengaturan aplikasi.')),
+            const SnackBar(
+              content: Text(
+                'Izin lokasi ditolak permanen. Silakan buka pengaturan aplikasi.',
+              ),
+            ),
           );
         }
         return;
@@ -112,30 +121,40 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       );
 
       final provider = context.read<MotorProvider>();
-      
+
       // 1. Get branches that actually have this unit in stock (Consistent with Web)
-      final availableBranchNames = provider.getBranchesWithMotor(widget.motor.name);
-      
+      final availableBranchNames = provider.getBranchesWithMotor(
+        widget.motor.name,
+      );
+
       Map<String, dynamic>? nearest;
-      
+
       if (availableBranchNames.isNotEmpty) {
         // Find nearest from available branches
         double minDistance = double.infinity;
         for (var branch in provider.branches) {
           final bLat = double.tryParse(branch['latitude']?.toString() ?? '');
           final bLon = double.tryParse(branch['longitude']?.toString() ?? '');
-          
+
           if (bLat != null && bLon != null) {
             // Calculate and save distance for ALL branches so UI can display it
-            final dist = provider.calculateDistance(position.latitude, position.longitude, bLat, bLon);
+            final dist = provider.calculateDistance(
+              position.latitude,
+              position.longitude,
+              bLat,
+              bLon,
+            );
             branch['distance'] = dist;
 
             final bName = branch['name']?.toString().toLowerCase() ?? '';
             final bCode = branch['code']?.toString().toLowerCase() ?? '';
             final bId = branch['id']?.toString().toLowerCase() ?? '';
-            
-            bool hasStock = availableBranchNames.any((av) => 
-              av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId
+
+            bool hasStock = availableBranchNames.any(
+              (av) =>
+                  av.toLowerCase() == bName ||
+                  av.toLowerCase() == bCode ||
+                  av.toLowerCase() == bId,
             );
 
             if (hasStock) {
@@ -150,7 +169,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
       // If no specifically available branch found, fallback to all branches nearest
       if (nearest == null) {
-        nearest = await provider.findNearestBranch(position.latitude, position.longitude);
+        nearest = await provider.findNearestBranch(
+          position.latitude,
+          position.longitude,
+        );
       }
 
       if (nearest != null && mounted) {
@@ -160,16 +182,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: const Color(0xFF10B981),
-            content: Text('Berhasil! Cabang terdekat dengan unit ready: ${nearest['name']} (${NumberFormat('#,##0.0', 'id_ID').format(nearest['distance'] ?? 0)} km)'),
+            content: Text(
+              'Berhasil! Cabang terdekat dengan unit ready: ${nearest['name']} (${NumberFormat('#,##0.0', 'id_ID').format(nearest['distance'] ?? 0)} km)',
+            ),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _selectedBranch = widget.motor.branch);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mendapatkan lokasi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal mendapatkan lokasi: $e')));
       }
     }
   }
@@ -194,30 +218,35 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       }
 
       final success = await context.read<OrderProvider>().submitCashOrder(
-            motorId: widget.motor.id,
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            nik: _nikController.text.trim(),
-            address: _addressController.text.trim(),
-            motorColor: _selectedColor ?? 'Default',
-            deliveryMethod: _deliveryMethod,
-            paymentMethod: _paymentMethod,
-            branch: _selectedBranch,
-            bookingFee: double.tryParse(_bookingFeeController.text.replaceAll('.', '')) ?? 0,
-            email: _emailController.text.trim(),
-            notes: _notesController.text.trim(),
-          );
+        motorId: widget.motor.id,
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        nik: _nikController.text.trim(),
+        address: _addressController.text.trim(),
+        motorColor: _selectedColor ?? 'Default',
+        deliveryMethod: _deliveryMethod,
+        paymentMethod: _paymentMethod,
+        branch: _selectedBranch,
+        bookingFee:
+            double.tryParse(_bookingFeeController.text.replaceAll('.', '')) ??
+            0,
+        email: _emailController.text.trim(),
+        notes: _notesController.text.trim(),
+      );
 
       if (success && mounted) {
         final lastResult = context.read<OrderProvider>().lastOrderResult;
-        
-        if (_paymentMethod == 'Transfer Bank' && lastResult?['snap_token'] != null) {
+
+        if (_paymentMethod == 'Transfer Bank' &&
+            lastResult?['snap_token'] != null) {
           _handleMidtransNativePayment(lastResult!['snap_token']);
         } else {
           _showSuccessDialog();
         }
       } else if (!success && mounted) {
-        _showErrorDialog(context.read<OrderProvider>().errorMessage ?? 'Gagal membuat pesanan');
+        _showErrorDialog(
+          context.read<OrderProvider>().errorMessage ?? 'Gagal membuat pesanan',
+        );
       }
     }
   }
@@ -239,18 +268,30 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   color: const Color(0xFF10B981).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_rounded, color: Color(0xFF10B981), size: 50),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Color(0xFF10B981),
+                  size: 50,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Pesanan Terkirim!',
-                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                style: GoogleFonts.outfit(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Terima kasih! Pesanan Anda telah kami terima. Tim kami akan segera menghubungi Anda melalui WhatsApp.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(color: const Color(0xFF64748B), height: 1.5, fontSize: 14),
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF64748B),
+                  height: 1.5,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -266,10 +307,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     backgroundColor: const Color(0xFF0F172A),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('LIHAT PESANAN SAYA', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  child: Text(
+                    'LIHAT PESANAN SAYA',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -296,18 +345,30 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   color: const Color(0xFF2563EB).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF2563EB), size: 40),
+                child: const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: Color(0xFF2563EB),
+                  size: 40,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Lanjutkan Pembayaran',
-                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Selesaikan pembayaran booking fee Anda melalui Midtrans untuk memproses pesanan.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(color: const Color(0xFF64748B), height: 1.5, fontSize: 14),
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF64748B),
+                  height: 1.5,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -317,12 +378,14 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     context.read<MainProvider>().setSelectedIndex(1);
                     final orderProvider = context.read<OrderProvider>();
                     final lastResult = orderProvider.lastOrderResult;
-                    if (lastResult != null && 
-                        lastResult['order'] != null && 
+                    if (lastResult != null &&
+                        lastResult['order'] != null &&
                         lastResult['order']['installments'] != null &&
-                        (lastResult['order']['installments'] as List).isNotEmpty) {
+                        (lastResult['order']['installments'] as List)
+                            .isNotEmpty) {
                       final orderData = lastResult['order'];
-                      final firstInst = (orderData['installments'] as List).first;
+                      final firstInst =
+                          (orderData['installments'] as List).first;
                       final instId = firstInst['id'];
                       final orderId = orderData['id'];
                       if (instId != null && orderId != null) {
@@ -344,10 +407,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('BAYAR SEKARANG', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  child: Text(
+                    'BAYAR SEKARANG',
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -373,16 +444,36 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   color: const Color(0xFFEF4444).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 40),
+                child: const Icon(
+                  Icons.error_outline_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 40,
+                ),
               ),
               const SizedBox(height: 16),
-              Text('Terjadi Kesalahan', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                'Terjadi Kesalahan',
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 12),
-              Text(message, textAlign: TextAlign.center, style: GoogleFonts.outfit(color: const Color(0xFF64748B))),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(color: const Color(0xFF64748B)),
+              ),
               const SizedBox(height: 24),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('TUTUP', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFEF4444))),
+                child: Text(
+                  'TUTUP',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFEF4444),
+                  ),
+                ),
               ),
             ],
           ),
@@ -395,17 +486,33 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   Widget build(BuildContext context) {
     final isLoading = context.watch<OrderProvider>().isLoading;
     final motorProvider = context.watch<MotorProvider>();
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('FORMULIR PEMBELIAN', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A), fontSize: 16, letterSpacing: 1)),
+        title: Text(
+          'FORMULIR PEMBELIAN',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0F172A),
+            fontSize: 16,
+            letterSpacing: 1,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF0F172A), size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -419,7 +526,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               children: [
                 _buildMotorSummary(currencyFormat),
                 const SizedBox(height: 32),
-                
+
                 _buildSectionHeader('INFORMASI CABANG'),
                 const SizedBox(height: 16),
                 _buildBranchSelection(motorProvider),
@@ -427,17 +534,41 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
                 _buildSectionHeader('INFORMASI PELANGGAN'),
                 const SizedBox(height: 16),
-                _buildTextField(_nameController, 'Nama Lengkap', Icons.person_rounded, hint: 'Sesuai KTP'),
+                _buildTextField(
+                  _nameController,
+                  'Nama Lengkap',
+                  Icons.person_rounded,
+                  hint: 'Sesuai KTP',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_phoneController, 'WhatsApp', Icons.phone_android_rounded, keyboardType: TextInputType.phone, hint: 'Contoh: 0812...'),
+                _buildTextField(
+                  _phoneController,
+                  'WhatsApp',
+                  Icons.phone_android_rounded,
+                  keyboardType: TextInputType.phone,
+                  hint: 'Contoh: 0812...',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_emailController, 'Email', Icons.email_rounded, keyboardType: TextInputType.emailAddress, hint: 'Alamat email aktif'),
+                _buildTextField(
+                  _emailController,
+                  'Email',
+                  Icons.email_rounded,
+                  keyboardType: TextInputType.emailAddress,
+                  hint: 'Alamat email aktif',
+                ),
                 const SizedBox(height: 16),
-                _buildTextField(_nikController, 'NIK', Icons.badge_rounded, keyboardType: TextInputType.number, maxLength: 16, hint: '16 digit nomor KTP'),
+                _buildTextField(
+                  _nikController,
+                  'NIK',
+                  Icons.badge_rounded,
+                  keyboardType: TextInputType.number,
+                  maxLength: 16,
+                  hint: '16 digit nomor KTP',
+                ),
                 const SizedBox(height: 16),
                 _buildDropdownColor(),
                 const SizedBox(height: 32),
-                
+
                 _buildSectionHeader('PENGIRIMAN & PEMBAYARAN'),
                 const SizedBox(height: 16),
                 _buildToggleSelection(
@@ -460,44 +591,88 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   'Alamat Lengkap',
                   Icons.location_on_rounded,
                   maxLines: 3,
-                  hint: _deliveryMethod == 'Kirim ke Rumah' 
-                      ? 'Alamat tujuan pengiriman unit...' 
+                  hint: _deliveryMethod == 'Kirim ke Rumah'
+                      ? 'Alamat tujuan pengiriman unit...'
                       : 'Alamat domisili untuk STNK/BPKB',
                 ),
                 const SizedBox(height: 16),
-                
-                _buildTextField(_bookingFeeController, 'Booking Fee', Icons.payments_rounded, keyboardType: TextInputType.number, isCurrency: true, hint: 'Opsional (Rp)'),
-                
-                if (_bookingFeeController.text.isNotEmpty && double.parse(_bookingFeeController.text.replaceAll('.', '')) > 0)
+
+                _buildTextField(
+                  _bookingFeeController,
+                  'Booking Fee',
+                  Icons.payments_rounded,
+                  keyboardType: TextInputType.number,
+                  isCurrency: true,
+                  hint: 'Opsional (Rp)',
+                ),
+
+                if (_bookingFeeController.text.isNotEmpty &&
+                    double.parse(
+                          _bookingFeeController.text.replaceAll('.', ''),
+                        ) >
+                        0)
                   _buildRemainingBalanceCard(currencyFormat),
-                
+
                 const SizedBox(height: 16),
-                _buildTextField(_notesController, 'Catatan Tambahan', Icons.chat_bubble_rounded, maxLines: 2, hint: 'Tulis pesan khusus jika ada...'),
-                
+                _buildTextField(
+                  _notesController,
+                  'Catatan Tambahan',
+                  Icons.chat_bubble_rounded,
+                  maxLines: 2,
+                  hint: 'Tulis pesan khusus jika ada...',
+                ),
+
                 const SizedBox(height: 48),
-                
+
                 ElevatedButton(
                   onPressed: isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                     elevation: 4,
                     shadowColor: const Color(0xFF2563EB).withOpacity(0.4),
                   ),
                   child: isLoading
-                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text('KONFIRMASI PESANAN', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'KONFIRMASI PESANAN',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 24),
                 Center(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.verified_user_rounded, size: 16, color: Color(0xFF10B981)),
+                      const Icon(
+                        Icons.verified_user_rounded,
+                        size: 16,
+                        color: Color(0xFF10B981),
+                      ),
                       const SizedBox(width: 8),
-                      Text('Data aman dan terenkripsi oleh sistem', style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500)),
+                      Text(
+                        'Data aman dan terenkripsi oleh sistem',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -518,7 +693,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0xFFF1F5F9)),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8)),
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Row(
@@ -544,11 +723,33 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.motor.brand.toUpperCase(), style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF2563EB), letterSpacing: 1)),
+                Text(
+                  widget.motor.brand.toUpperCase(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2563EB),
+                    letterSpacing: 1,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(widget.motor.name, style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+                Text(
+                  widget.motor.name,
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(format.format(widget.motor.price), style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+                Text(
+                  format.format(widget.motor.price),
+                  style: GoogleFonts.outfit(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
               ],
             ),
           ),
@@ -558,40 +759,61 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   }
 
   Widget _buildNoImage() {
-    return Container(width: 110, height: 90, color: const Color(0xFFF1F5F9), child: const Icon(Icons.motorcycle_rounded, color: Color(0xFFCBD5E1), size: 32));
+    return Container(
+      width: 110,
+      height: 90,
+      color: const Color(0xFFF1F5F9),
+      child: const Icon(
+        Icons.motorcycle_rounded,
+        color: Color(0xFFCBD5E1),
+        size: 32,
+      ),
+    );
   }
 
   Widget _buildSectionHeader(String title) {
     return Text(
-      title, 
+      title,
       style: GoogleFonts.outfit(
-        fontSize: 12, 
-        fontWeight: FontWeight.bold, 
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
         color: const Color(0xFF64748B),
-        letterSpacing: 1.5
-      )
+        letterSpacing: 1.5,
+      ),
     );
   }
 
   Widget _buildBranchSelection(MotorProvider provider) {
-    final availableBranchNames = provider.getBranchesWithMotor(widget.motor.name);
-    
+    final availableBranchNames = provider.getBranchesWithMotor(
+      widget.motor.name,
+    );
+
     // Sort branches: Put available ones at top, then by distance
     final sortedBranches = List<Map<String, dynamic>>.from(provider.branches);
     sortedBranches.sort((a, b) {
       final aName = a['name']?.toString().toLowerCase() ?? '';
       final aCode = a['code']?.toString().toLowerCase() ?? '';
       final aId = a['id']?.toString().toLowerCase() ?? '';
-      final aAvailable = availableBranchNames.any((av) => av.toLowerCase() == aName || av.toLowerCase() == aCode || av.toLowerCase() == aId);
+      final aAvailable = availableBranchNames.any(
+        (av) =>
+            av.toLowerCase() == aName ||
+            av.toLowerCase() == aCode ||
+            av.toLowerCase() == aId,
+      );
 
       final bName = b['name']?.toString().toLowerCase() ?? '';
       final bCode = b['code']?.toString().toLowerCase() ?? '';
       final bId = b['id']?.toString().toLowerCase() ?? '';
-      final bAvailable = availableBranchNames.any((av) => av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId);
-      
+      final bAvailable = availableBranchNames.any(
+        (av) =>
+            av.toLowerCase() == bName ||
+            av.toLowerCase() == bCode ||
+            av.toLowerCase() == bId,
+      );
+
       if (aAvailable && !bAvailable) return -1;
       if (!aAvailable && bAvailable) return 1;
-      
+
       // If both same availability, sort by distance if available
       if (a['distance'] != null && b['distance'] != null) {
         return (a['distance'] as double).compareTo(b['distance'] as double);
@@ -634,19 +856,40 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: provider.isLocationLoading ? null : _checkNearestBranch,
-                      icon: provider.isLocationLoading 
-                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2563EB)))
-                        : const Icon(Icons.my_location_rounded, size: 16),
+                      onPressed: provider.isLocationLoading
+                          ? null
+                          : _checkNearestBranch,
+                      icon: provider.isLocationLoading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF2563EB),
+                              ),
+                            )
+                          : const Icon(Icons.my_location_rounded, size: 16),
                       label: Text(
-                        provider.isLocationLoading ? 'Mencari...' : 'Cek Lokasi',
-                        style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold),
+                        provider.isLocationLoading
+                            ? 'Mencari...'
+                            : 'Cek Lokasi',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       style: TextButton.styleFrom(
                         foregroundColor: const Color(0xFF2563EB),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        backgroundColor: const Color(0xFF2563EB).withOpacity(0.08),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        backgroundColor: const Color(
+                          0xFF2563EB,
+                        ).withOpacity(0.08),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
@@ -656,130 +899,183 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       'Silakan klik "Cek Lokasi" untuk mencari dealer terdekat',
-                      style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFFEF4444), fontWeight: FontWeight.w500),
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: const Color(0xFFEF4444),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
               ],
             ),
           ),
           const Divider(height: 1, color: Color(0xFFF1F5F9)),
-          
+
           // Logic: Show only selected branch OR show all if toggled
-          ...sortedBranches.where((b) => _showAllBranches || _selectedBranch?.toLowerCase() == b['name'].toString().toLowerCase()).map((branch) {
-            final isSelected = _selectedBranch?.toLowerCase() == branch['name'].toString().toLowerCase();
-            
-            final bName = branch['name']?.toString().toLowerCase() ?? '';
-            final bCode = branch['code']?.toString().toLowerCase() ?? '';
-            final bId = branch['id']?.toString().toLowerCase() ?? '';
-            final isAvailable = availableBranchNames.any((av) => av.toLowerCase() == bName || av.toLowerCase() == bCode || av.toLowerCase() == bId);
-            
-            return InkWell(
-              onTap: () => setState(() {
-                _selectedBranch = branch['name'];
-                _showAllBranches = false; // Auto-collapse after select
-              }),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF2563EB).withOpacity(0.04) : Colors.transparent,
-                  border: Border(bottom: BorderSide(color: branch == sortedBranches.last || (!_showAllBranches && isSelected) ? Colors.transparent : const Color(0xFFF1F5F9))),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 2),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.location_on_rounded, 
-                        size: 18, 
-                        color: isSelected ? Colors.white : const Color(0xFF64748B)
+          ...sortedBranches
+              .where(
+                (b) =>
+                    _showAllBranches ||
+                    _selectedBranch?.toLowerCase() ==
+                        b['name'].toString().toLowerCase(),
+              )
+              .map((branch) {
+                final isSelected =
+                    _selectedBranch?.toLowerCase() ==
+                    branch['name'].toString().toLowerCase();
+
+                final bName = branch['name']?.toString().toLowerCase() ?? '';
+                final bCode = branch['code']?.toString().toLowerCase() ?? '';
+                final bId = branch['id']?.toString().toLowerCase() ?? '';
+                final isAvailable = availableBranchNames.any(
+                  (av) =>
+                      av.toLowerCase() == bName ||
+                      av.toLowerCase() == bCode ||
+                      av.toLowerCase() == bId,
+                );
+
+                return InkWell(
+                  onTap: () => setState(() {
+                    _selectedBranch = branch['name'];
+                    _showAllBranches = false; // Auto-collapse after select
+                  }),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF2563EB).withOpacity(0.04)
+                          : Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
+                          color:
+                              branch == sortedBranches.last ||
+                                  (!_showAllBranches && isSelected)
+                              ? Colors.transparent
+                              : const Color(0xFFF1F5F9),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            branch['name'], 
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.bold, 
-                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A), 
-                              fontSize: 15
-                            )
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFF2563EB)
+                                : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(height: 6),
-                          Row(
+                          child: Icon(
+                            Icons.location_on_rounded,
+                            size: 18,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (isAvailable) ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.check_circle_outline_rounded, size: 10, color: Color(0xFF059669)),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'READY',
+                              Text(
+                                branch['name'],
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected
+                                      ? const Color(0xFF2563EB)
+                                      : const Color(0xFF0F172A),
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  if (isAvailable) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF10B981,
+                                        ).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_outline_rounded,
+                                            size: 10,
+                                            color: Color(0xFF059669),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'READY',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w900,
+                                              color: const Color(0xFF059669),
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  if (branch['distance'] != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF2563EB,
+                                        ).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        '${NumberFormat('#,##0.0', 'id_ID').format(branch['distance'])} KM',
                                         style: GoogleFonts.outfit(
-                                          fontSize: 9, 
-                                          fontWeight: FontWeight.w900, 
-                                          color: const Color(0xFF059669),
-                                          letterSpacing: 0.5
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF2563EB),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              if (branch['distance'] != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2563EB).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    '${NumberFormat('#,##0.0', 'id_ID').format(branch['distance'])} KM',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF2563EB),
                                     ),
-                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                branch['address'] ?? '',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  color: const Color(0xFF64748B),
+                                  height: 1.4,
                                 ),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            branch['address'] ?? '', 
-                            style: GoogleFonts.outfit(
-                              fontSize: 12, 
-                              color: const Color(0xFF64748B),
-                              height: 1.4
-                            )
+                        ),
+                        if (isSelected && !_showAllBranches)
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF2563EB),
+                            size: 26,
                           ),
-                        ],
-                      ),
+                      ],
                     ),
-                    if (isSelected && !_showAllBranches)
-                      const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 26),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
+                  ),
+                );
+              })
+              .toList(),
 
           // Button to show all
           if (!_showAllBranches && _selectedBranch != null)
@@ -795,7 +1091,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF64748B),
-                      letterSpacing: 1
+                      letterSpacing: 1,
                     ),
                   ),
                 ),
@@ -806,11 +1102,23 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     );
   }
 
-  Widget _buildToggleSelection({required String label, required List<String> options, required String currentValue, required Function(String) onChanged}) {
+  Widget _buildToggleSelection({
+    required String label,
+    required List<String> options,
+    required String currentValue,
+    required Function(String) onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF475569))),
+        Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF475569),
+          ),
+        ),
         const SizedBox(height: 10),
         Row(
           children: options.map((option) {
@@ -820,13 +1128,29 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 onTap: () => onChanged(option),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.only(right: option == options.first ? 10 : 0, left: option == options.last ? 10 : 0),
+                  margin: EdgeInsets.only(
+                    right: option == options.first ? 10 : 0,
+                    left: option == options.last ? 10 : 0,
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFF0F172A) : Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0), width: 1.5),
-                    boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))] : [],
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFE2E8F0),
+                      width: 1.5,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF0F172A).withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Center(
                     child: Text(
@@ -834,8 +1158,10 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       style: GoogleFonts.outfit(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : const Color(0xFF475569),
-                        letterSpacing: 0.5
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF475569),
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -849,78 +1175,168 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   }
 
   Widget _buildDropdownColor() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+    return DropdownButtonFormField<String>(
+      value: _selectedColor,
+      icon: const Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: Color(0xFF64748B),
       ),
-      child: DropdownButtonFormField<String>(
-        value: _selectedColor,
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
-        decoration: InputDecoration(
-          labelText: 'Pilih Warna Motor',
-          labelStyle: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 14),
-          prefixIcon: const Icon(Icons.palette_rounded, color: Color(0xFF64748B)),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
+      ),
+      decoration: InputDecoration(
+        labelText: 'Pilih Warna Motor',
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
         ),
-        dropdownColor: Colors.white,
-        items: _availableColors.map((color) => DropdownMenuItem(value: color, child: Text(color, style: GoogleFonts.outfit()))).toList(),
-        onChanged: (val) => setState(() => _selectedColor = val),
-        validator: (value) => value == null ? 'Warna wajib dipilih' : null,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.palette_rounded,
+              color: Color(0xFF2563EB),
+              size: 20,
+            ),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
       ),
+      dropdownColor: Colors.white,
+      items: _availableColors
+          .map(
+            (color) => DropdownMenuItem(
+              value: color,
+              child: Text(color, style: GoogleFonts.outfit()),
+            ),
+          )
+          .toList(),
+      onChanged: (val) => setState(() => _selectedColor = val),
+      validator: (value) => value == null ? 'Warna wajib dipilih' : null,
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {TextInputType? keyboardType, int maxLines = 1, int? maxLength, bool isCurrency = false, String? hint}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    int? maxLength,
+    bool isCurrency = false,
+    String? hint,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      maxLength: maxLength,
+      style: GoogleFonts.outfit(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF0F172A),
       ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        maxLength: maxLength,
-        style: GoogleFonts.outfit(fontSize: 15, color: const Color(0xFF0F172A)),
-        onChanged: (value) {
-          if (isCurrency) {
-            String cleaned = value.replaceAll('.', '').replaceAll(RegExp(r'[^0-9]'), '');
-            if (cleaned.isNotEmpty) {
-              final formatter = NumberFormat.decimalPattern('id_ID');
-              String formatted = formatter.format(int.parse(cleaned));
-              controller.value = TextEditingValue(
-                text: formatted,
-                selection: TextSelection.collapsed(offset: formatted.length),
-              );
-            }
-            setState(() {
-              double booking = double.tryParse(cleaned) ?? 0;
-              _sisaPembayaran = widget.motor.price - booking;
-            });
+      onChanged: (value) {
+        if (isCurrency) {
+          String cleaned = value
+              .replaceAll('.', '')
+              .replaceAll(RegExp(r'[^0-9]'), '');
+          if (cleaned.isNotEmpty) {
+            final formatter = NumberFormat.decimalPattern('id_ID');
+            String formatted = formatter.format(int.parse(cleaned));
+            controller.value = TextEditingValue(
+              text: formatted,
+              selection: TextSelection.collapsed(offset: formatted.length),
+            );
           }
-        },
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 14),
-          hintText: hint,
-          hintStyle: GoogleFonts.outfit(color: const Color(0xFFCBD5E1), fontSize: 14),
-          prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 22),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          counterText: '',
+          setState(() {
+            double booking = double.tryParse(cleaned) ?? 0;
+            _sisaPembayaran = widget.motor.price - booking;
+          });
+        }
+      },
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.outfit(
+          color: const Color(0xFF64748B),
+          fontSize: 14,
         ),
-        validator: (value) {
-          if (label.contains('Opsional') || label.contains('Booking Fee') || label.contains('Catatan')) return null;
-          if (value == null || value.isEmpty) return '$label wajib diisi';
-          if (label.contains('NIK') && value.length != 16) return 'NIK harus 16 digit';
-          return null;
-        },
+        hintText: hint,
+        hintStyle: GoogleFonts.outfit(
+          color: const Color(0xFF94A3B8),
+          fontSize: 15,
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+        ),
+        counterText: '',
       ),
+      validator: (value) {
+        if (label.contains('Opsional') ||
+            label.contains('Booking Fee') ||
+            label.contains('Catatan'))
+          return null;
+        if (value == null || value.isEmpty) return '$label wajib diisi';
+        if (label.contains('NIK') && value.length != 16)
+          return 'NIK harus 16 digit';
+        return null;
+      },
     );
   }
 
@@ -932,7 +1348,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       decoration: BoxDecoration(
         color: isOverPrice ? const Color(0xFFFEF2F2) : const Color(0xFFF0FDF4),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isOverPrice ? const Color(0xFFFEE2E2) : const Color(0xFFDCFCE7)),
+        border: Border.all(
+          color: isOverPrice
+              ? const Color(0xFFFEE2E2)
+              : const Color(0xFFDCFCE7),
+        ),
       ),
       child: Column(
         children: [
@@ -942,15 +1362,21 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               Text(
                 'ESTIMASI PELUNASAN',
                 style: GoogleFonts.outfit(
-                  fontSize: 11, 
-                  fontWeight: FontWeight.bold, 
-                  color: isOverPrice ? const Color(0xFFB91C1C) : const Color(0xFF15803D),
-                  letterSpacing: 1.2
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isOverPrice
+                      ? const Color(0xFFB91C1C)
+                      : const Color(0xFF15803D),
+                  letterSpacing: 1.2,
                 ),
               ),
               Text(
                 format.format(_sisaPembayaran < 0 ? 0 : _sisaPembayaran),
-                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
               ),
             ],
           ),
@@ -959,7 +1385,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               padding: const EdgeInsets.only(top: 12),
               child: Text(
                 'Booking fee melebihi harga unit!',
-                style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFFB91C1C), fontWeight: FontWeight.bold),
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: const Color(0xFFB91C1C),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
         ],

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -37,19 +37,34 @@ class _CatalogScreenState extends State<CatalogScreen> {
           SliverToBoxAdapter(
             child: Stack(
               children: [
-                // Header with Premium Gradient
+                // Header with Asset Image Background
                 Container(
                   height: 280,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF0F2249), Color(0xFF194291)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/banner/banner.webp'),
+                      fit: BoxFit.cover,
                     ),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(40),
                       bottomRight: Radius.circular(40),
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(40),
+                        bottomRight: Radius.circular(40),
+                      ),
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF0F2249).withOpacity(0.7),
+                          const Color(0xFF0F2249).withOpacity(0.9),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
                   ),
                 ),
@@ -161,10 +176,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           const SizedBox(height: 8),
           Text(
             'Koleksi motor premium Honda & Yamaha terbaik.',
-            style: GoogleFonts.outfit(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
+            style: GoogleFonts.outfit(fontSize: 14, color: Colors.white70),
           ),
         ],
       ),
@@ -236,12 +248,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        
+
         // Horizontal Filter Chips (Quick Select)
         _buildQuickFilterSection(
           items: ['Semua', ...motorProvider.brands],
           selectedValue: motorProvider.selectedBrand ?? 'Semua',
-          onSelected: (val) => motorProvider.setBrand(val == 'Semua' ? null : val),
+          onSelected: (val) =>
+              motorProvider.setBrand(val == 'Semua' ? null : val),
         ),
       ],
     );
@@ -262,7 +275,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         itemBuilder: (context, index) {
           final isSelected = selectedValue == items[index];
           final String label = items[index].toUpperCase();
-          
+
           return Padding(
             padding: const EdgeInsets.only(right: 12),
             child: Material(
@@ -283,7 +296,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       ),
                     ],
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                      color: isSelected
+                          ? const Color(0xFF2563EB)
+                          : const Color(0xFFE2E8F0),
                       width: 1.5,
                     ),
                   ),
@@ -294,7 +309,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         fontSize: 12,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1,
-                        color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF1E293B),
                       ),
                     ),
                   ),
@@ -307,7 +324,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  void _showFilterBottomSheet(BuildContext context, MotorProvider motorProvider) {
+  void _showFilterBottomSheet(
+    BuildContext context,
+    MotorProvider motorProvider,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -316,7 +336,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
         builder: (context, setModalState) {
           return Container(
             height: MediaQuery.of(context).size.height * 0.75,
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -355,7 +377,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             color: Color(0xFFF1F5F9),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 20,
+                            color: Color(0xFF64748B),
+                          ),
                         ),
                       ),
                     ],
@@ -375,14 +401,24 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          _buildChoiceChip('Semua', motorProvider.selectedCategory == null, () {
-                            motorProvider.setCategory(null);
-                            setModalState(() {});
-                          }),
-                          ...motorProvider.categories.map((c) => _buildChoiceChip(c.name, motorProvider.selectedCategory == c.name, () {
+                          _buildChoiceChip(
+                            'Semua',
+                            motorProvider.selectedCategory == null,
+                            () {
+                              motorProvider.setCategory(null);
+                              setModalState(() {});
+                            },
+                          ),
+                          ...motorProvider.categories.map(
+                            (c) => _buildChoiceChip(
+                              c.name,
+                              motorProvider.selectedCategory == c.name,
+                              () {
                                 motorProvider.setCategory(c.name);
                                 setModalState(() {});
-                              })),
+                              },
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -392,17 +428,21 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         children: [
                           Expanded(
                             child: _buildPriceField(
-                              'MIN', 
-                              motorProvider.minPrice, 
-                              (val) => motorProvider.setMinPrice(double.tryParse(val.replaceAll('.', '')))
+                              'MIN',
+                              motorProvider.minPrice,
+                              (val) => motorProvider.setMinPrice(
+                                double.tryParse(val.replaceAll('.', '')),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildPriceField(
-                              'MAX', 
-                              motorProvider.maxPrice, 
-                              (val) => motorProvider.setMaxPrice(double.tryParse(val.replaceAll('.', '')))
+                              'MAX',
+                              motorProvider.maxPrice,
+                              (val) => motorProvider.setMaxPrice(
+                                double.tryParse(val.replaceAll('.', '')),
+                              ),
                             ),
                           ),
                         ],
@@ -415,14 +455,24 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       const SizedBox(height: 12),
                       Column(
                         children: [
-                          _buildBranchItem('Semua Lokasi', motorProvider.selectedBranch == null, () {
-                            motorProvider.setBranch(null);
-                            setModalState(() {});
-                          }),
-                          ...motorProvider.branches.map((b) => _buildBranchItem(b['name'], motorProvider.selectedBranch == b['name'], () {
+                          _buildBranchItem(
+                            'Semua Lokasi',
+                            motorProvider.selectedBranch == null,
+                            () {
+                              motorProvider.setBranch(null);
+                              setModalState(() {});
+                            },
+                          ),
+                          ...motorProvider.branches.map(
+                            (b) => _buildBranchItem(
+                              b['name'],
+                              motorProvider.selectedBranch == b['name'],
+                              () {
                                 motorProvider.setBranch(b['name']);
                                 setModalState(() {});
-                              })),
+                              },
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 32),
@@ -434,7 +484,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
                     ],
                   ),
                   child: Column(
@@ -444,12 +498,18 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2563EB),
                           minimumSize: const Size(double.infinity, 54),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 0,
                         ),
                         child: Text(
                           'Terapkan Filter',
-                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -507,7 +567,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Widget _buildChoiceChip(String label, bool isSelected, VoidCallback onSelected) {
+  Widget _buildChoiceChip(
+    String label,
+    bool isSelected,
+    VoidCallback onSelected,
+  ) {
     return FilterChip(
       label: Text(label),
       selected: isSelected,
@@ -529,7 +593,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Widget _buildPriceField(String label, double? value, Function(String) onChanged) {
+  Widget _buildPriceField(
+    String label,
+    double? value,
+    Function(String) onChanged,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
@@ -540,13 +608,23 @@ class _CatalogScreenState extends State<CatalogScreen> {
       child: TextField(
         onChanged: onChanged,
         keyboardType: TextInputType.number,
-        controller: TextEditingController(text: value?.toStringAsFixed(0) ?? "")..selection = TextSelection.collapsed(offset: (value?.toStringAsFixed(0) ?? "").length),
+        controller: TextEditingController(text: value?.toStringAsFixed(0) ?? "")
+          ..selection = TextSelection.collapsed(
+            offset: (value?.toStringAsFixed(0) ?? "").length,
+          ),
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: label,
-          hintStyle: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF94A3B8)),
+          hintStyle: GoogleFonts.outfit(
+            fontSize: 13,
+            color: const Color(0xFF94A3B8),
+          ),
           prefixText: 'Rp ',
-          prefixStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+          prefixStyle: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF475569),
+          ),
         ),
       ),
     );
@@ -560,23 +638,57 @@ class _CatalogScreenState extends State<CatalogScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB).withOpacity(0.05) : const Color(0xFFF8FAFC),
+          color: isSelected
+              ? const Color(0xFF2563EB).withOpacity(0.05)
+              : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0), width: isSelected ? 1.5 : 1),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF2563EB)
+                : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
         child: Row(
           children: [
-            Icon(Icons.location_on_rounded, size: 16, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8)),
+            Icon(
+              Icons.location_on_rounded,
+              size: 16,
+              color: isSelected
+                  ? const Color(0xFF2563EB)
+                  : const Color(0xFF94A3B8),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF334155)))),
-            if (isSelected) const Icon(Icons.check_circle_rounded, size: 18, color: Color(0xFF2563EB)),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF334155),
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                size: 18,
+                color: Color(0xFF2563EB),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPriceInput(String label, String hint, double? value, Function(String) onChanged) {
+  Widget _buildPriceInput(
+    String label,
+    String hint,
+    double? value,
+    Function(String) onChanged,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -590,13 +702,24 @@ class _CatalogScreenState extends State<CatalogScreen> {
           child: TextField(
             keyboardType: TextInputType.number,
             onChanged: onChanged,
-            controller: TextEditingController(text: value?.toStringAsFixed(0) ?? "")..selection = TextSelection.collapsed(offset: (value?.toStringAsFixed(0) ?? "").length),
+            controller:
+                TextEditingController(text: value?.toStringAsFixed(0) ?? "")
+                  ..selection = TextSelection.collapsed(
+                    offset: (value?.toStringAsFixed(0) ?? "").length,
+                  ),
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
-              hintStyle: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF94A3B8)),
+              hintStyle: GoogleFonts.outfit(
+                fontSize: 14,
+                color: const Color(0xFF94A3B8),
+              ),
               prefixText: 'Rp ',
-              prefixStyle: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF475569)),
+              prefixStyle: GoogleFonts.outfit(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF475569),
+              ),
             ),
           ),
         ),
@@ -605,8 +728,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
   }
 
   Widget _buildActiveFilters(MotorProvider motorProvider) {
-    if (motorProvider.selectedBrand == null && 
-        motorProvider.selectedCategory == null && 
+    if (motorProvider.selectedBrand == null &&
+        motorProvider.selectedCategory == null &&
         (motorProvider.searchQuery?.isEmpty ?? true)) {
       return const SliverToBoxAdapter(child: SizedBox());
     }
@@ -618,9 +741,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
           spacing: 8,
           children: [
             if (motorProvider.selectedBrand != null)
-              _buildActiveChip(motorProvider.selectedBrand!, () => motorProvider.setBrand(null)),
+              _buildActiveChip(
+                motorProvider.selectedBrand!,
+                () => motorProvider.setBrand(null),
+              ),
             if (motorProvider.selectedCategory != null)
-              _buildActiveChip(motorProvider.selectedCategory!, () => motorProvider.setCategory(null)),
+              _buildActiveChip(
+                motorProvider.selectedCategory!,
+                () => motorProvider.setCategory(null),
+              ),
           ],
         ),
       ),
@@ -633,7 +762,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
       onDeleted: onDelete,
       deleteIconColor: Colors.white70,
       backgroundColor: const Color(0xFF1E293B),
-      labelStyle: GoogleFonts.outfit(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+      labelStyle: GoogleFonts.outfit(
+        color: Colors.white,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     );
   }
@@ -662,7 +795,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.sort_rounded, size: 16, color: Color(0xFF64748B)),
+                  const Icon(
+                    Icons.sort_rounded,
+                    size: 16,
+                    color: Color(0xFF64748B),
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Terbaru',
@@ -692,7 +829,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         ),
       );
     }
-    
+
     if (motorProvider.motors.isEmpty) {
       return SliverToBoxAdapter(
         child: Center(
@@ -703,7 +840,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
               const SizedBox(height: 16),
               Text(
                 'Motor tidak ditemukan',
-                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
               TextButton(
                 onPressed: () => motorProvider.initializeData(),
@@ -761,7 +902,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
                       image: motor.imagePath != null
                           ? DecorationImage(
                               image: CachedNetworkImageProvider(
@@ -777,9 +920,12 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: motor.tersedia 
+                        color: motor.tersedia
                             ? const Color(0xFF22C55E)
                             : const Color(0xFFEF4444),
                         borderRadius: BorderRadius.circular(30),
@@ -806,8 +952,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
                           Text(
                             motor.tersedia ? 'READY' : 'SOLD',
                             style: GoogleFonts.outfit(
-                              color: Colors.white, 
-                              fontSize: 9, 
+                              color: Colors.white,
+                              fontSize: 9,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
                             ),
@@ -821,7 +967,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       bottom: 12,
                       right: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(12),
@@ -836,20 +985,26 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.location_on_rounded, size: 10, color: Colors.blueAccent),
+                            const Icon(
+                              Icons.location_on_rounded,
+                              size: 10,
+                              color: Colors.blueAccent,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               (motor.branch ?? motor.branchCode ?? 'Jakarta')
                                   .replaceAll('_', ' ')
                                   .split(' ')
-                                  .map((str) => str.isNotEmpty 
-                                      ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}' 
-                                      : '')
+                                  .map(
+                                    (str) => str.isNotEmpty
+                                        ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}'
+                                        : '',
+                                  )
                                   .join(' '),
                               style: GoogleFonts.outfit(
-                                color: const Color(0xFF1E293B), 
-                                fontSize: 9, 
-                                fontWeight: FontWeight.w800
+                                color: const Color(0xFF1E293B),
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
@@ -902,7 +1057,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(10),
@@ -911,7 +1069,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         fit: BoxFit.scaleDown,
                         child: Row(
                           children: [
-                            _buildMiniSpec(Icons.flash_on_rounded, '${motor.engine ?? 155}cc'),
+                            _buildMiniSpec(
+                              Icons.flash_on_rounded,
+                              '${motor.engine ?? 155}cc',
+                            ),
                             const SizedBox(width: 12),
                             _buildMiniSpec(Icons.settings_outlined, 'Matic'),
                           ],
@@ -935,7 +1096,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
         const SizedBox(width: 4),
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 9, fontWeight: FontWeight.bold, color: const Color(0xFF64748B)),
+          style: GoogleFonts.outfit(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF64748B),
+          ),
         ),
       ],
     );
