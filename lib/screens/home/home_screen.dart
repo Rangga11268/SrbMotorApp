@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final mainProvider = context.watch<MainProvider>();
-    
+
     // Safety check to prevent RangeError
     int currentIndex = mainProvider.selectedIndex;
     if (currentIndex >= _pages.length) {
@@ -55,11 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 8,
           shape: const CircleBorder(),
           mini: true,
-          child: const Icon(
-            Icons.chat_rounded,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.chat_rounded, color: Colors.white, size: 20),
         ),
       ),
       bottomNavigationBar: CustomBottomNav(
@@ -185,20 +181,28 @@ class _HomeContentState extends State<HomeContent> {
                         height: 32,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Text(
-                        'SRB MOTORS',
+                        'X',
                         style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -0.5,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white70,
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        'assets/images/logos/logoSSM.webp',
+                        height: 32,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox.shrink(),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 2),
                   Text(
-                    'Support by SSM',
+                    'Partner Resmi Terpercaya',
                     style: GoogleFonts.outfit(
                       fontSize: 10,
                       color: Colors.white.withOpacity(0.5),
@@ -224,7 +228,10 @@ class _HomeContentState extends State<HomeContent> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const NotificationScreen(),
+                              ),
                             );
                           },
                         ),
@@ -246,15 +253,22 @@ class _HomeContentState extends State<HomeContent> {
                   ),
                   const SizedBox(width: 12),
                   GestureDetector(
-                    onTap: () => context.read<MainProvider>().setSelectedIndex(4),
+                    onTap: () =>
+                        context.read<MainProvider>().setSelectedIndex(4),
                     child: Container(
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1.5,
+                        ),
                         image: DecorationImage(
-                          image: NetworkImage(user?.profilePhotoPath ?? 'https://ui-avatars.com/api/?name=${user?.name ?? "User"}&background=2563EB&color=fff'),
+                          image: NetworkImage(
+                            user?.profilePhotoPath ??
+                                'https://ui-avatars.com/api/?name=${user?.name ?? "User"}&background=2563EB&color=fff',
+                          ),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -265,7 +279,7 @@ class _HomeContentState extends State<HomeContent> {
             ],
           ),
           const SizedBox(height: 28),
-          
+
           // Row 2: Greeting
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,7 +360,10 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.tune_rounded, color: Color(0xFF0F2249)),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    color: Color(0xFF0F2249),
+                  ),
                 ),
               ),
             ],
@@ -750,8 +767,8 @@ class _HomeContentState extends State<HomeContent> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: motor.tersedia 
-                            ? const Color(0xFF22C55E).withValues(alpha: 0.9) 
+                        color: motor.tersedia
+                            ? const Color(0xFF22C55E).withValues(alpha: 0.9)
                             : const Color(0xFFEF4444).withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
@@ -808,7 +825,10 @@ class _HomeContentState extends State<HomeContent> {
                       bottom: 10,
                       right: 10,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(10),
@@ -822,15 +842,21 @@ class _HomeContentState extends State<HomeContent> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.location_on_rounded, size: 8, color: Colors.blueAccent),
+                            const Icon(
+                              Icons.location_on_rounded,
+                              size: 8,
+                              color: Colors.blueAccent,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               motor.branchCode!
                                   .replaceAll('_', ' ')
                                   .split(' ')
-                                  .map((str) => str.isNotEmpty 
-                                      ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}' 
-                                      : '')
+                                  .map(
+                                    (str) => str.isNotEmpty
+                                        ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}'
+                                        : '',
+                                  )
                                   .join(' '),
                               style: GoogleFonts.outfit(
                                 fontSize: 8,
@@ -888,8 +914,14 @@ class _HomeContentState extends State<HomeContent> {
                     spacing: 8,
                     runSpacing: 4,
                     children: [
-                      _buildFeatureItem(Icons.bolt_rounded, '${motor.engine ?? 155}cc'),
-                      _buildFeatureItem(Icons.settings_suggest_rounded, motor.type ?? 'Matic'),
+                      _buildFeatureItem(
+                        Icons.bolt_rounded,
+                        '${motor.engine ?? 155}cc',
+                      ),
+                      _buildFeatureItem(
+                        Icons.settings_suggest_rounded,
+                        motor.type ?? 'Matic',
+                      ),
                     ],
                   ),
                 ],
@@ -1073,10 +1105,7 @@ class _HomeContentState extends State<HomeContent> {
                 SizedBox(
                   height: 45,
                   width: 80,
-                  child: Image.asset(
-                    brand['logo']!,
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset(brand['logo']!, fit: BoxFit.contain),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -1132,7 +1161,10 @@ class _HomeContentState extends State<HomeContent> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2563EB),
                     borderRadius: BorderRadius.circular(8),
@@ -1159,16 +1191,25 @@ class _HomeContentState extends State<HomeContent> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => context.read<MainProvider>().setSelectedIndex(2),
+                  onPressed: () =>
+                      context.read<MainProvider>().setSelectedIndex(2),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF0F172A),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     'Booking Sekarang',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12),
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
@@ -1181,9 +1222,21 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildServicePackages() {
     final packages = [
-      {'name': 'Ganti Oli Plus', 'price': 'Rp 85.000', 'icon': Icons.opacity_rounded},
-      {'name': 'Servis Lengkap', 'price': 'Rp 150.000', 'icon': Icons.settings_rounded},
-      {'name': 'Cek Kelistrikan', 'price': 'Rp 50.000', 'icon': Icons.bolt_rounded},
+      {
+        'name': 'Ganti Oli Plus',
+        'price': 'Rp 85.000',
+        'icon': Icons.opacity_rounded,
+      },
+      {
+        'name': 'Servis Lengkap',
+        'price': 'Rp 150.000',
+        'icon': Icons.settings_rounded,
+      },
+      {
+        'name': 'Cek Kelistrikan',
+        'price': 'Rp 50.000',
+        'icon': Icons.bolt_rounded,
+      },
     ];
 
     return Column(
@@ -1216,20 +1269,32 @@ class _HomeContentState extends State<HomeContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(packages[index]['icon'] as IconData, color: const Color(0xFF2563EB), size: 24),
+                    Icon(
+                      packages[index]['icon'] as IconData,
+                      color: const Color(0xFF2563EB),
+                      size: 24,
+                    ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           packages[index]['name'] as String,
-                          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF0F172A)),
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: const Color(0xFF0F172A),
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           packages[index]['price'] as String,
-                          style: GoogleFonts.outfit(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 12),
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xFF2563EB),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -1245,8 +1310,16 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildTestimonials() {
     final reviews = [
-      {'name': 'Budi Santoso', 'comment': 'Pelayanan cepat, motor jadi kayak baru lagi! Mantap SRB.', 'stars': 5},
-      {'name': 'Siti Aminah', 'comment': 'Dealer paling terpercaya di Kaliabang. Salesnya ramah.', 'stars': 5},
+      {
+        'name': 'Budi Santoso',
+        'comment': 'Pelayanan cepat, motor jadi kayak baru lagi! Mantap SRB.',
+        'stars': 5,
+      },
+      {
+        'name': 'Siti Aminah',
+        'comment': 'Dealer paling terpercaya di Kaliabang. Salesnya ramah.',
+        'stars': 5,
+      },
     ];
 
     return Column(
@@ -1272,13 +1345,26 @@ class _HomeContentState extends State<HomeContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: List.generate(5, (i) => Icon(Icons.star_rounded, color: i < (reviews[index]['stars'] as int) ? Colors.orange : Colors.grey[300], size: 16)),
+                      children: List.generate(
+                        5,
+                        (i) => Icon(
+                          Icons.star_rounded,
+                          color: i < (reviews[index]['stars'] as int)
+                              ? Colors.orange
+                              : Colors.grey[300],
+                          size: 16,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Expanded(
                       child: Text(
                         '"${reviews[index]['comment']}"',
-                        style: GoogleFonts.outfit(fontSize: 13, fontStyle: FontStyle.italic, color: const Color(0xFF475569)),
+                        style: GoogleFonts.outfit(
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                          color: const Color(0xFF475569),
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1286,7 +1372,11 @@ class _HomeContentState extends State<HomeContent> {
                     const SizedBox(height: 8),
                     Text(
                       reviews[index]['name'] as String,
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12, color: const Color(0xFF0F172A)),
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: const Color(0xFF0F172A),
+                      ),
                     ),
                   ],
                 ),
@@ -1303,12 +1393,14 @@ class _HomeContentState extends State<HomeContent> {
       {
         'title': '5 Tips Merawat Mesin Agar Tetap Awet',
         'category': 'Tips & Trik',
-        'image': 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop',
+        'image':
+            'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop',
       },
       {
         'title': 'Pilih Oli yang Tepat untuk Motor Anda',
         'category': 'Panduan',
-        'image': 'https://images.unsplash.com/photo-1591438122444-0d5042462e21?q=80&w=2070&auto=format&fit=crop',
+        'image':
+            'https://images.unsplash.com/photo-1591438122444-0d5042462e21?q=80&w=2070&auto=format&fit=crop',
       },
     ];
 
@@ -1341,7 +1433,9 @@ class _HomeContentState extends State<HomeContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                       child: Image.network(
                         articles[index]['image']!,
                         height: 140,
@@ -1350,7 +1444,10 @@ class _HomeContentState extends State<HomeContent> {
                         errorBuilder: (c, e, s) => Container(
                           height: 140,
                           color: Colors.grey[200],
-                          child: const Icon(Icons.image_not_supported_rounded, color: Colors.grey),
+                          child: const Icon(
+                            Icons.image_not_supported_rounded,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -1420,6 +1517,7 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
+
   void _showFilterModal(BuildContext context, MotorProvider provider) {
     showModalBottomSheet(
       context: context,
@@ -1430,7 +1528,9 @@ class _HomeContentState extends State<HomeContent> {
           builder: (context, setModalState) {
             return Container(
               height: MediaQuery.of(context).size.height * 0.75,
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -1469,7 +1569,11 @@ class _HomeContentState extends State<HomeContent> {
                               color: Color(0xFFF1F5F9),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 20,
+                              color: Color(0xFF64748B),
+                            ),
                           ),
                         ),
                       ],
@@ -1489,7 +1593,13 @@ class _HomeContentState extends State<HomeContent> {
                                 provider.setCategory(null);
                                 setModalState(() {});
                               },
-                              child: Text('Reset', style: GoogleFonts.outfit(color: Colors.redAccent, fontSize: 12)),
+                              child: Text(
+                                'Reset',
+                                style: GoogleFonts.outfit(
+                                  color: Colors.redAccent,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -1498,14 +1608,24 @@ class _HomeContentState extends State<HomeContent> {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            _buildChoiceChip('Semua', provider.selectedCategory == null, () {
-                              provider.setCategory(null);
-                              setModalState(() {});
-                            }),
-                            ...provider.categories.map((c) => _buildChoiceChip(c.name, provider.selectedCategory == c.name, () {
+                            _buildChoiceChip(
+                              'Semua',
+                              provider.selectedCategory == null,
+                              () {
+                                provider.setCategory(null);
+                                setModalState(() {});
+                              },
+                            ),
+                            ...provider.categories.map(
+                              (c) => _buildChoiceChip(
+                                c.name,
+                                provider.selectedCategory == c.name,
+                                () {
                                   provider.setCategory(c.name);
                                   setModalState(() {});
-                                })),
+                                },
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -1513,13 +1633,21 @@ class _HomeContentState extends State<HomeContent> {
                         const SizedBox(height: 16),
                         Row(
                           children: [
-                            Expanded(child: _buildPriceInput('Min (Rp)', (val) {
-                              provider.setMinPrice(double.tryParse(val.replaceAll('.', '')));
-                            })),
+                            Expanded(
+                              child: _buildPriceInput('Min (Rp)', (val) {
+                                provider.setMinPrice(
+                                  double.tryParse(val.replaceAll('.', '')),
+                                );
+                              }),
+                            ),
                             const SizedBox(width: 12),
-                            Expanded(child: _buildPriceInput('Max (Rp)', (val) {
-                              provider.setMaxPrice(double.tryParse(val.replaceAll('.', '')));
-                            })),
+                            Expanded(
+                              child: _buildPriceInput('Max (Rp)', (val) {
+                                provider.setMaxPrice(
+                                  double.tryParse(val.replaceAll('.', '')),
+                                );
+                              }),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -1527,14 +1655,24 @@ class _HomeContentState extends State<HomeContent> {
                         const SizedBox(height: 12),
                         Column(
                           children: [
-                            _buildBranchFilterItem('Semua Lokasi', provider.selectedBranch == null, () {
-                              provider.setBranch(null);
-                              setModalState(() {});
-                            }),
-                            ...provider.branches.map((b) => _buildBranchFilterItem(b['name'], provider.selectedBranch == b['name'], () {
+                            _buildBranchFilterItem(
+                              'Semua Lokasi',
+                              provider.selectedBranch == null,
+                              () {
+                                provider.setBranch(null);
+                                setModalState(() {});
+                              },
+                            ),
+                            ...provider.branches.map(
+                              (b) => _buildBranchFilterItem(
+                                b['name'],
+                                provider.selectedBranch == b['name'],
+                                () {
                                   provider.setBranch(b['name']);
                                   setModalState(() {});
-                                })),
+                                },
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 32),
@@ -1546,7 +1684,11 @@ class _HomeContentState extends State<HomeContent> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -5),
+                        ),
                       ],
                     ),
                     child: ElevatedButton(
@@ -1554,12 +1696,18 @@ class _HomeContentState extends State<HomeContent> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2563EB),
                         minimumSize: const Size(double.infinity, 54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         elevation: 0,
                       ),
                       child: Text(
                         'Tampilkan Hasil',
-                        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -1586,13 +1734,20 @@ class _HomeContentState extends State<HomeContent> {
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: label,
-          hintStyle: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF94A3B8)),
+          hintStyle: GoogleFonts.outfit(
+            fontSize: 14,
+            color: const Color(0xFF94A3B8),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildBranchFilterItem(String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildBranchFilterItem(
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1600,16 +1755,45 @@ class _HomeContentState extends State<HomeContent> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB).withOpacity(0.05) : const Color(0xFFF8FAFC),
+          color: isSelected
+              ? const Color(0xFF2563EB).withOpacity(0.05)
+              : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0), width: isSelected ? 1.5 : 1),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF2563EB)
+                : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
         child: Row(
           children: [
-            Icon(Icons.location_on_rounded, size: 16, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8)),
+            Icon(
+              Icons.location_on_rounded,
+              size: 16,
+              color: isSelected
+                  ? const Color(0xFF2563EB)
+                  : const Color(0xFF94A3B8),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF334155)))),
-            if (isSelected) const Icon(Icons.check_circle_rounded, size: 18, color: Color(0xFF2563EB)),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF334155),
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                size: 18,
+                color: Color(0xFF2563EB),
+              ),
           ],
         ),
       ),
@@ -1627,7 +1811,11 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildChoiceChip(String label, bool isSelected, VoidCallback onSelected) {
+  Widget _buildChoiceChip(
+    String label,
+    bool isSelected,
+    VoidCallback onSelected,
+  ) {
     return FilterChip(
       label: Text(label),
       selected: isSelected,

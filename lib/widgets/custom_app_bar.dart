@@ -28,82 +28,88 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Image.asset(
                   'assets/images/logos/logo_srb.webp',
                   height: 30,
-                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
                 ),
                 const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'SRB MOTOR',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E293B),
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Text(
-                      'Support by SSM',
-                      style: GoogleFonts.inter(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF64748B),
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'X',
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Image.asset(
+                  'assets/images/logos/logoSSM.webp',
+                  height: 30,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
                 ),
               ],
             )
           : (title != null
-              ? Text(
-                  title!,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1E293B),
-                  ),
-                )
-              : null),
-      actions: actions ?? [
-        Consumer<NotificationProvider>(
-          builder: (context, provider, child) {
-            return Stack(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const NotificationScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.notifications_none_outlined, color: Colors.black87),
-                ),
-                if (provider.unreadCount > 0)
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                      child: Text(
-                        '${provider.unreadCount > 9 ? '9+' : provider.unreadCount}',
-                        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
+                ? Text(
+                    title!,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1E293B),
                     ),
                   )
-              ],
-            );
-          },
-        ),
-        const SizedBox(width: 8),
-      ],
+                : null),
+      actions:
+          actions ??
+          [
+            Consumer<NotificationProvider>(
+              builder: (context, provider, child) {
+                return Stack(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.notifications_none_outlined,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    if (provider.unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${provider.unreadCount > 9 ? '9+' : provider.unreadCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
       iconTheme: const IconThemeData(color: Colors.black87),
     );
   }

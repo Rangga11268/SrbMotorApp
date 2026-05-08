@@ -93,42 +93,86 @@ class _ServiceScreenState extends State<ServiceScreen> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.blueAccent.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'PROMO BULAN INI',
-              style: GoogleFonts.inter(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: Colors.blueAccent,
-                letterSpacing: 1,
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Opacity(
+              opacity: 0.1,
+              child: Image.asset(
+                'assets/images/logos/logoSSM.webp',
+                height: 100,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Servis Lengkap\nDiskon 20%',
-            style: GoogleFonts.inter(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Berlaku untuk semua jenis motor di semua cabang SRB Motor.',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: Colors.white.withOpacity(0.7),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'PROMO BULAN INI',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.blueAccent,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'Powered by',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Image.asset(
+                        'assets/images/logos/logoSSM.webp',
+                        height: 14,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Servis Lengkap\nDiskon 20%',
+                style: GoogleFonts.inter(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Berlaku untuk semua jenis motor di semua cabang SRB Motor.',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.white.withOpacity(0.7),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -131,6 +131,32 @@ class ServiceTicketScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Servis Oleh:',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.asset(
+                        'assets/images/logos/logoSSM.webp',
+                        height: 24,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
