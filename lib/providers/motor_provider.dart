@@ -263,10 +263,10 @@ class MotorProvider with ChangeNotifier {
     }
   }
 
-  // Find all branches that have a motor with the same name
+  // Find all branches that have a motor with the same name and are in stock
   List<String> getBranchesWithMotor(String motorName) {
     return _allMotors
-        .where((m) => m.name.toLowerCase() == motorName.toLowerCase())
+        .where((m) => m.name.toLowerCase() == motorName.toLowerCase() && m.tersedia == true)
         .map((m) => m.branch?.toString() ?? '')
         .where((b) => b.isNotEmpty)
         .toSet() // Remove duplicates

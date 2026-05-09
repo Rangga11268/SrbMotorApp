@@ -63,18 +63,31 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
       text: NumberFormat.decimalPattern('id_ID').format(_dpAmount),
     );
 
-    // Auto-select branch from motor data (Same as Web Flow)
+    // Auto-select branch from motor data — but only if it has stock
+    final motorProvider = context.read<MotorProvider>();
+    final availableBranches = motorProvider.getBranchesWithMotor(widget.motor.name);
+
     if (widget.motor.branch != null) {
-      _selectedBranch = widget.motor.branch;
+      // Only auto-select if this branch actually has stock
+      final branchLower = widget.motor.branch!.toLowerCase();
+      final hasStock = availableBranches.any((av) => av.toLowerCase() == branchLower);
+      if (hasStock) {
+        _selectedBranch = widget.motor.branch;
+      }
     } else if (widget.motor.branchCode != null) {
-      // Try to find branch name by code
-      final motorProvider = context.read<MotorProvider>();
       final branch = motorProvider.branches.firstWhere(
         (b) => b['id'].toString() == widget.motor.branchCode.toString(),
         orElse: () => <String, dynamic>{},
       );
       if (branch.isNotEmpty) {
-        _selectedBranch = branch['name'];
+        final bName = branch['name']?.toString().toLowerCase() ?? '';
+        final bCode = branch['code']?.toString().toLowerCase() ?? '';
+        final hasStock = availableBranches.any(
+          (av) => av.toLowerCase() == bName || av.toLowerCase() == bCode,
+        );
+        if (hasStock) {
+          _selectedBranch = branch['name'];
+        }
       }
     }
 
@@ -180,12 +193,17 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
         }
       }
 
-      // If no specifically available branch found, fallback to all branches nearest
-      if (nearest == null) {
-        nearest = await provider.findNearestBranch(
-          position.latitude,
-          position.longitude,
+      // If no available branch found, warn user instead of fallback
+      if (nearest == null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFFEF4444),
+            content: Text(
+              'Tidak ada cabang yang memiliki stok unit ini. Silakan coba motor lain.',
+            ),
+          ),
         );
+        return;
       }
 
       if (nearest != null && mounted) {
@@ -203,7 +221,6 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _selectedBranch = widget.motor.branch);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Gagal mendapatkan lokasi: $e')));
@@ -806,33 +823,20 @@ class _CreditOrderFormScreenState extends State<CreditOrderFormScreen> {
       widget.motor.name,
     );
 
-    // Sort branches: Put available ones at top, then by distance
-    final sortedBranches = List<Map<String, dynamic>>.from(provider.branches);
-    sortedBranches.sort((a, b) {
-      final aName = a['name']?.toString().toLowerCase() ?? '';
-      final aCode = a['code']?.toString().toLowerCase() ?? '';
-      final aId = a['id']?.toString().toLowerCase() ?? '';
-      final aAvailable = availableBranchNames.any(
-        (av) =>
-            av.toLowerCase() == aName ||
-            av.toLowerCase() == aCode ||
-            av.toLowerCase() == aId,
-      );
-
+    // Filter and sort branches: Only show available ones, then by distance
+    final sortedBranches = List<Map<String, dynamic>>.from(provider.branches).where((b) {
       final bName = b['name']?.toString().toLowerCase() ?? '';
       final bCode = b['code']?.toString().toLowerCase() ?? '';
       final bId = b['id']?.toString().toLowerCase() ?? '';
-      final bAvailable = availableBranchNames.any(
+      return availableBranchNames.any(
         (av) =>
             av.toLowerCase() == bName ||
             av.toLowerCase() == bCode ||
             av.toLowerCase() == bId,
       );
+    }).toList();
 
-      if (aAvailable && !bAvailable) return -1;
-      if (!aAvailable && bAvailable) return 1;
-
-      // If both same availability, sort by distance if available
+    sortedBranches.sort((a, b) {
       if (a['distance'] != null && b['distance'] != null) {
         return (a['distance'] as double).compareTo(b['distance'] as double);
       }

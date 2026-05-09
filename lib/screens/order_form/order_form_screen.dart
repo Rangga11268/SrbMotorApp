@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/motor.dart';
 import '../../providers/order_provider.dart';
@@ -39,6 +41,32 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
   List<String> _availableColors = [];
 
+  File? _ktpImage;
+  File? _kkImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(bool isKtp) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (image != null) {
+        setState(() {
+          if (isKtp) {
+            _ktpImage = File(image.path);
+          } else {
+            _kkImage = File(image.path);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Gagal mengambil gambar: $e');
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -50,18 +78,30 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
     _addressController = TextEditingController(text: user?.alamat);
     _sisaPembayaran = widget.motor.price;
 
-    // Auto-select branch from motor data (Same as Web Flow)
+    // Auto-select branch from motor data — but only if it has stock
+    final motorProvider = context.read<MotorProvider>();
+    final availableBranches = motorProvider.getBranchesWithMotor(widget.motor.name);
+
     if (widget.motor.branch != null) {
-      _selectedBranch = widget.motor.branch;
+      final branchLower = widget.motor.branch!.toLowerCase();
+      final hasStock = availableBranches.any((av) => av.toLowerCase() == branchLower);
+      if (hasStock) {
+        _selectedBranch = widget.motor.branch;
+      }
     } else if (widget.motor.branchCode != null) {
-      // Try to find branch name by code
-      final motorProvider = context.read<MotorProvider>();
       final branch = motorProvider.branches.firstWhere(
         (b) => b['id'].toString() == widget.motor.branchCode.toString(),
         orElse: () => <String, dynamic>{},
       );
       if (branch.isNotEmpty) {
-        _selectedBranch = branch['name'];
+        final bName = branch['name']?.toString().toLowerCase() ?? '';
+        final bCode = branch['code']?.toString().toLowerCase() ?? '';
+        final hasStock = availableBranches.any(
+          (av) => av.toLowerCase() == bName || av.toLowerCase() == bCode,
+        );
+        if (hasStock) {
+          _selectedBranch = branch['name'];
+        }
       }
     }
 
@@ -167,12 +207,17 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         }
       }
 
-      // If no specifically available branch found, fallback to all branches nearest
-      if (nearest == null) {
-        nearest = await provider.findNearestBranch(
-          position.latitude,
-          position.longitude,
+      // If no available branch found, warn user instead of fallback
+      if (nearest == null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFFEF4444),
+            content: Text(
+              'Tidak ada cabang yang memiliki stok unit ini. Silakan coba motor lain.',
+            ),
+          ),
         );
+        return;
       }
 
       if (nearest != null && mounted) {
@@ -190,7 +235,6 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _selectedBranch = widget.motor.branch);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Gagal mendapatkan lokasi: $e')));
@@ -217,6 +261,11 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
         return;
       }
 
+      if (_ktpImage == null || _kkImage == null) {
+        _showErrorDialog('Mohon unggah dokumen KTP dan KK Anda.');
+        return;
+      }
+
       final success = await context.read<OrderProvider>().submitCashOrder(
         motorId: widget.motor.id,
         name: _nameController.text.trim(),
@@ -232,6 +281,8 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
             0,
         email: _emailController.text.trim(),
         notes: _notesController.text.trim(),
+        ktpImage: _ktpImage,
+        kkImage: _kkImage,
       );
 
       if (success && mounted) {
@@ -569,6 +620,23 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 _buildDropdownColor(),
                 const SizedBox(height: 32),
 
+                _buildSectionHeader('DOKUMEN PERSYARATAN'),
+                const SizedBox(height: 16),
+                _buildDocumentUploadCard(
+                  title: 'Foto KTP',
+                  subtitle: 'Unggah foto KTP asli yang jelas terbaca',
+                  image: _ktpImage,
+                  onTap: () => _pickImage(true),
+                ),
+                const SizedBox(height: 12),
+                _buildDocumentUploadCard(
+                  title: 'Foto Kartu Keluarga (KK)',
+                  subtitle: 'Unggah foto KK yang jelas terbaca',
+                  image: _kkImage,
+                  onTap: () => _pickImage(false),
+                ),
+                const SizedBox(height: 32),
+
                 _buildSectionHeader('PENGIRIMAN & PEMBAYARAN'),
                 const SizedBox(height: 16),
                 _buildToggleSelection(
@@ -788,33 +856,20 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
       widget.motor.name,
     );
 
-    // Sort branches: Put available ones at top, then by distance
-    final sortedBranches = List<Map<String, dynamic>>.from(provider.branches);
-    sortedBranches.sort((a, b) {
-      final aName = a['name']?.toString().toLowerCase() ?? '';
-      final aCode = a['code']?.toString().toLowerCase() ?? '';
-      final aId = a['id']?.toString().toLowerCase() ?? '';
-      final aAvailable = availableBranchNames.any(
-        (av) =>
-            av.toLowerCase() == aName ||
-            av.toLowerCase() == aCode ||
-            av.toLowerCase() == aId,
-      );
-
+    // Filter and sort branches: Only show available ones, then by distance
+    final sortedBranches = List<Map<String, dynamic>>.from(provider.branches).where((b) {
       final bName = b['name']?.toString().toLowerCase() ?? '';
       final bCode = b['code']?.toString().toLowerCase() ?? '';
       final bId = b['id']?.toString().toLowerCase() ?? '';
-      final bAvailable = availableBranchNames.any(
+      return availableBranchNames.any(
         (av) =>
             av.toLowerCase() == bName ||
             av.toLowerCase() == bCode ||
             av.toLowerCase() == bId,
       );
+    }).toList();
 
-      if (aAvailable && !bAvailable) return -1;
-      if (!aAvailable && bAvailable) return 1;
-
-      // If both same availability, sort by distance if available
+    sortedBranches.sort((a, b) {
       if (a['distance'] != null && b['distance'] != null) {
         return (a['distance'] as double).compareTo(b['distance'] as double);
       }
@@ -1393,6 +1448,86 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentUploadCard({
+    required String title,
+    required String subtitle,
+    required File? image,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: image != null ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+            width: image != null ? 2 : 1.5,
+          ),
+          boxShadow: [
+            if (image != null)
+              BoxShadow(
+                color: const Color(0xFF2563EB).withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: image != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(11),
+                      child: Image.file(image, fit: BoxFit.cover),
+                    )
+                  : const Icon(
+                      Icons.add_a_photo_rounded,
+                      color: Color(0xFF94A3B8),
+                    ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    image != null ? 'Dokumen terunggah' : subtitle,
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: image != null ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              image != null ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
+              color: image != null ? const Color(0xFF10B981) : const Color(0xFFCBD5E1),
+            ),
+          ],
+        ),
       ),
     );
   }

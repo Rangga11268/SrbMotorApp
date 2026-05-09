@@ -41,29 +41,38 @@ class OrderService {
     required String motorColor,
     required String deliveryMethod,
     required String paymentMethod,
+    required dynamic ktpImage,
+    required dynamic kkImage,
     String? branch,
     double? bookingFee,
     String? email,
     String? notes,
   }) async {
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}/orders/cash'),
-      headers: await ApiConfig.headers,
-      body: jsonEncode({
-        'motor_id': motorId,
-        'customer_name': name,
-        'customer_phone': phone,
-        'customer_email': email,
-        'customer_nik': nik,
-        'customer_address': address,
-        'motor_color': motorColor,
-        'delivery_method': deliveryMethod,
-        'payment_method': paymentMethod,
-        'branch': branch,
-        'booking_fee': bookingFee,
-        'notes': notes,
-      }),
-    ).timeout(const Duration(seconds: 10));
+    final uri = Uri.parse('${ApiConfig.baseUrl}/orders/cash');
+    final request = http.MultipartRequest('POST', uri);
+
+    final headers = await ApiConfig.headers;
+    headers.remove('Content-Type');
+    request.headers.addAll(headers);
+
+    request.fields['motor_id'] = motorId.toString();
+    request.fields['customer_name'] = name;
+    request.fields['customer_phone'] = phone;
+    request.fields['customer_nik'] = nik;
+    request.fields['customer_address'] = address;
+    request.fields['motor_color'] = motorColor;
+    request.fields['delivery_method'] = deliveryMethod;
+    request.fields['payment_method'] = paymentMethod;
+    if (branch != null) request.fields['branch'] = branch;
+    if (bookingFee != null) request.fields['booking_fee'] = bookingFee.toString();
+    if (email != null) request.fields['customer_email'] = email;
+    if (notes != null) request.fields['notes'] = notes;
+
+    request.files.add(await http.MultipartFile.fromPath('ktp_image', ktpImage.path));
+    request.files.add(await http.MultipartFile.fromPath('kk_image', kkImage.path));
+
+    final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+    final response = await http.Response.fromStream(streamedResponse);
 
     final data = jsonDecode(response.body);
     if (response.statusCode == 201 || response.statusCode == 200) {
