@@ -86,8 +86,10 @@ class _MyAppState extends State<MyApp> {
       // Ketika transaksi selesai (baik sukses, batal, atau pending),
       // paksa pengecekan otomatis (sync) ke backend agar status "Lunas" instan
       final orderProvider = context.read<OrderProvider>();
+      final serviceProvider = context.read<ServiceProvider>();
       if (mounted) {
         orderProvider.syncActivePayment();
+        serviceProvider.syncServiceHistory();
       }
     });
   }

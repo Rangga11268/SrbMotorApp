@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../providers/service_provider.dart';
+import '../../main.dart';
 
 class ServiceTicketScreen extends StatelessWidget {
   final Map<String, dynamic> ticket;
@@ -10,7 +14,7 @@ class ServiceTicketScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = (ticket['status'] ?? 'pending').toString().toLowerCase();
     final bool isCompleted = status == 'completed' || status == 'selesai';
-    final bool isPending = status == 'pending' || status == 'menunggu';
+    final bool isUnpaid = ticket['payment_status'] == 'unpaid';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -29,50 +33,101 @@ class ServiceTicketScreen extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: Color(0xFF1E293B)),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+      body: Consumer<ServiceProvider>(
+        builder: (context, serviceProvider, _) {
+          // Use latest data from provider if available
+          final currentTicket = serviceProvider.history.firstWhere(
+            (t) => t['id'] == ticket['id'],
+            orElse: () => ticket,
+          );
+          
+          final currentStatus = (currentTicket['status'] ?? 'pending').toString().toLowerCase();
+          final bool canPay = currentStatus == 'completed' && currentTicket['payment_status'] == 'unpaid' && currentTicket['total_cost'] != null;
+
+          return Stack(
             children: [
-              _buildTicketCard(context, status),
-              const SizedBox(height: 32),
-              if (isPending && ticket['payment_status'] != 'paid')
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showPaymentDialog(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 8,
-                      shadowColor: const Color(
-                        0xFF2563EB,
-                      ).withValues(alpha: 0.3),
-                    ),
-                    child: Text(
-                      'Bayar Sekarang',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _buildTicketCard(context, currentTicket),
+                      const SizedBox(height: 32),
+                      if (canPay)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _handlePayment(context, currentTicket['id']);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2563EB),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 8,
+                              shadowColor: const Color(
+                                0xFF2563EB,
+                              ).withValues(alpha: 0.3),
+                            ),
+                            child: Text(
+                              'Bayar Sekarang',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+              ),
+              if (serviceProvider.isLoading)
+                Container(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildTicketCard(BuildContext context, String currentStatus) {
+  void _handlePayment(BuildContext context, int id) async {
+    final serviceProvider = context.read<ServiceProvider>();
+    final result = await serviceProvider.getServicePaymentToken(id);
+
+    if (result['success'] && result['snap_token'] != null) {
+      try {
+        final token = result['snap_token'];
+        midtrans?.startPaymentUiFlow(token: token);
+        
+        // After starting UI flow, we should eventually refresh the status
+        // The main.dart callback will handle the sync
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal membuka halaman pembayaran')),
+          );
+        }
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Gagal membuat token pembayaran')),
+        );
+      }
+    }
+  }
+
+  Widget _buildTicketCard(BuildContext context, Map<String, dynamic> ticketData) {
+    final status = (ticketData['status'] ?? 'pending').toString().toLowerCase();
+    
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -114,7 +169,7 @@ class ServiceTicketScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        ticket['motor_model'] ?? 'Servis Motor',
+                        ticketData['motor_model'] ?? 'Servis Motor',
                         style: GoogleFonts.outfit(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -122,7 +177,7 @@ class ServiceTicketScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        ticket['plate_number'] ?? '-',
+                        ticketData['plate_number'] ?? '-',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: Colors.white.withValues(alpha: 0.7),
@@ -168,24 +223,44 @@ class ServiceTicketScreen extends StatelessWidget {
               children: [
                 _buildInfoRow(
                   'Nomor Antrean',
-                  ticket['queue_number']?.toString() ?? '-',
+                  ticketData['queue_number']?.toString() ?? '-',
                 ),
                 const Divider(height: 32, color: Color(0xFFF1F5F9)),
-                _buildInfoRow('Jenis Servis', ticket['service_type'] ?? '-'),
+                _buildInfoRow('Jenis Servis', ticketData['service_type'] ?? '-'),
                 const SizedBox(height: 16),
                 _buildInfoRow(
                   'Jadwal',
-                  '${ticket['service_date'] ?? ''} ${ticket['service_time'] ?? ''}',
+                  '${ticketData['service_date'] ?? ''} ${ticketData['service_time'] ?? ''}',
                 ),
                 const SizedBox(height: 16),
-                _buildInfoRow('Cabang', ticket['branch'] ?? 'Pusat'),
+                _buildInfoRow('Cabang', ticketData['branch'] ?? 'Pusat'),
 
-                if (ticket['complaint_notes'] != null) ...[
+                if (ticketData['complaint_notes'] != null) ...[
                   const SizedBox(height: 16),
-                  _buildInfoRow('Keluhan', ticket['complaint_notes']),
+                  _buildInfoRow('Keluhan', ticketData['complaint_notes']),
                 ],
+
+                // Itemized Service Details
+                if (ticketData['service_notes'] != null) ...[
+                  const Divider(height: 32, color: Color(0xFFF1F5F9)),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Rincian Pekerjaan & Suku Cadang',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF64748B),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildItemizedList(ticketData['service_notes']),
+                ],
+
                 const Divider(height: 32, color: Color(0xFFF1F5F9)),
-                _buildStatusRow(currentStatus),
+                _buildStatusRow(status, ticketData['payment_status']),
               ],
             ),
           ),
@@ -194,7 +269,7 @@ class ServiceTicketScreen extends StatelessWidget {
           _buildTearEdge(),
 
           // Footer Section (Total Cost)
-          if (ticket['estimated_cost'] != null || ticket['total_cost'] != null)
+          if (ticketData['estimated_cost'] != null || ticketData['total_cost'] != null)
             Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
@@ -207,14 +282,14 @@ class ServiceTicketScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Estimasi Biaya',
+                    status == 'completed' ? 'Total Biaya' : 'Estimasi Biaya',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: const Color(0xFF64748B),
                     ),
                   ),
                   Text(
-                    'Rp ${ticket['total_cost'] ?? ticket['estimated_cost']}',
+                    'Rp ${ticketData['total_cost'] ?? ticketData['estimated_cost']}',
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -257,7 +332,7 @@ class ServiceTicketScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusRow(String status) {
+  Widget _buildStatusRow(String status, String? paymentStatus) {
     Color statusColor;
     String statusText;
 
@@ -265,12 +340,16 @@ class ServiceTicketScreen extends StatelessWidget {
       case 'completed':
       case 'selesai':
         statusColor = Colors.green;
-        statusText = 'Selesai';
+        statusText = paymentStatus == 'paid' ? 'Selesai & Lunas' : 'Selesai (Belum Bayar)';
         break;
       case 'pending':
       case 'menunggu':
         statusColor = Colors.orange;
         statusText = 'Menunggu';
+        break;
+      case 'in_progress':
+        statusColor = Colors.blue;
+        statusText = 'Sedang Dikerjakan';
         break;
       case 'cancelled':
       case 'batal':
@@ -326,37 +405,54 @@ class ServiceTicketScreen extends StatelessWidget {
     );
   }
 
-  void _showPaymentDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.info_outline_rounded,
-              color: Colors.blue,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Informasi',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Text(
-          'Fitur pembayaran online untuk servis sedang dalam pengembangan. Silakan lakukan pembayaran langsung di bengkel setelah servis selesai.',
-          style: GoogleFonts.inter(color: const Color(0xFF64748B)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
+  Widget _buildItemizedList(dynamic serviceNotes) {
+    try {
+      final List<dynamic> items = serviceNotes is String 
+          ? jsonDecode(serviceNotes) 
+          : serviceNotes;
+      
+      return Column(
+        children: items.map((item) => _buildItemRow(
+          item['name'] ?? 'Item',
+          item['qty']?.toString() ?? '1',
+          item['price']?.toString() ?? '0',
+        )).toList(),
+      );
+    } catch (e) {
+      return Text(
+        serviceNotes.toString(),
+        style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF1E293B)),
+      );
+    }
+  }
+
+  Widget _buildItemRow(String name, String qty, String price) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
             child: Text(
-              'Tutup',
+              name,
+              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF1E293B)),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              'x$qty',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              'Rp $price',
+              textAlign: TextAlign.right,
               style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF2563EB),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1E293B),
               ),
             ),
           ),
@@ -365,3 +461,4 @@ class ServiceTicketScreen extends StatelessWidget {
     );
   }
 }
+

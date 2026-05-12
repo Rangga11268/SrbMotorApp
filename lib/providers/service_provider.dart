@@ -107,4 +107,23 @@ class ServiceProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<Map<String, dynamic>> getServicePaymentToken(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      return await _service.getPaymentToken(id);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> syncServiceHistory() async {
+    await fetchHistory();
+  }
 }

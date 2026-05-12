@@ -82,4 +82,24 @@ class ServiceBookingService {
       return {'success': false, 'message': data['message'] ?? 'Gagal membatalkan servis'};
     }
   }
+
+  Future<Map<String, dynamic>> getPaymentToken(int appointmentId) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/services/$appointmentId/pay'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'snap_token': data['token'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Gagal mendapatkan token pembayaran',
+      };
+    }
+  }
 }
