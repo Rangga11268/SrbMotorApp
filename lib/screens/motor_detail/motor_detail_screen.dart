@@ -10,6 +10,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import '../../models/motor.dart';
 import '../order_form/order_form_screen.dart';
 import '../order_form/credit_order_form_screen.dart';
+import '../../utils/currency_util.dart';
 
 class MotorDetailScreen extends StatefulWidget {
   final Motor motor;
@@ -22,11 +23,6 @@ class MotorDetailScreen extends StatefulWidget {
 class _MotorDetailScreenState extends State<MotorDetailScreen> {
   int _selectedTenor = 36;
   late double _dpAmount;
-  final currencyFormat = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
 
   @override
   void initState() {
@@ -45,7 +41,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
   void _launchWhatsApp() async {
     final phone = context.read<MotorProvider>().contactPhone;
     final message = Uri.encodeComponent(
-      'Halo SRB Motor, saya tertarik dengan unit ${widget.motor.name} (${currencyFormat.format(widget.motor.price)}). Bisa minta info lebih lanjut?',
+      'Halo SRB Motor, saya tertarik dengan unit ${widget.motor.name} (${CurrencyUtil.format(widget.motor.price)}). Bisa minta info lebih lanjut?',
     );
     final url = Uri.parse('https://wa.me/$phone?text=$message');
     if (await canLaunchUrl(url)) {
@@ -183,8 +179,8 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: widget.motor.tersedia 
-                    ? const Color(0xFF22C55E).withValues(alpha: 0.1) 
-                    : const Color(0xFFEF4444).withValues(alpha: 0.1),
+                    ? const Color(0xFF22C55E).withOpacity(0.1)
+                    : const Color(0xFFEF4444).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
                   color: widget.motor.tersedia ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
@@ -223,7 +219,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          currencyFormat.format(widget.motor.price),
+          CurrencyUtil.format(widget.motor.price),
           style: GoogleFonts.outfit(fontSize: 26, fontWeight: FontWeight.w900, color: const Color(0xFF1E293B)),
         ),
       ],
@@ -344,7 +340,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Uang Muka (DP)', style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13)),
-            Text(currencyFormat.format(_dpAmount), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+            Text(CurrencyUtil.format(_dpAmount), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
           ],
         ),
         SliderTheme(
@@ -405,7 +401,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
         children: [
           Text('ESTIMASI ANGSURAN', style: GoogleFonts.outfit(color: Colors.blue[300], fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 8),
-          Text(currencyFormat.format(_monthlyInstallment), style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white)),
+          Text(CurrencyUtil.format(_monthlyInstallment), style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white)),
           Text('*Flat 1.5% - OTR Bekasi', style: GoogleFonts.outfit(fontSize: 10, color: Colors.white38)),
         ],
       ),
@@ -622,7 +618,7 @@ class _MotorDetailScreenState extends State<MotorDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(m.name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Text(currencyFormat.format(m.price), style: GoogleFonts.outfit(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 11)),
+                  Text(CurrencyUtil.format(m.price), style: GoogleFonts.outfit(color: const Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 11)),
                 ],
               ),
             ),

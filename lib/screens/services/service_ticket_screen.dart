@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/service_provider.dart';
 import '../../main.dart';
+import '../../utils/currency_util.dart';
 
 class ServiceTicketScreen extends StatelessWidget {
   final Map<String, dynamic> ticket;
@@ -54,33 +56,62 @@ class ServiceTicketScreen extends StatelessWidget {
                       _buildTicketCard(context, currentTicket),
                       const SizedBox(height: 32),
                       if (canPay)
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _handlePayment(context, currentTicket['id']);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2563EB),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                        Column(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                _handlePayment(context, currentTicket['id']);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 56),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 8,
+                                shadowColor: const Color(
+                                  0xFF2563EB,
+                                ).withOpacity(0.3),
                               ),
-                              elevation: 8,
-                              shadowColor: const Color(
-                                0xFF2563EB,
-                              ).withValues(alpha: 0.3),
+                              child: Text(
+                                'Bayar Sekarang',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                             ),
-                            child: Text(
-                              'Bayar Sekarang',
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.timer_outlined,
+                                  size: 14,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Batas waktu bayar online: 24 Jam',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color: const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Atau bayar langsung di bengkel',
                               style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                color: const Color(0xFF94A3B8),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                     ],
                   ),
@@ -88,7 +119,7 @@ class ServiceTicketScreen extends StatelessWidget {
               ),
               if (serviceProvider.isLoading)
                 Container(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: Colors.white.withOpacity(0.5),
                   child: const Center(child: CircularProgressIndicator()),
                 ),
             ],
@@ -105,10 +136,10 @@ class ServiceTicketScreen extends StatelessWidget {
     if (result['success'] && result['snap_token'] != null) {
       try {
         final token = result['snap_token'];
-        midtrans?.startPaymentUiFlow(token: token);
+        // Start background polling
+        serviceProvider.startPollingServiceStatus(id);
         
-        // After starting UI flow, we should eventually refresh the status
-        // The main.dart callback will handle the sync
+        midtrans?.startPaymentUiFlow(token: token);
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +165,7 @@ class ServiceTicketScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -154,7 +185,7 @@ class ServiceTicketScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
@@ -180,7 +211,7 @@ class ServiceTicketScreen extends StatelessWidget {
                         ticketData['plate_number'] ?? '-',
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: Colors.white.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -193,7 +224,7 @@ class ServiceTicketScreen extends StatelessWidget {
                       'Servis Oleh:',
                       style: GoogleFonts.inter(
                         fontSize: 10,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: Colors.white.withOpacity(0.7),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -230,7 +261,7 @@ class ServiceTicketScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildInfoRow(
                   'Jadwal',
-                  '${ticketData['service_date'] ?? ''} ${ticketData['service_time'] ?? ''}',
+                  _formatDateTime(ticketData['service_date'], ticketData['service_time']),
                 ),
                 const SizedBox(height: 16),
                 _buildInfoRow('Cabang', ticketData['branch'] ?? 'Pusat'),
@@ -289,7 +320,7 @@ class ServiceTicketScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Rp ${ticketData['total_cost'] ?? ticketData['estimated_cost']}',
+                    CurrencyUtil.format(ticketData['total_cost'] ?? ticketData['estimated_cost']),
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -374,7 +405,7 @@ class ServiceTicketScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: statusColor.withValues(alpha: 0.1),
+            color: statusColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -447,7 +478,7 @@ class ServiceTicketScreen extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              'Rp $price',
+              CurrencyUtil.format(price),
               textAlign: TextAlign.right,
               style: GoogleFonts.inter(
                 fontSize: 13,
@@ -459,6 +490,17 @@ class ServiceTicketScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatDateTime(String? date, String? time) {
+    if (date == null || date.isEmpty) return '-';
+    try {
+      final dateTime = DateTime.parse(date);
+      final formattedDate = DateFormat('dd MMMM yyyy').format(dateTime);
+      return '$formattedDate${time != null ? ', $time' : ''}';
+    } catch (e) {
+      return '$date ${time ?? ''}';
+    }
   }
 }
 

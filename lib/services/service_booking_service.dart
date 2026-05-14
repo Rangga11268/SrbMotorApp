@@ -102,4 +102,17 @@ class ServiceBookingService {
       };
     }
   }
+
+  Future<bool> checkPaymentStatus(int appointmentId) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/services/$appointmentId/check-status'),
+      headers: await ApiConfig.headers,
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['paid'] ?? false;
+    }
+    return false;
+  }
 }

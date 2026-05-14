@@ -11,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/motor_provider.dart';
 import '../../services/api_config.dart';
 import 'payment_details_screen.dart';
+import '../../utils/currency_util.dart';
 
 class OrderStatusScreen extends StatefulWidget {
   final OrderModel order;
@@ -72,7 +73,6 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final dateFormat = DateFormat('dd MMMM yyyy, HH:mm');
 
     return Selector<OrderProvider, OrderModel>(
@@ -122,7 +122,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       const SizedBox(height: 24),
 
                       // 3. Motor Info Card
-                      _buildMotorCard(currentOrder, currencyFormat),
+                      _buildMotorCard(currentOrder),
                       const SizedBox(height: 24),
 
                       // 4. Timeline Status
@@ -130,7 +130,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       const SizedBox(height: 24),
 
                       // 5. Payment Summary
-                      _buildPaymentSection(currentOrder, currencyFormat),
+                      _buildPaymentSection(currentOrder),
                       const SizedBox(height: 24),
 
                       // 6. Customer Details Card
@@ -277,7 +277,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildMotorCard(OrderModel currentOrder, NumberFormat format) {
+  Widget _buildMotorCard(OrderModel currentOrder) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -320,7 +320,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  format.format(currentOrder.motor?.price ?? 0),
+                  CurrencyUtil.format(currentOrder.motor?.price ?? 0),
                   style: GoogleFonts.inter(color: const Color(0xFF2563EB), fontWeight: FontWeight.w800, fontSize: 16),
                 ),
                 if (currentOrder.motorColor != null) ...[
@@ -478,7 +478,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     );
   }
 
-  Widget _buildPaymentSection(OrderModel currentOrder, NumberFormat format) {
+  Widget _buildPaymentSection(OrderModel currentOrder) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -511,13 +511,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
           ),
           child: Column(
             children: [
-              _buildPaymentItem('Harga Unit', format.format(currentOrder.motor?.price ?? 0), isBold: true),
+              _buildPaymentItem('Harga Unit', CurrencyUtil.format(currentOrder.motor?.price ?? 0), isBold: true),
               const SizedBox(height: 16),
               const Divider(height: 1, color: Color(0xFFF1F5F9)),
               const SizedBox(height: 16),
-              _buildPaymentStatusItem('Booking Fee', format.format(currentOrder.bookingFee), currentOrder.installments.isNotEmpty ? currentOrder.installments.first.status : 'Pending'),
+              _buildPaymentStatusItem('Booking Fee', CurrencyUtil.format(currentOrder.bookingFee), currentOrder.installments.isNotEmpty ? currentOrder.installments.first.status : 'Pending'),
               const SizedBox(height: 16),
-              _buildPaymentStatusItem('Sisa Pelunasan', format.format((currentOrder.motor?.price ?? 0) - currentOrder.bookingFee), currentOrder.status == 'completed' ? 'PAID' : 'UNPAID'),
+              _buildPaymentStatusItem('Sisa Pelunasan', CurrencyUtil.format((currentOrder.motor?.price ?? 0) - currentOrder.bookingFee), currentOrder.status == 'completed' ? 'PAID' : 'UNPAID'),
             ],
           ),
         ),

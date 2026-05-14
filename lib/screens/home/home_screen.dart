@@ -13,10 +13,10 @@ import 'package:srb_motor_app/widgets/custom_bottom_nav.dart';
 import 'package:srb_motor_app/screens/motor_detail/motor_detail_screen.dart';
 import 'package:srb_motor_app/screens/menu/order_history_screen.dart';
 import 'package:srb_motor_app/screens/menu/profile_screen.dart';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:srb_motor_app/screens/services/service_screen.dart';
 import 'package:srb_motor_app/screens/menu/notification_screen.dart';
+import 'package:srb_motor_app/utils/currency_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -100,12 +100,6 @@ class _HomeContentState extends State<HomeContent> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
     final motorProvider = context.watch<MotorProvider>();
-    final currencyFormat = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: RefreshIndicator(
@@ -143,7 +137,7 @@ class _HomeContentState extends State<HomeContent> {
             SliverToBoxAdapter(
               child: _buildSectionTitle('Rekomendasi Untukmu', 'Lihat Semua >'),
             ),
-            _buildMotorList(motorProvider, currencyFormat),
+            _buildMotorList(motorProvider),
             SliverToBoxAdapter(child: _buildSecondaryBanner()),
             SliverToBoxAdapter(child: _buildServicePackages()),
             SliverToBoxAdapter(child: _buildKeunggulan()),
@@ -563,7 +557,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.black.withOpacity(0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -609,7 +603,7 @@ class _HomeContentState extends State<HomeContent> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
+                              color: Colors.black.withOpacity(0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -670,7 +664,7 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildMotorList(MotorProvider motorProvider, NumberFormat format) {
+  Widget _buildMotorList(MotorProvider motorProvider) {
     if (motorProvider.isLoading) {
       return const SliverToBoxAdapter(
         child: Center(child: CircularProgressIndicator()),
@@ -694,7 +688,7 @@ class _HomeContentState extends State<HomeContent> {
           itemCount: motorProvider.motors.length,
           itemBuilder: (context, index) {
             final motor = motorProvider.motors[index];
-            return _buildMotorCard(motor, format, context);
+            return _buildMotorCard(motor, context);
           },
         ),
       ),
@@ -703,7 +697,6 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildMotorCard(
     Motor motor,
-    NumberFormat format,
     BuildContext context,
   ) {
     return GestureDetector(
@@ -719,7 +712,7 @@ class _HomeContentState extends State<HomeContent> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -753,7 +746,7 @@ class _HomeContentState extends State<HomeContent> {
                             child: Icon(
                               Icons.motorcycle,
                               size: 40,
-                              color: Colors.blueGrey.withValues(alpha: 0.3),
+                              color: Colors.blueGrey.withOpacity(0.3),
                             ),
                           )
                         : null,
@@ -768,12 +761,12 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                       decoration: BoxDecoration(
                         color: motor.tersedia
-                            ? const Color(0xFF22C55E).withValues(alpha: 0.9)
-                            : const Color(0xFFEF4444).withValues(alpha: 0.9),
+                            ? const Color(0xFF22C55E).withOpacity(0.9)
+                            : const Color(0xFFEF4444).withOpacity(0.9),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: Colors.black.withOpacity(0.1),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -830,11 +823,11 @@ class _HomeContentState extends State<HomeContent> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.95),
+                          color: Colors.white.withOpacity(0.95),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
+                              color: Colors.black.withOpacity(0.05),
                               blurRadius: 10,
                             ),
                           ],
@@ -897,11 +890,7 @@ class _HomeContentState extends State<HomeContent> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    NumberFormat.currency(
-                      locale: 'id_ID',
-                      symbol: 'Rp ',
-                      decimalDigits: 0,
-                    ).format(motor.price),
+                    CurrencyUtil.format(motor.price),
                     style: GoogleFonts.outfit(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
@@ -1502,7 +1491,7 @@ class _HomeContentState extends State<HomeContent> {
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

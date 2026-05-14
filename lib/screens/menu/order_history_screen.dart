@@ -7,6 +7,7 @@ import '../../services/api_config.dart';
 import 'package:intl/intl.dart';
 import 'order_status_screen.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../utils/currency_util.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -162,7 +163,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   Widget _buildOrderCard(dynamic order) {
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
     final statusColor = _getStatusColor(order.status);
 
@@ -173,7 +173,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -230,9 +230,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
+                      color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                      border: Border.all(color: statusColor.withOpacity(0.2)),
                     ),
                     child: Text(
                       order.statusText.toUpperCase(),
@@ -293,7 +293,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          currencyFormat.format(order.motor?.price ?? 0),
+                          CurrencyUtil.format(order.motor?.price ?? 0),
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,

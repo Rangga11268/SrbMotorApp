@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
       final serviceProvider = context.read<ServiceProvider>();
       if (mounted) {
         orderProvider.syncActivePayment();
-        serviceProvider.syncServiceHistory();
+        serviceProvider.syncActiveServicePayment();
       }
     });
   }

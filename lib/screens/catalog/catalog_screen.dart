@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,6 +8,7 @@ import '../../providers/motor_provider.dart';
 import '../../models/motor.dart';
 import '../../services/api_config.dart';
 import '../motor_detail/motor_detail_screen.dart';
+import '../../utils/currency_util.dart';
 
 class CatalogScreen extends StatefulWidget {
   final bool isRoot;
@@ -18,11 +19,6 @@ class CatalogScreen extends StatefulWidget {
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
-  final currencyFormat = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +101,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
@@ -199,7 +195,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0F172A).withValues(alpha: 0.1),
+                        color: const Color(0xFF0F172A).withOpacity(0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -235,7 +231,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1E293B).withValues(alpha: 0.3),
+                        color: const Color(0xFF1E293B).withOpacity(0.3),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -290,7 +286,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -884,7 +880,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -931,7 +927,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
+                            color: Colors.black.withOpacity(0.15),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -972,11 +968,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.95),
+                          color: Colors.white.withOpacity(0.95),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
+                              color: Colors.black.withOpacity(0.1),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -1047,7 +1043,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          currencyFormat.format(motor.price),
+                          CurrencyUtil.format(motor.price),
                           style: GoogleFonts.outfit(
                             fontSize: 14,
                             fontWeight: FontWeight.w900,

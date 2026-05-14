@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/service_booking_service.dart';
 
@@ -125,5 +126,44 @@ class ServiceProvider with ChangeNotifier {
 
   Future<void> syncServiceHistory() async {
     await fetchHistory();
+  }
+
+  Timer? _servicePollingTimer;
+  int? _activePollingServiceId;
+
+  void startPollingServiceStatus(int appointmentId) {
+    stopPollingServiceStatus();
+    _activePollingServiceId = appointmentId;
+
+    _servicePollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      final isPaid = await _service.checkPaymentStatus(appointmentId);
+      if (isPaid) {
+        timer.cancel();
+        _servicePollingTimer = null;
+        await fetchHistory();
+      }
+    });
+
+    Timer(const Duration(minutes: 5), () => stopPollingServiceStatus());
+  }
+
+  void stopPollingServiceStatus() {
+    _servicePollingTimer?.cancel();
+    _servicePollingTimer = null;
+    _activePollingServiceId = null;
+  }
+
+  Future<void> syncActiveServicePayment() async {
+    if (_activePollingServiceId != null) {
+      final isPaid = await _service.checkPaymentStatus(_activePollingServiceId!);
+      if (isPaid) stopPollingServiceStatus();
+      await fetchHistory();
+    }
+  }
+
+  @override
+  void dispose() {
+    stopPollingServiceStatus();
+    super.dispose();
   }
 }

@@ -451,7 +451,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                             decoration: BoxDecoration(
                               color: const Color(
                                 0xFF22C55E,
-                              ).withValues(alpha: 0.1),
+                              ).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
