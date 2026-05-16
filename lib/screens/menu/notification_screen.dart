@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../widgets/shimmer_loading.dart';
 import '../../providers/notification_provider.dart';
 import '../../models/notification.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -42,7 +43,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       body: Consumer<NotificationProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.notifications.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildShimmerNotificationList();
           }
 
           if (provider.notifications.isEmpty) {
@@ -198,5 +199,25 @@ class _NotificationScreenState extends State<NotificationScreen> {
     } else {
       return DateFormat('dd MMM').format(timestamp);
     }
+  }
+
+  Widget _buildShimmerNotificationList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 8,
+      itemBuilder: (context, index) {
+        return ShimmerLoading(
+          isLoading: true,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            height: 90,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

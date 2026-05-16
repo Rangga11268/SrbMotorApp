@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'order_status_screen.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../utils/currency_util.dart';
+import '../../widgets/shimmer_loading.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -79,7 +80,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           _buildSearchAndFilter(),
           Expanded(
             child: orderProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? _buildShimmerOrderList()
                 : orderProvider.errorMessage != null
                     ? _buildErrorState(orderProvider.errorMessage!)
                     : filteredOrders.isEmpty
@@ -434,5 +435,25 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       default:
         return const Color(0xFF64748B); // Slate
     }
+  }
+
+  Widget _buildShimmerOrderList() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return ShimmerLoading(
+          isLoading: true,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            height: 180,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

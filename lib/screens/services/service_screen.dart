@@ -5,6 +5,7 @@ import '../../providers/service_provider.dart';
 import 'service_booking_screen.dart';
 import 'service_ticket_screen.dart';
 import 'package:intl/intl.dart';
+import '../../widgets/shimmer_loading.dart';
 
 class ServiceScreen extends StatefulWidget {
   const ServiceScreen({super.key});
@@ -40,7 +41,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                 _buildHeroBanner(),
                 _buildServiceCategories(),
                 _buildWhyChooseUs(),
-                if (serviceProvider.history.isNotEmpty)
+                if (serviceProvider.isLoading)
+                  _buildShimmerHistory()
+                else if (serviceProvider.history.isNotEmpty)
                   _buildRecentHistory(serviceProvider),
                 const SizedBox(height: 100), // Space for FAB-like button
               ],
@@ -544,5 +547,40 @@ class _ServiceScreenState extends State<ServiceScreen> {
     } catch (e) {
       return dateStr;
     }
+  }
+
+  Widget _buildShimmerHistory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: const ShimmerPlaceholder(width: 120, height: 12),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            scrollDirection: Axis.horizontal,
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              return ShimmerLoading(
+                isLoading: true,
+                child: Container(
+                  width: 240,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

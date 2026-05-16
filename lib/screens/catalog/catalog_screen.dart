@@ -9,6 +9,7 @@ import '../../models/motor.dart';
 import '../../services/api_config.dart';
 import '../motor_detail/motor_detail_screen.dart';
 import '../../utils/currency_util.dart';
+import '../../widgets/shimmer_loading.dart';
 
 class CatalogScreen extends StatefulWidget {
   final bool isRoot;
@@ -814,16 +815,63 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
+  Widget _buildShimmerMotorGrid() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          mainAxisExtent: 280,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return ShimmerLoading(
+              isLoading: true,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 150,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const ShimmerPlaceholder(width: 80, height: 12),
+                          const SizedBox(height: 8),
+                          const ShimmerPlaceholder(width: 120, height: 16),
+                          const SizedBox(height: 12),
+                          const ShimmerPlaceholder(width: 100, height: 20),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          childCount: 6,
+        ),
+      ),
+    );
+  }
+
   Widget _buildMotorGrid(MotorProvider motorProvider) {
     if (motorProvider.isLoading) {
-      return const SliverToBoxAdapter(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(50),
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      );
+      return _buildShimmerMotorGrid();
     }
 
     if (motorProvider.motors.isEmpty) {

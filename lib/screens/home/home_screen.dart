@@ -16,6 +16,7 @@ import 'package:srb_motor_app/screens/menu/profile_screen.dart';
 import 'package:srb_motor_app/screens/services/service_screen.dart';
 import 'package:srb_motor_app/screens/menu/notification_screen.dart';
 import 'package:srb_motor_app/utils/currency_util.dart';
+import 'package:srb_motor_app/widgets/shimmer_loading.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -666,8 +667,8 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildMotorList(MotorProvider motorProvider) {
     if (motorProvider.isLoading) {
-      return const SliverToBoxAdapter(
-        child: Center(child: CircularProgressIndicator()),
+      return SliverToBoxAdapter(
+        child: _buildShimmerMotorList(),
       );
     } else if (motorProvider.errorMessage != null) {
       return SliverToBoxAdapter(
@@ -691,6 +692,64 @@ class _HomeContentState extends State<HomeContent> {
             return _buildMotorCard(motor, context);
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerMotorList() {
+    return SizedBox(
+      height: 280,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return ShimmerLoading(
+            isLoading: true,
+            child: Container(
+              width: 170,
+              margin: const EdgeInsets.only(right: 16, bottom: 8, top: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 150,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ShimmerPlaceholder(width: 60, height: 10),
+                        const SizedBox(height: 8),
+                        const ShimmerPlaceholder(width: 120, height: 14),
+                        const SizedBox(height: 12),
+                        const ShimmerPlaceholder(width: 100, height: 16),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const ShimmerPlaceholder(width: 45, height: 18),
+                            const SizedBox(width: 8),
+                            const ShimmerPlaceholder(width: 45, height: 18),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
