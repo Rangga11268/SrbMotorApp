@@ -8,7 +8,8 @@ import 'package:srb_motor_app/providers/main_provider.dart';
 
 class ServiceBookingScreen extends StatefulWidget {
   final bool isRoot;
-  const ServiceBookingScreen({super.key, this.isRoot = false});
+  final String? initialServiceType;
+  const ServiceBookingScreen({super.key, this.isRoot = false, this.initialServiceType});
 
   @override
   State<ServiceBookingScreen> createState() => _ServiceBookingScreenState();
@@ -37,6 +38,9 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialServiceType != null) {
+      _selectedServiceType = widget.initialServiceType!;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<MotorProvider>().fetchBranches();
     });

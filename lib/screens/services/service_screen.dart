@@ -65,119 +65,111 @@ class _ServiceScreenState extends State<ServiceScreen> {
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.white,
       title: Text(
-        'Layanan Servis',
-        style: GoogleFonts.inter(
+        'LAYANAN SERVIS',
+        style: GoogleFonts.outfit(
           fontWeight: FontWeight.bold,
-          fontSize: 18,
-          color: const Color(0xFF1E293B),
+          fontSize: 16,
+          color: const Color(0xFF0F172A),
+          letterSpacing: 1.2,
         ),
       ),
       centerTitle: true,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(
+          color: const Color(0xFFE2E8F0),
+          height: 1,
+        ),
+      ),
     );
   }
 
   Widget _buildHeroBanner() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      height: 160,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF334155)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
         borderRadius: BorderRadius.circular(24),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/banner/banner_service.png'),
+          fit: BoxFit.cover,
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Opacity(
-              opacity: 0.1,
-              child: Image.asset(
-                'assets/images/logos/logoSSM.webp',
-                height: 100,
-                errorBuilder: (context, error, stackTrace) =>
-                    const SizedBox.shrink(),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            colors: [
+              Colors.black.withOpacity(0.8),
+              Colors.black.withOpacity(0.3),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFF60A5FA).withOpacity(0.3)),
+              ),
+              child: Text(
+                'PROMO BULAN INI',
+                style: GoogleFonts.outfit(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF60A5FA),
+                  letterSpacing: 1,
+                ),
               ),
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'PROMO BULAN INI',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.blueAccent,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Powered by',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Image.asset(
-                        'assets/images/logos/logoSSM.webp',
-                        height: 14,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ],
+            const SizedBox(height: 10),
+            Text(
+               'Servis Lengkap\nDiskon 20%',
+              style: GoogleFonts.outfit(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                height: 1.2,
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Servis Lengkap\nDiskon 20%',
-                style: GoogleFonts.inter(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 1.2,
-                ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Berlaku untuk semua jenis motor matic.',
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withOpacity(0.7),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Berlaku untuk semua jenis motor di semua cabang SRB Motor.',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        fontSize: 11,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF64748B),
+        letterSpacing: 1.5,
       ),
     );
   }
@@ -186,23 +178,27 @@ class _ServiceScreenState extends State<ServiceScreen> {
     final categories = [
       {
         'title': 'Servis Berkala',
+        'desc': 'Pengecekan rutin & tune-up komponen motor.',
         'icon': Icons.build_circle_outlined,
-        'color': Colors.blue,
+        'color': const Color(0xFF2563EB),
       },
       {
         'title': 'Ganti Oli',
-        'icon': Icons.water_drop_outlined,
-        'color': Colors.orange,
+        'desc': 'Ganti oli mesin & oli gardan original.',
+        'icon': Icons.opacity_outlined,
+        'color': const Color(0xFFF97316),
       },
       {
         'title': 'Servis Berat',
-        'icon': Icons.settings_outlined,
-        'color': Colors.red,
+        'desc': 'Overhaul mesin & perbaikan komponen inti.',
+        'icon': Icons.handyman_outlined,
+        'color': const Color(0xFFEF4444),
       },
       {
-        'title': 'Kelistrikan',
-        'icon': Icons.flash_on_outlined,
-        'color': Colors.amber,
+        'title': 'Cek Kelistrikan',
+        'desc': 'Pengecekan aki, lampu, kabel & starter.',
+        'icon': Icons.bolt_outlined,
+        'color': const Color(0xFFEAB308),
       },
     ];
 
@@ -211,68 +207,86 @@ class _ServiceScreenState extends State<ServiceScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            'LAYANAN KAMI',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF94A3B8),
-              letterSpacing: 1,
-            ),
-          ),
+          child: _buildSectionTitle('LAYANAN KAMI'),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         GridView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.4,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.15,
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
             final cat = categories[index];
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: (cat['color'] as Color).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      cat['icon'] as IconData,
-                      color: cat['color'] as Color,
-                      size: 20,
+            final color = cat['color'] as Color;
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ServiceBookingScreen(
+                      initialServiceType: cat['title'] as String,
                     ),
                   ),
-                  Text(
-                    cat['title'] as String,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1E293B),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        cat['icon'] as IconData,
+                        color: color,
+                        size: 20,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      cat['title'] as String,
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      cat['desc'] as String,
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF64748B),
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -287,76 +301,102 @@ class _ServiceScreenState extends State<ServiceScreen> {
         'title': 'Mekanik Ahli',
         'subtitle': 'Teknisi bersertifikat resmi.',
         'icon': Icons.verified_user_outlined,
+        'color': const Color(0xFF10B981),
       },
       {
-        'title': 'Suku Cadang Asli',
-        'subtitle': 'Hanya menggunakan part original.',
+        'title': 'Part Asli',
+        'subtitle': 'Suku cadang 100% original.',
         'icon': Icons.auto_awesome_outlined,
+        'color': const Color(0xFF2563EB),
       },
       {
         'title': 'Garansi Servis',
         'subtitle': 'Jaminan pengerjaan 7 hari.',
         'icon': Icons.security_outlined,
+        'color': const Color(0xFF6366F1),
       },
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            'KEUNGGULAN KAMI',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF94A3B8),
-              letterSpacing: 1,
-            ),
-          ),
+          child: _buildSectionTitle('KEUNGGULAN KAMI'),
         ),
-        const SizedBox(height: 16),
-        ...benefits.map(
-          (b) => Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    b['icon'] as IconData,
-                    color: const Color(0xFF2563EB),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        b['title'] as String,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E293B),
-                        ),
-                      ),
-                      Text(
-                        b['subtitle'] as String,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 72,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            scrollDirection: Axis.horizontal,
+            itemCount: benefits.length,
+            itemBuilder: (context, index) {
+               final b = benefits[index];
+               final color = b['color'] as Color;
+               return Container(
+                 width: 220,
+                 margin: const EdgeInsets.only(right: 12, bottom: 4),
+                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                 decoration: BoxDecoration(
+                   color: Colors.white,
+                   borderRadius: BorderRadius.circular(16),
+                   border: Border.all(color: const Color(0xFFE2E8F0)),
+                   boxShadow: [
+                     BoxShadow(
+                       color: Colors.black.withOpacity(0.01),
+                       blurRadius: 6,
+                       offset: const Offset(0, 3),
+                     ),
+                   ],
+                 ),
+                 child: Row(
+                   children: [
+                     Container(
+                       padding: const EdgeInsets.all(8),
+                       decoration: BoxDecoration(
+                         color: color.withOpacity(0.08),
+                         shape: BoxShape.circle,
+                       ),
+                       child: Icon(
+                         b['icon'] as IconData,
+                         color: color,
+                         size: 18,
+                       ),
+                     ),
+                     const SizedBox(width: 12),
+                     Expanded(
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           Text(
+                             b['title'] as String,
+                             style: GoogleFonts.outfit(
+                               fontSize: 12,
+                               fontWeight: FontWeight.bold,
+                               color: const Color(0xFF0F172A),
+                             ),
+                           ),
+                           const SizedBox(height: 2),
+                           Text(
+                             b['subtitle'] as String,
+                             style: GoogleFonts.outfit(
+                               fontSize: 9,
+                               fontWeight: FontWeight.w600,
+                               color: const Color(0xFF64748B),
+                             ),
+                             maxLines: 1,
+                             overflow: TextOverflow.ellipsis,
+                           ),
+                         ],
+                       ),
+                     ),
+                   ],
+                 ),
+               );
+            },
           ),
         ),
       ],
@@ -367,41 +407,35 @@ class _ServiceScreenState extends State<ServiceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'RIWAYAT TERBARU',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF94A3B8),
-                  letterSpacing: 1,
-                ),
-              ),
-              Text(
-                'Lihat Semua',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2563EB),
-                ),
-              ),
-            ],
-          ),
+          child: _buildSectionTitle('RIWAYAT TERBARU'),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         SizedBox(
-          height: 120,
+          height: 130,
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             scrollDirection: Axis.horizontal,
-            itemCount: provider.history.take(3).length,
+            itemCount: provider.history.take(5).length,
             itemBuilder: (context, index) {
               final item = provider.history[index];
+              final status = (item['status'] as String?)?.toLowerCase() ?? 'pending';
+
+              Color statusColor;
+              Color statusBg;
+              if (status == 'success' || status == 'completed' || status == 'selesai') {
+                statusColor = const Color(0xFF10B981);
+                statusBg = const Color(0xFFECFDF5);
+              } else if (status == 'pending' || status == 'proses') {
+                statusColor = const Color(0xFFF59E0B);
+                statusBg = const Color(0xFFFEF3C7);
+              } else {
+                statusColor = const Color(0xFFEF4444);
+                statusBg = const Color(0xFFFEE2E2);
+              }
+
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -414,74 +448,89 @@ class _ServiceScreenState extends State<ServiceScreen> {
                   );
                 },
                 child: Container(
-                  width: 240,
-                  margin: const EdgeInsets.only(right: 12),
+                  width: 250,
+                  margin: const EdgeInsets.only(right: 12, bottom: 6),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(
-                            Icons.calendar_today,
-                            size: 12,
-                            color: Color(0xFF64748B),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              _formatDate(item['service_date'] ?? '-'),
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF64748B),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_rounded,
+                                size: 12,
+                                color: Color(0xFF64748B),
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _formatDate(item['service_date'] ?? '-'),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF22C55E,
-                              ).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
+                              color: statusBg,
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              item['status']?.toUpperCase() ?? 'SUCCESS',
-                              style: GoogleFonts.inter(
+                              status.toUpperCase(),
+                              style: GoogleFonts.outfit(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w900,
-                                color: const Color(0xFF22C55E),
+                                color: statusColor,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item['motor_model'] ?? 'Unit Motor',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E293B),
-                        ),
-                      ),
-                      Text(
-                        item['service_type'] ?? 'Servis Umum',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: const Color(0xFF94A3B8),
+                      const Divider(color: Color(0xFFF1F5F9), height: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              item['motor_model'] ?? 'Unit Motor',
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0F172A),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item['service_type'] ?? 'Servis Umum',
+                              style: GoogleFonts.outfit(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -497,42 +546,53 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   Widget _buildBookingButton(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ServiceBookingScreen(),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2563EB).withOpacity(0.25),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-            elevation: 8,
-            shadowColor: const Color(0xFF2563EB).withOpacity(0.3),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.add_task_rounded, size: 20),
-              const SizedBox(width: 12),
-              Text(
-                'BOOKING SERVIS SEKARANG',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                  letterSpacing: 1,
+          ],
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ServiceBookingScreen(),
                 ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-            ],
+              elevation: 0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.add_task_rounded, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  'BOOKING SERVIS SEKARANG',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -553,23 +613,23 @@ class _ServiceScreenState extends State<ServiceScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: const ShimmerPlaceholder(width: 120, height: 12),
+          child: _buildSectionTitle('RIWAYAT TERBARU'),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         SizedBox(
-          height: 120,
+          height: 130,
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             scrollDirection: Axis.horizontal,
             itemCount: 3,
             itemBuilder: (context, index) {
               return ShimmerLoading(
                 isLoading: true,
                 child: Container(
-                  width: 240,
+                  width: 250,
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
