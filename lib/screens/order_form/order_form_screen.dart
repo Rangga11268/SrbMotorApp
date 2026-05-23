@@ -38,6 +38,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   String _deliveryMethod = 'Ambil di Dealer';
   String _paymentMethod = 'Tunai di Toko';
   double _sisaPembayaran = 0;
+  int _currentStep = 0;
 
   List<String> _availableColors = [];
 
@@ -566,25 +567,75 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: const Color(0xFFE2E8F0),
+            height: 1,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildMotorSummary(currencyFormat),
-                const SizedBox(height: 32),
+                _buildStepIndicator(),
+                const SizedBox(height: 28),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.1, 0.0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: KeyedSubtree(
+                    key: ValueKey<int>(_currentStep),
+                    child: _buildCurrentStepContent(motorProvider, currencyFormat),
+                  ),
+                ),
+                _buildStepNavigation(isLoading),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-                _buildSectionHeader('INFORMASI CABANG'),
-                const SizedBox(height: 16),
-                _buildBranchSelection(motorProvider),
-                const SizedBox(height: 32),
-
-                _buildSectionHeader('INFORMASI PELANGGAN'),
-                const SizedBox(height: 16),
+  Widget _buildCurrentStepContent(
+      MotorProvider motorProvider, NumberFormat currencyFormat) {
+    switch (_currentStep) {
+      case 0:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildMotorSummary(currencyFormat),
+            const SizedBox(height: 28),
+            _buildSectionHeader('INFORMASI CABANG'),
+            const SizedBox(height: 12),
+            _buildBranchSelection(motorProvider),
+          ],
+        );
+      case 1:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildFormCard(
+              title: 'INFORMASI PELANGGAN',
+              icon: Icons.person_outline_rounded,
+              children: [
                 _buildTextField(
                   _nameController,
                   'Nama Lengkap',
@@ -618,10 +669,13 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 _buildDropdownColor(),
-                const SizedBox(height: 32),
-
-                _buildSectionHeader('DOKUMEN PERSYARATAN'),
-                const SizedBox(height: 16),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildFormCard(
+              title: 'DOKUMEN PERSYARATAN',
+              icon: Icons.badge_outlined,
+              children: [
                 _buildDocumentUploadCard(
                   title: 'Foto KTP',
                   subtitle: 'Unggah foto KTP asli yang jelas terbaca',
@@ -635,10 +689,18 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   image: _kkImage,
                   onTap: () => _pickImage(false),
                 ),
-                const SizedBox(height: 32),
-
-                _buildSectionHeader('PENGIRIMAN & PEMBAYARAN'),
-                const SizedBox(height: 16),
+              ],
+            ),
+          ],
+        );
+      case 2:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildFormCard(
+              title: 'PENGIRIMAN & PEMBAYARAN',
+              icon: Icons.local_shipping_outlined,
+              children: [
                 _buildToggleSelection(
                   label: 'Metode Penyerahan',
                   options: ['Ambil di Dealer', 'Kirim ke Rumah'],
@@ -653,7 +715,6 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   onChanged: (val) => setState(() => _paymentMethod = val),
                 ),
                 const SizedBox(height: 24),
-
                 _buildTextField(
                   _addressController,
                   'Alamat Lengkap',
@@ -664,7 +725,6 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                       : 'Alamat domisili untuk STNK/BPKB',
                 ),
                 const SizedBox(height: 16),
-
                 _buildTextField(
                   _bookingFeeController,
                   'Booking Fee',
@@ -673,14 +733,12 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   isCurrency: true,
                   hint: 'Opsional (Rp)',
                 ),
-
                 if (_bookingFeeController.text.isNotEmpty &&
                     double.parse(
                           _bookingFeeController.text.replaceAll('.', ''),
                         ) >
                         0)
                   _buildRemainingBalanceCard(currencyFormat),
-
                 const SizedBox(height: 16),
                 _buildTextField(
                   _notesController,
@@ -689,65 +747,317 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                   maxLines: 2,
                   hint: 'Tulis pesan khusus jika ada...',
                 ),
+              ],
+            ),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
 
-                const SizedBox(height: 48),
-
-                ElevatedButton(
-                  onPressed: isLoading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+  Widget _buildStepNavigation(bool isLoading) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24.0),
+      child: Row(
+        children: [
+          if (_currentStep > 0)
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.only(right: 12),
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentStep--;
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    elevation: 4,
-                    shadowColor: const Color(0xFF2563EB).withOpacity(0.4),
+                    foregroundColor: const Color(0xFF475569),
                   ),
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          'KONFIRMASI PESANAN',
-                          style: GoogleFonts.outfit(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 24),
-                Center(
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.verified_user_rounded,
-                        size: 16,
-                        color: Color(0xFF10B981),
-                      ),
+                      const Icon(Icons.arrow_back_rounded, size: 18),
                       const SizedBox(width: 8),
                       Text(
-                        'Data aman dan terenkripsi oleh sistem',
+                        'KEMBALI',
                         style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          color: const Color(0xFF94A3B8),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 1,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
+          Expanded(
+            child: _currentStep < 2
+                ? SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_currentStep == 0) {
+                          if (_selectedBranch == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Silakan pilih cabang pengambilan terlebih dahulu'),
+                                backgroundColor: Color(0xFFEF4444),
+                              ),
+                            );
+                            return;
+                          }
+                          setState(() {
+                            _currentStep = 1;
+                          });
+                        } else if (_currentStep == 1) {
+                          if (_formKey.currentState!.validate()) {
+                            if (_ktpImage == null || _kkImage == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Mohon unggah dokumen KTP dan KK Anda.'),
+                                  backgroundColor: Color(0xFFEF4444),
+                                ),
+                              );
+                              return;
+                            }
+                            setState(() {
+                              _currentStep = 2;
+                            });
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'LANJUT',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 18),
+                        ],
+                      ),
+                    ),
+                  )
+                : _buildSubmitButton(isLoading),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildStepNode(0, 'Dealer', Icons.store_rounded),
+          _buildStepLine(0),
+          _buildStepNode(1, 'Data Diri', Icons.person_rounded),
+          _buildStepLine(1),
+          _buildStepNode(2, 'Pengiriman', Icons.local_shipping_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepNode(int stepIndex, String title, IconData icon) {
+    final isActive = _currentStep == stepIndex;
+    final isCompleted = _currentStep > stepIndex;
+
+    Color containerColor;
+    Color iconColor;
+    Color textColor;
+    double scale = isActive ? 1.05 : 1.0;
+
+    if (isActive) {
+      containerColor = const Color(0xFF2563EB);
+      iconColor = Colors.white;
+      textColor = const Color(0xFF2563EB);
+    } else if (isCompleted) {
+      containerColor = const Color(0xFF10B981);
+      iconColor = Colors.white;
+      textColor = const Color(0xFF10B981);
+    } else {
+      containerColor = const Color(0xFFF1F5F9);
+      iconColor = const Color(0xFF94A3B8);
+      textColor = const Color(0xFF94A3B8);
+    }
+
+    return Expanded(
+      child: AnimatedScale(
+        scale: scale,
+        duration: const Duration(milliseconds: 200),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: containerColor,
+                shape: BoxShape.circle,
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                isCompleted ? Icons.check_rounded : icon,
+                color: iconColor,
+                size: 16,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w900 : FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepLine(int afterStep) {
+    final isPassed = _currentStep > afterStep;
+    return Container(
+      width: 24,
+      height: 2,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isPassed ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+        borderRadius: BorderRadius.circular(1),
+      ),
+    );
+  }
+
+  Widget _buildFormCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: const Color(0xFF64748B)),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 32, color: Color(0xFFF1F5F9)),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(bool isLoading) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : _submit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2563EB),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            elevation: 0,
+          ),
+          child: isLoading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  'KONFIRMASI PESANAN',
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
         ),
       ),
     );
