@@ -158,50 +158,77 @@ class _HomeContentState extends State<HomeContent> {
     final notifProvider = context.watch<NotificationProvider>();
     final unreadCount = notifProvider.unreadCount;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Row 1: Logo & Actions
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/images/logos/logo_srb.webp',
+                          height: 18,
+                          fit: BoxFit.contain,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          height: 12,
+                          width: 1,
+                          color: const Color(0xFFCBD5E1),
+                        ),
+                        Image.asset(
+                          'assets/images/logos/logoSSM.webp',
+                          height: 18,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
-                      Image.asset(
-                        'assets/images/logos/logo_srb.webp',
-                        height: 32,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'X',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white70,
+                      Container(
+                        width: 4,
+                        height: 4,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF60A5FA),
+                          shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Image.asset(
-                        'assets/images/logos/logoSSM.webp',
-                        height: 32,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const SizedBox.shrink(),
+                      const SizedBox(width: 6),
+                      Text(
+                        'PARTNER RESMI TERPERCAYA',
+                        style: GoogleFonts.outfit(
+                          fontSize: 8,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white.withOpacity(0.6),
+                          letterSpacing: 0.8,
+                        ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Partner Resmi Terpercaya',
-                    style: GoogleFonts.outfit(
-                      fontSize: 10,
-                      color: Colors.white.withOpacity(0.5),
-                    ),
                   ),
                 ],
               ),
@@ -211,7 +238,7 @@ class _HomeContentState extends State<HomeContent> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withOpacity(0.08),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
@@ -251,13 +278,13 @@ class _HomeContentState extends State<HomeContent> {
                     onTap: () =>
                         context.read<MainProvider>().setSelectedIndex(4),
                     child: Container(
-                      width: 42,
-                      height: 42,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 1.5,
+                          color: Colors.white.withOpacity(0.15),
+                          width: 2,
                         ),
                         image: DecorationImage(
                           image: NetworkImage(
@@ -273,7 +300,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
           // Row 2: Greeting
           Column(
@@ -281,7 +308,7 @@ class _HomeContentState extends State<HomeContent> {
             children: [
               RichText(
                 text: TextSpan(
-                  style: GoogleFonts.outfit(fontSize: 24, color: Colors.white),
+                  style: GoogleFonts.outfit(fontSize: 22, color: Colors.white),
                   children: [
                     const TextSpan(text: 'Halo, '),
                     TextSpan(
@@ -295,27 +322,27 @@ class _HomeContentState extends State<HomeContent> {
               Text(
                 'Mau motor apa hari ini?',
                 style: GoogleFonts.outfit(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: Colors.white.withOpacity(0.6),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Row 3: Search Bar
           Row(
             children: [
               Expanded(
                 child: Container(
-                  height: 50,
+                  height: 52,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                     ],
@@ -326,31 +353,32 @@ class _HomeContentState extends State<HomeContent> {
                       hintText: 'Cari motor impian Anda...',
                       hintStyle: GoogleFonts.outfit(
                         color: const Color(0xFF94A3B8),
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                       prefixIcon: const Icon(
                         Icons.search_rounded,
                         color: Color(0xFF64748B),
+                        size: 20,
                       ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               GestureDetector(
                 onTap: () => _showFilterModal(context, motorProvider),
                 child: Container(
-                  height: 50,
-                  width: 50,
+                  height: 52,
+                  width: 52,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                     ],
@@ -358,6 +386,7 @@ class _HomeContentState extends State<HomeContent> {
                   child: const Icon(
                     Icons.tune_rounded,
                     color: Color(0xFF0F2249),
+                    size: 20,
                   ),
                 ),
               ),
@@ -553,14 +582,14 @@ class _HomeContentState extends State<HomeContent> {
             borderRadius: BorderRadius.circular(20),
             color: const Color(0xFF1E40AF),
             image: const DecorationImage(
-              image: AssetImage('assets/images/banner/banner.webp'),
+              image: AssetImage('assets/images/banner/banner_promo_1.png'),
               fit: BoxFit.cover,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -1178,14 +1207,13 @@ class _HomeContentState extends State<HomeContent> {
       height: 210,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        image: const DecorationImage(
+          image: AssetImage('assets/images/banner/banner_service.png'),
+          fit: BoxFit.cover,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E293B).withOpacity(0.2),
+            color: const Color(0xFF1E293B).withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1193,13 +1221,17 @@ class _HomeContentState extends State<HomeContent> {
       ),
       child: Stack(
         children: [
-          Positioned(
-            right: -20,
-            bottom: -20,
-            child: Icon(
-              Icons.build_circle_rounded,
-              size: 180,
-              color: Colors.white.withOpacity(0.05),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.75),
+                  Colors.black.withOpacity(0.25),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
             ),
           ),
           Padding(
@@ -1240,7 +1272,7 @@ class _HomeContentState extends State<HomeContent> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () =>
-                      context.read<MainProvider>().setSelectedIndex(2),
+                      context.read<MainProvider>().setSelectedIndex(1),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF0F172A),
