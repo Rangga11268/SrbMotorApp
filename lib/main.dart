@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:srb_motor_app/app_state.dart';
-import 'screens/auth/auth_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 import 'screens/home/home_screen_modern.dart';
 import 'screens/splash/splash_screen.dart';
+import 'screens/detail/motor_detail_phantom_x.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -80,6 +82,10 @@ class MyApp extends StatelessWidget {
           case '/home':
             return MaterialPageRoute(
               builder: (context) => HomeScreen(appState: appState),
+            );
+          case '/detail_phantom_x':
+            return MaterialPageRoute(
+              builder: (context) => MotorDetailPhantomXScreen(appState: appState),
             );
           default:
             return null;

@@ -18,6 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _routeNext() async {
+    // 2-second delay to show splash, then route
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) {
       return;
@@ -31,56 +32,37 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF2563EB), Color(0xFF0F172A)],
-          ),
-        ),
+      backgroundColor: Colors.white, // Match bg-surface-container-lowest
+      body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 110,
-                  height: 110,
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset('assets/images/logos/logo_srb.webp'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Centered Logo Container
+              Image.asset(
+                'assets/images/logos/logo_srb.webp',
+                width: 200,
+                height: 200,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.two_wheeler,
+                    size: 100,
+                    color: Color(0xFF041627),
+                  );
+                },
+              ),
+              const SizedBox(height: 48),
+              // Subtle Loading Indicator
+              const SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF041627)),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'SRB Motor',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Katalog motor yang sederhana dan bersih',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 32),
-                const SizedBox(
-                  width: 180,
-                  child: LinearProgressIndicator(
-                    minHeight: 4,
-                    backgroundColor: Color(0x332563EB),
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
