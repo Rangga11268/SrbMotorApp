@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:srb_motor_app/app_state.dart';
 import 'package:srb_motor_app/models/motor.dart';
+import 'package:srb_motor_app/screens/detail/motor_compare_screen.dart';
 
 // Mock Motor instance specifically for Phantom X as designed in Stitch
 final Motor phantomXMotor = Motor(
@@ -60,6 +61,74 @@ class _MotorDetailPhantomXScreenState extends State<MotorDetailPhantomXScreen> {
     final totalInterest = loanAmount * annualInterestRate * (selectedTenor / 12);
     final totalPayable = loanAmount + totalInterest;
     return totalPayable / selectedTenor;
+  }
+
+  void _showCompareSelection(BuildContext context) {
+    final otherMotors = motorList.where((m) => m.id != phantomXMotor.id).toList();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Pilih Motor Pembanding',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF041627),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: otherMotors.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final other = otherMotors[index];
+                    return ListTile(
+                      leading: SizedBox(
+                        width: 50,
+                        child: Image.asset(
+                          other.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.two_wheeler),
+                        ),
+                      ),
+                      title: Text(
+                        other.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF041627)),
+                      ),
+                      subtitle: Text('${other.brand} • ${formatPrice(other.price)}'),
+                      onTap: () {
+                        Navigator.pop(context); // Close bottom sheet
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MotorCompareScreen(
+                              motor1: phantomXMotor,
+                              motor2: other,
+                              formatPrice: formatPrice,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -168,14 +237,37 @@ class _MotorDetailPhantomXScreenState extends State<MotorDetailPhantomXScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    phantomXMotor.name,
-                    style: const TextStyle(
-                      fontFamily: 'Hanken Grotesk',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF041627),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        phantomXMotor.name,
+                        style: const TextStyle(
+                          fontFamily: 'Hanken Grotesk',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF041627),
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => _showCompareSelection(context),
+                        icon: const Icon(Icons.compare_arrows, size: 18),
+                        label: const Text(
+                          'BANDINGKAN',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2563EB),
+                          side: const BorderSide(color: Color(0xFF2563EB)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   // Description
