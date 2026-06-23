@@ -227,13 +227,25 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     backgroundColor: const Color(0xFFF3F3F3),
                   ),
-                  child: const Text(
-                    'Honda',
-                    style: TextStyle(
-                      color: Color(0xFF041627),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/logos/Honda.webp',
+                        height: 24,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.two_wheeler, color: Colors.grey),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Honda',
+                        style: TextStyle(
+                          color: Color(0xFF041627),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -252,13 +264,25 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     backgroundColor: const Color(0xFFF3F3F3),
                   ),
-                  child: const Text(
-                    'Yamaha',
-                    style: TextStyle(
-                      color: Color(0xFF041627),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/logos/yamaha.webp',
+                        height: 24,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.two_wheeler, color: Colors.grey),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Yamaha',
+                        style: TextStyle(
+                          color: Color(0xFF041627),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
